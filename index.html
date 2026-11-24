@@ -8,10 +8,10 @@
   <style>
     .selector-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
       gap: 20px;
       width: 100%;
-      max-width: 880px;
+      max-width: 920px;
     }
     .selector-card {
       display: flex;
@@ -32,6 +32,44 @@
       color: var(--muted);
       line-height: 1.45;
     }
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 0.75rem;
+      margin: 16px 0;
+      text-transform: uppercase;
+    }
+    .divider::before,
+    .divider::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+    .user-list {
+      margin-top: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .user-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background: var(--bg-app);
+      border: 1px solid var(--border);
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+    }
+    .scope-tag {
+      color: var(--muted);
+      margin-left: 8px;
+      font-size: 0.78rem;
+    }
   </style>
 </head>
 <body>
@@ -42,7 +80,13 @@
     </div>
 
     <!-- Login -->
-    <section id="login-panel" class="card" style="width: 100%; max-width: 390px;">
+    <section id="login-panel" class="card" style="width: 100%; max-width: 400px;">
+      <button id="google-login-btn" type="button" class="btn" style="width: 100%; background: #ffffff; color: #111111;">
+        Continuar con Google
+      </button>
+
+      <div class="divider">o con correo y contraseña</div>
+
       <form id="login-form">
         <div class="field">
           <label for="login-email">Correo</label>
@@ -52,15 +96,21 @@
           <label for="login-password">Contraseña</label>
           <input id="login-password" type="password" required autocomplete="current-password">
         </div>
-        <button type="submit" class="btn" style="width: 100%;">Iniciar Sesión</button>
-        <div id="login-error" class="error-text"></div>
+        <button type="submit" class="btn btn-ghost" style="width: 100%;">Iniciar Sesión</button>
       </form>
+
+      <div id="login-error" class="error-text"></div>
     </section>
 
-    <!-- Selector tras login -->
-    <section id="hub-panel" style="display: none; width: 100%; max-width: 880px;">
+    <!-- Hub tras login -->
+    <section id="hub-panel" style="display: none; width: 100%; max-width: 920px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+        <div id="session-badge" style="font-size: 0.85rem; color: var(--muted);"></div>
+        <button id="logout-btn" class="btn btn-ghost" style="padding: 7px 14px; font-size: 0.75rem;">Cerrar Sesión</button>
+      </div>
+
       <div class="selector-grid">
-        <article class="card selector-card">
+        <article id="card-studio" class="card selector-card">
           <div>
             <h2>Estudio</h2>
             <p>Configura estilos, encuadres en grilla 16:9 y habilita pestañas para el control.</p>
@@ -71,12 +121,12 @@
         <article class="card selector-card">
           <div>
             <h2>Modo Control</h2>
-            <p>Activa o apaga overlays en vivo y sincroniza el estado con el estudio.</p>
+            <p>Activa o apaga overlays en vivo, opera marcadores y sincroniza con el estudio.</p>
           </div>
           <button class="btn" onclick="location.href='control.html'">Abrir Control</button>
         </article>
 
-        <article class="card selector-card">
+        <article id="card-live" class="card selector-card">
           <div>
             <h2>Link Live</h2>
             <p>Copia la URL pública (sin login) para OBS, vMix o Prism Live Studio.</p>
@@ -85,28 +135,104 @@
         </article>
       </div>
 
-      <div style="text-align: center; margin-top: 26px;">
-        <button id="logout-btn" class="btn btn-ghost" style="padding: 8px 16px; font-size: 0.75rem;">Cerrar Sesión</button>
-      </div>
+      <!-- Gestión de Usuarios de Control (solo para Admin) -->
+      <section id="users-manager" class="card" style="display: none; margin-top: 22px;">
+        <h3 style="font-size: 1rem; margin-bottom: 6px;">Usuarios de Control Autorizados</h3>
+        <p style="font-size: 0.82rem; color: var(--muted); margin-bottom: 14px;">
+          Agrega correos de operadores (por ejemplo, para controlar un marcador en una competencia puntual).
+        </p>
+
+        <form id="add-user-form" style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <input
+            id="op-email"
+            type="email"
+            required
+            placeholder="operador@correo.cl"
+            style="flex: 1; min-width: 210px; padding: 9px 12px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-app); color: var(--text);"
+          >
+          <select
+            id="op-scope"
+            style="padding: 9px 12px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-app); color: var(--text);"
+          >
+            <option value="all">Todos los módulos habilitados</option>
+            <option value="marcadores">Solo Marcadores</option>
+          </select>
+          <button type="submit" class="btn" style="padding: 9px 16px; font-size: 0.78rem;">Agregar Usuario</button>
+        </form>
+
+        <div id="op-error" class="error-text"></div>
+        <div id="op-list" class="user-list"></div>
+      </section>
     </section>
   </main>
 
   <script type="module">
     import {
       auth,
+      db,
+      DB_PATH,
+      ref,
+      set,
+      remove,
+      onValue,
       onAuthStateChanged,
       signInWithEmailAndPassword,
-      signOut
+      loginWithGoogle,
+      signOut,
+      getUserRole,
+      emailToKey
     } from "./js/firebase.js";
 
     const loginPanel = document.getElementById("login-panel");
     const hubPanel = document.getElementById("hub-panel");
     const loginForm = document.getElementById("login-form");
     const loginError = document.getElementById("login-error");
+    const googleBtn = document.getElementById("google-login-btn");
+    const usersManager = document.getElementById("users-manager");
+    const cardStudio = document.getElementById("card-studio");
+    const cardLive = document.getElementById("card-live");
+    const sessionBadge = document.getElementById("session-badge");
 
-    onAuthStateChanged(auth, (user) => {
-      loginPanel.style.display = user ? "none" : "block";
-      hubPanel.style.display = user ? "block" : "none";
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("denied") === "1") {
+      loginError.textContent = "Tu cuenta no está autorizada para acceder a Studio TF 2.0.";
+    }
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        loginPanel.style.display = "block";
+        hubPanel.style.display = "none";
+        return;
+      }
+
+      const role = await getUserRole(user);
+      if (!role) {
+        loginError.textContent = `La cuenta ${user.email} no tiene permisos asignados.`;
+        await signOut(auth);
+        return;
+      }
+
+      loginPanel.style.display = "none";
+      hubPanel.style.display = "block";
+      sessionBadge.innerHTML = `Sesión: <strong>${user.email}</strong> · Rol: <span style="color: var(--accent); font-weight: 700;">${role.toUpperCase()}</span>`;
+
+      const isAdmin = role === "admin";
+      cardStudio.style.display = isAdmin ? "flex" : "none";
+      cardLive.style.display = isAdmin ? "flex" : "none";
+      usersManager.style.display = isAdmin ? "block" : "none";
+
+      if (isAdmin) {
+        listenControlUsers();
+      }
+    });
+
+    googleBtn.addEventListener("click", async () => {
+      loginError.textContent = "";
+      try {
+        await loginWithGoogle();
+      } catch (err) {
+        loginError.textContent = `Error al iniciar con Google (${err.code || "revisa dominios autorizados"}).`;
+      }
     });
 
     loginForm.addEventListener("submit", async (e) => {
@@ -135,6 +261,59 @@
         btn.textContent = prev;
         btn.style.borderColor = "";
       }, 1800);
+    });
+
+    function listenControlUsers() {
+      const opList = document.getElementById("op-list");
+      onValue(ref(db, `${DB_PATH}/controlUsers`), (snap) => {
+        opList.innerHTML = "";
+        if (!snap.exists()) {
+          opList.innerHTML = "<p style='color: var(--muted); font-size: 0.82rem;'>No hay usuarios de control agregados aún.</p>";
+          return;
+        }
+
+        Object.entries(snap.val()).forEach(([key, info]) => {
+          const row = document.createElement("div");
+          row.className = "user-row";
+          const scopeLabel = info.scope === "marcadores" ? "Solo Marcadores" : "Control General";
+          row.innerHTML = `
+            <div>
+              <strong>${info.email}</strong>
+              <span class="scope-tag">(${scopeLabel})</span>
+            </div>
+            <button class="btn btn-ghost" data-del="${key}" style="padding: 4px 10px; font-size: 0.72rem;">Quitar</button>
+          `;
+          opList.appendChild(row);
+        });
+
+        opList.querySelectorAll("button[data-del]").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            await remove(ref(db, `${DB_PATH}/controlUsers/${btn.dataset.del}`));
+          });
+        });
+      });
+    }
+
+    document.getElementById("add-user-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const opError = document.getElementById("op-error");
+      opError.textContent = "";
+
+      const email = document.getElementById("op-email").value.trim().toLowerCase();
+      const scope = document.getElementById("op-scope").value;
+      if (!email) return;
+
+      try {
+        const key = emailToKey(email);
+        await set(ref(db, `${DB_PATH}/controlUsers/${key}`), {
+          email,
+          scope,
+          active: true
+        });
+        document.getElementById("op-email").value = "";
+      } catch {
+        opError.textContent = "No se pudo guardar el usuario. Revisa las reglas de Firebase.";
+      }
     });
   </script>
 </body>
