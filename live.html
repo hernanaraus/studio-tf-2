@@ -21,15 +21,79 @@
     .live-item.is-visible {
       opacity: 1;
     }
+    .live-sb {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: rgba(14, 14, 18, 0.95);
+      color: #fff;
+      padding: 12px 22px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      font-weight: 800;
+      font-size: 28px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+    }
+    .live-sb.style-compact {
+      font-size: 22px;
+      padding: 8px 16px;
+      border-radius: 5px;
+    }
+    .live-team {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: #1d1e26;
+      padding: 6px 14px;
+      border-radius: 5px;
+      border-left: 6px solid #e11d2e;
+    }
+    .live-score {
+      font-variant-numeric: tabular-nums;
+    }
+    .live-meta {
+      font-size: 20px;
+      color: #e4e4ee;
+      border-left: 2px solid rgba(255, 255, 255, 0.22);
+      padding-left: 16px;
+      font-variant-numeric: tabular-nums;
+    }
   </style>
 </head>
 <body>
-  <div id="live-marcadores" class="live-item" style="background: rgba(18,18,22,0.95); border-left: 5px solid #e11d2e; color: #fff; padding: 14px 24px; border-radius: 6px; font-size: 26px; font-weight: 700;">
-    MARCADOR EN VIVO
+  <div id="live-marcadores" class="live-item">
+    <div id="live-sb-box" class="live-sb">
+      <span id="live-local-team" class="live-team">
+        <span id="live-local-name">LOC</span>
+        <span id="live-local-score" class="live-score">0</span>
+      </span>
+      <span style="color: #9898a6;">-</span>
+      <span id="live-visita-team" class="live-team">
+        <span id="live-visita-score" class="live-score">0</span>
+        <span id="live-visita-name">VIS</span>
+      </span>
+      <span id="live-meta" class="live-meta">1° · 10:00</span>
+    </div>
   </div>
 
   <script type="module">
     import { db, DB_PATH, ref, onValue } from "./js/firebase.js";
+
+    function renderMarcador(data = {}) {
+      const box = document.getElementById("live-sb-box");
+      box.classList.toggle("style-compact", data.style === "compact");
+
+      const localTeam = document.getElementById("live-local-team");
+      const visitaTeam = document.getElementById("live-visita-team");
+      localTeam.style.borderLeftColor = data.localColor || "#e11d2e";
+      visitaTeam.style.borderLeftColor = data.visitaColor || "#2563eb";
+
+      document.getElementById("live-local-name").textContent = data.localName || "LOC";
+      document.getElementById("live-local-score").textContent = data.localScore ?? 0;
+      document.getElementById("live-visita-name").textContent = data.visitaName || "VIS";
+      document.getElementById("live-visita-score").textContent = data.visitaScore ?? 0;
+      document.getElementById("live-meta").textContent = `${data.period || "1°"} · ${data.clock || "10:00"}`;
+    }
 
     onValue(ref(db, `${DB_PATH}/modules`), (snap) => {
       const mods = snap.val() || {};
@@ -40,6 +104,10 @@
         if (cfg.pos) {
           el.style.left = `${cfg.pos.x ?? 5}%`;
           el.style.top = `${cfg.pos.y ?? 6}%`;
+        }
+
+        if (key === "marcadores") {
+          renderMarcador(cfg.data);
         }
 
         if (cfg.enabled && cfg.on) {
