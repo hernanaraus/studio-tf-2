@@ -13,53 +13,72 @@
       letter-spacing: 1px;
       cursor: pointer;
       user-select: none;
+      white-space: nowrap;
     }
-    .brand-link span {
-      color: var(--accent);
+    .brand-link span { color: var(--accent); }
+
+    .zoom-bar {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--bg-app);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 2px 6px;
+      font-size: 0.72rem;
+      font-weight: 700;
     }
-    .sb-sections {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
+    .zoom-btn {
+      background: transparent;
+      color: var(--text);
+      border: none;
+      padding: 3px 7px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 800;
     }
-    .sb-box-card {
+    .zoom-btn:hover { background: var(--bg-elevated); color: var(--accent); }
+
+    .base-three-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .box-card {
       background: var(--bg-app);
       border: 1px solid var(--border);
       border-radius: 8px;
-      padding: 12px 14px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
     }
-    .sb-box-title {
-      font-size: 0.78rem;
+    .box-title {
+      font-size: 0.76rem;
       text-transform: uppercase;
       letter-spacing: 0.7px;
       color: var(--accent);
       font-weight: 800;
-      margin-bottom: 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      padding-bottom: 5px;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
-    .sb-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-      gap: 10px;
-    }
-    .s-field {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
+    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .row-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .row-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(175px, 1fr)); gap: 10px; }
+
+    .s-field { display: flex; flex-direction: column; gap: 3px; }
     .s-field label {
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       color: var(--muted);
       font-weight: 600;
       display: flex;
       justify-content: space-between;
     }
-    .s-field label span.v {
-      color: var(--text);
-      font-variant-numeric: tabular-nums;
-    }
+    .s-field label span.v { color: var(--text); font-variant-numeric: tabular-nums; }
     .s-field input[type="text"],
     .s-field input[type="number"],
     .s-field select {
@@ -68,12 +87,12 @@
       color: var(--text);
       padding: 6px 8px;
       border-radius: 6px;
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       width: 100%;
     }
     .s-field input[type="color"] {
       width: 100%;
-      height: 30px;
+      height: 28px;
       border: 1px solid var(--border);
       border-radius: 6px;
       background: var(--bg-surface);
@@ -89,10 +108,9 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      font-size: 0.78rem;
+      font-size: 0.75rem;
       font-weight: 600;
       cursor: pointer;
-      margin-top: 4px;
     }
     .mini-file {
       display: flex;
@@ -103,50 +121,66 @@
       padding: 5px;
       border-radius: 6px;
     }
-    .mini-file input[type="file"] {
-      font-size: 0.68rem;
-      color: var(--muted);
-      width: 100%;
+    .mini-file input[type="file"] { font-size: 0.68rem; color: var(--muted); width: 100%; }
+
+    .palette-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 7px 9px;
     }
-    .adv-panel {
-      display: none;
-      margin-top: 10px;
+    .palette-swatches {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 6px;
+      flex-wrap: wrap;
     }
-    .adv-panel.is-open {
-      display: block;
+    .swatch-btn {
+      width: 24px;
+      height: 24px;
+      border-radius: 5px;
+      border: 1.5px solid rgba(255,255,255,0.6);
+      cursor: pointer;
     }
-    .status-note {
-      font-size: 0.75rem;
-      color: var(--muted);
-    }
+    .swatch-btn:hover { transform: scale(1.1); border-color: #fff; }
   </style>
 </head>
 <body>
   <div class="studio-shell">
     <header class="studio-topbar">
-      <div class="brand-link" onclick="location.href='index.html'" title="Volver al menú principal">
+      <div class="brand-link" onclick="location.href='index.html'" title="Ir al menú principal">
         STUDIO <span>TF 2.0</span>
       </div>
-      <div style="display: flex; gap: 8px; align-items: center;">
-        <span id="studio-status" class="status-note">Listo</span>
-        <button id="grid-toggle" class="btn btn-ghost" style="padding: 6px 12px; font-size: 0.74rem;">Grilla: ON</button>
-        <button id="save-publish-btn" class="btn" style="padding: 6px 14px; font-size: 0.74rem;">Guardar y Sincronizar</button>
-        <button class="btn btn-ghost" style="padding: 6px 12px; font-size: 0.74rem;" onclick="location.href='control.html'">Control</button>
+
+      <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+        <span id="studio-status" style="font-size: 0.73rem; color: var(--muted);">Listo</span>
+
+        <div class="zoom-bar">
+          <button type="button" class="zoom-btn" id="zoom-out" title="Alejar">−</button>
+          <span id="zoom-label" style="min-width: 42px; text-align: center;">FIT</span>
+          <button type="button" class="zoom-btn" id="zoom-in" title="Acercar">+</button>
+          <button type="button" class="zoom-btn" id="zoom-fit" title="Ajustar al recuadro">Ajustar</button>
+        </div>
+
+        <button id="grid-toggle" type="button" class="btn btn-ghost" style="padding: 5px 10px; font-size: 0.72rem;">Grilla: ON</button>
+        <button id="save-publish-btn" type="button" class="btn" style="padding: 5px 12px; font-size: 0.72rem;">Guardar y Sincronizar</button>
+        <button type="button" class="btn btn-ghost" style="padding: 5px 10px; font-size: 0.72rem;" onclick="location.href='control.html'">Control</button>
       </div>
     </header>
 
-    <main class="canvas-area">
+    <main id="canvas-area" class="canvas-area">
       <div id="stage" class="stage-16x9">
         <div id="stage-grid" class="stage-grid"></div>
-
-        <!-- Marcador arrastrable en el preview 16:9 -->
         <div class="overlay-box" data-module="marcadores" style="left: 14%; top: 76%;">
           <div id="studioSbPreview"></div>
         </div>
       </div>
     </main>
 
-    <section class="dock-panel">
+    <div id="dock-resizer" class="dock-resizer" title="Arrastra para ajustar el alto del panel"></div>
+
+    <section id="dock-panel" class="dock-panel">
       <nav class="dock-tabs">
         <button class="dock-tab is-active" data-target="marcadores">Marcadores</button>
         <button class="dock-tab" data-target="especiales">Competencias Especiales</button>
@@ -169,278 +203,271 @@
             </div>
           </div>
 
-          <div class="sb-sections">
-            <!-- APARTADO 1: PERSONALIZACIÓN BASE -->
-            <div class="sb-box-card">
-              <div class="sb-box-title">
-                <span>1. Personalización Base</span>
-                <button id="toggle-adv-btn" type="button" class="btn btn-ghost" style="padding: 4px 10px; font-size: 0.7rem;">⚙ Personalización Avanzada</button>
+          <!-- 3 RECUADROS DE PERSONALIZACIÓN BASE -->
+          <div class="base-three-grid">
+            <!-- Recuadro 1: Local -->
+            <div class="box-card">
+              <div class="box-title">1. Equipo Local</div>
+              <div class="s-field">
+                <label>Nombre / Sigla Local</label>
+                <input type="text" id="name1" value="LOCAL">
               </div>
-
-              <div class="sb-grid">
+              <div class="row-2">
                 <div class="s-field">
-                  <label>Equipo Local</label>
-                  <input type="text" id="name1" value="LOCAL">
+                  <label>Color Fondo</label>
+                  <input type="color" id="bg1Color" value="#1c1e24">
                 </div>
                 <div class="s-field">
-                  <label>Fondo / Texto Local</label>
-                  <div style="display:flex; gap:6px;">
-                    <input type="color" id="bg1Color" value="#1c1e24">
-                    <input type="color" id="text1Color" value="#ffffff">
-                  </div>
-                </div>
-                <div class="s-field">
-                  <label>Equipo Visita</label>
-                  <input type="text" id="name2" value="VISITA">
-                </div>
-                <div class="s-field">
-                  <label>Fondo / Texto Visita</label>
-                  <div style="display:flex; gap:6px;">
-                    <input type="color" id="bg2Color" value="#1c1e24">
-                    <input type="color" id="text2Color" value="#ffffff">
-                  </div>
+                  <label>Color Texto</label>
+                  <input type="color" id="text1Color" value="#ffffff">
                 </div>
               </div>
+              <div class="s-field">
+                <label>Logo Local</label>
+                <div class="mini-file">
+                  <input type="file" accept="image/*" data-img="logo1">
+                </div>
+              </div>
+            </div>
 
-              <div class="sb-grid" style="margin-top: 10px;">
+            <!-- Recuadro 2: Visita -->
+            <div class="box-card">
+              <div class="box-title">2. Equipo Visita</div>
+              <div class="s-field">
+                <label>Nombre / Sigla Visita</label>
+                <input type="text" id="name2" value="VISITA">
+              </div>
+              <div class="row-2">
                 <div class="s-field">
-                  <label>Logo Liga / Local / Visita</label>
-                  <div class="mini-file">
-                    <input type="file" accept="image/*" data-img="logoLiga" title="Logo Liga">
-                    <input type="file" accept="image/*" data-img="logo1" title="Logo Local">
-                    <input type="file" accept="image/*" data-img="logo2" title="Logo Visita">
-                  </div>
+                  <label>Color Fondo</label>
+                  <input type="color" id="bg2Color" value="#1c1e24">
                 </div>
                 <div class="s-field">
-                  <label>Etiqueta Superior (Ej: FINAL)</label>
-                  <div style="display:flex; gap:6px; align-items:center;">
+                  <label>Color Texto</label>
+                  <input type="color" id="text2Color" value="#ffffff">
+                </div>
+              </div>
+              <div class="s-field">
+                <label>Logo Visita</label>
+                <div class="mini-file">
+                  <input type="file" accept="image/*" data-img="logo2">
+                </div>
+              </div>
+            </div>
+
+            <!-- Recuadro 3: Competencia / Torneo -->
+            <div class="box-card">
+              <div class="box-title">3. Competencia / Torneo</div>
+              <div class="s-field">
+                <label>Logo Competencia</label>
+                <div class="mini-file">
+                  <input type="file" accept="image/*" id="leagueLogoInput" data-img="logoLiga">
+                </div>
+              </div>
+
+              <div class="palette-box">
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; flex-wrap:wrap;">
+                  <span style="font-size:0.68rem; color:var(--muted); font-weight:700;">Colores sugeridos del logo:</span>
+                  <select id="paletteTarget" style="width:auto; padding:2px 6px; font-size:0.7rem;">
+                    <option value="accentColor">Aplicar a: Acento/Borde</option>
+                    <option value="scoreTextColor">Aplicar a: Puntos</option>
+                    <option value="scoreBgColor">Aplicar a: Fondo Puntos</option>
+                    <option value="bg1Color">Aplicar a: Fondo Local</option>
+                    <option value="bg2Color">Aplicar a: Fondo Visita</option>
+                  </select>
+                </div>
+                <div id="league-palette" class="palette-swatches">
+                  <span style="font-size:0.7rem; color:var(--muted);">Sube un logo para detectar colores</span>
+                </div>
+              </div>
+
+              <div class="row-2">
+                <div class="s-field">
+                  <label>Etiqueta Superior</label>
+                  <div style="display:flex; gap:5px; align-items:center;">
                     <input type="checkbox" id="topBadgeEnabled">
                     <input type="text" id="topTextValue" placeholder="GRAN FINAL">
                   </div>
                 </div>
                 <div class="s-field">
-                  <label>Redes Sociales (@tiempofuera_cl)</label>
-                  <label class="s-check"><input type="checkbox" id="socialAutoEnabled" checked> Auto-rotación IG / YT</label>
-                </div>
-                <div class="s-field">
-                  <label>Posición / Frecuencia RRSS (s)</label>
-                  <div style="display:flex; gap:6px;">
-                    <select id="socialPosition">
-                      <option value="top-left">Arriba Izq</option>
-                      <option value="top-right">Arriba Der</option>
-                    </select>
-                    <input type="number" id="socialIntervalSec" min="20" max="600" value="150">
-                  </div>
+                  <label>RRSS (@tiempofuera_cl)</label>
+                  <label class="s-check"><input type="checkbox" id="socialAutoEnabled" checked> Auto IG / YT</label>
                 </div>
               </div>
+            </div>
+          </div>
 
-              <!-- APARTADO 2: PERSONALIZACIÓN AVANZADA (COLAPSABLE) -->
-              <div id="adv-panel" class="adv-panel">
-                <div class="sb-box-title" style="margin-top: 6px;">2. Personalización Avanzada (Estilos, Tamaños y Colores)</div>
-                <div class="sb-grid">
-                  <div class="s-field">
-                    <label>Fuente Tipográfica</label>
-                    <select id="fontFamily">
-                      <option value="'Barlow Condensed', sans-serif">Barlow Condensed</option>
-                      <option value="'Bebas Neue', sans-serif">Bebas Neue</option>
-                      <option value="'Oswald', sans-serif">Oswald</option>
-                      <option value="'Teko', sans-serif">Teko</option>
-                      <option value="'Rajdhani', sans-serif">Rajdhani</option>
-                      <option value="'Chakra Petch', sans-serif">Chakra Petch</option>
-                      <option value="'Russo One', sans-serif">Russo One</option>
-                      <option value="'Anton', sans-serif">Anton</option>
-                    </select>
-                  </div>
-                  <div class="s-field">
-                    <label>Escala Marcador <span class="v" id="v_boardScale">1.00x</span></label>
-                    <input type="range" id="boardScale" min="0.65" max="1.65" step="0.05" value="1.0">
-                  </div>
-                  <div class="s-field">
-                    <label>Tamaño Logo Liga <span class="v" id="v_ligaSize">92px</span></label>
-                    <input type="range" id="ligaSize" min="60" max="150" value="92">
-                  </div>
-                  <div class="s-field">
-                    <label>Tamaño Escudos <span class="v" id="v_teamLogoSize">44px</span></label>
-                    <input type="range" id="teamLogoSize" min="28" max="62" value="44">
-                  </div>
-                </div>
+          <!-- RECUADRO GRANDE: PERSONALIZACIÓN AVANZADA -->
+          <div class="box-card" style="margin-bottom: 14px;">
+            <div class="box-title">Personalización Avanzada (Tamaños, Fuente, Colores y Relojes)</div>
+            <div class="row-4">
+              <div class="s-field">
+                <label>Fuente Tipográfica</label>
+                <select id="fontFamily">
+                  <option value="'Barlow Condensed', sans-serif">Barlow Condensed</option>
+                  <option value="'Bebas Neue', sans-serif">Bebas Neue</option>
+                  <option value="'Oswald', sans-serif">Oswald</option>
+                  <option value="'Teko', sans-serif">Teko</option>
+                  <option value="'Rajdhani', sans-serif">Rajdhani</option>
+                  <option value="'Chakra Petch', sans-serif">Chakra Petch</option>
+                  <option value="'Russo One', sans-serif">Russo One</option>
+                  <option value="'Anton', sans-serif">Anton</option>
+                </select>
+              </div>
+              <div class="s-field">
+                <label>Escala Marcador <span class="v" id="v_boardScale">1.00x</span></label>
+                <input type="range" id="boardScale" min="0.65" max="1.65" step="0.05" value="1.0">
+              </div>
+              <div class="s-field">
+                <label>Tamaño Logo Liga <span class="v" id="v_ligaSize">92px</span></label>
+                <input type="range" id="ligaSize" min="60" max="150" value="92">
+              </div>
+              <div class="s-field">
+                <label>Tamaño Escudos <span class="v" id="v_teamLogoSize">44px</span></label>
+                <input type="range" id="teamLogoSize" min="28" max="62" value="44">
+              </div>
+            </div>
 
-                <div class="sb-grid" style="margin-top: 10px;">
-                  <div class="s-field">
-                    <label>Texto Equipos <span class="v" id="v_teamFontSize">25px</span></label>
-                    <input type="range" id="teamFontSize" min="16" max="36" value="25">
-                  </div>
-                  <div class="s-field">
-                    <label>Tamaño Puntos <span class="v" id="v_scoreBoxSize">48px</span></label>
-                    <input type="range" id="scoreBoxSize" min="34" max="68" value="48">
-                  </div>
-                  <div class="s-field">
-                    <label>Tamaño Reloj <span class="v" id="v_clockFontSize">32px</span></label>
-                    <input type="range" id="clockFontSize" min="22" max="44" value="32">
-                  </div>
-                  <div class="s-field">
-                    <label>Acento / Fondo Pts / Pts</label>
-                    <div style="display:flex; gap:6px;">
-                      <input type="color" id="accentColor" value="#e3b857">
-                      <input type="color" id="scoreBgColor" value="#0c0d10">
-                      <input type="color" id="scoreTextColor" value="#e3b857">
-                    </div>
-                  </div>
-                </div>
-
-                <div class="sb-grid" style="margin-top: 10px;">
-                  <div class="s-field">
-                    <label>Fondo Reloj / Reloj / Cuarto</label>
-                    <div style="display:flex; gap:6px;">
-                      <input type="color" id="clockBgColor" value="#141519">
-                      <input type="color" id="clockTextColor" value="#ffffff">
-                      <input type="color" id="periodTextColor" value="#e3b857">
-                    </div>
-                  </div>
-                  <div class="s-field">
-                    <label>Falta Normal / Bonus (5ta)</label>
-                    <div style="display:flex; gap:6px;">
-                      <input type="color" id="foulActiveColor" value="#ffe600">
-                      <input type="color" id="foulBonusColor" value="#ff1744">
-                    </div>
-                  </div>
-                  <div class="s-field">
-                    <label>Reloj 24s + Colores</label>
-                    <label class="s-check"><input type="checkbox" id="showShotClock" checked> Mostrar 24s</label>
-                    <div style="display:flex; gap:6px; margin-top:4px;">
-                      <input type="color" id="shotBgColor" value="#141519">
-                      <input type="color" id="shotTextColor" value="#ff2a2a">
-                    </div>
-                  </div>
+            <div class="row-4">
+              <div class="s-field">
+                <label>Texto Equipos <span class="v" id="v_teamFontSize">25px</span></label>
+                <input type="range" id="teamFontSize" min="16" max="36" value="25">
+              </div>
+              <div class="s-field">
+                <label>Tamaño Puntos <span class="v" id="v_scoreBoxSize">48px</span></label>
+                <input type="range" id="scoreBoxSize" min="34" max="68" value="48">
+              </div>
+              <div class="s-field">
+                <label>Tamaño Reloj <span class="v" id="v_clockFontSize">32px</span></label>
+                <input type="range" id="clockFontSize" min="22" max="44" value="32">
+              </div>
+              <div class="s-field">
+                <label>Posición / Frecuencia RRSS (s)</label>
+                <div class="row-2">
+                  <select id="socialPosition">
+                    <option value="top-left">Arriba Izq</option>
+                    <option value="top-right">Arriba Der</option>
+                  </select>
+                  <input type="number" id="socialIntervalSec" min="20" max="600" value="150">
                 </div>
               </div>
             </div>
 
-            <!-- APARTADO 3: ORIGEN DE DATOS POR CAMPO -->
-            <div class="sb-box-card">
-              <div class="sb-box-title">
-                <span>3. Origen de Datos por Campo</span>
-                <span style="font-size: 0.7rem; color: var(--muted); text-transform: none;">Flexyscore Base: #20152</span>
-              </div>
-
-              <div class="sb-grid">
-                <div class="s-field">
-                  <label>Token API (liveid) Flexyscore</label>
-                  <input type="text" id="flexyLiveId" placeholder="Pega tu liveid aquí">
-                </div>
-                <div class="s-field">
-                  <label>Puntos Local (points_1)</label>
-                  <select id="src_points_1">
-                    <option value="flexyscore" selected>Flexyscore</option>
-                    <option value="scoresight">ScoreSight</option>
-                    <option value="manual">Manual (Control)</option>
-                  </select>
-                </div>
-                <div class="s-field">
-                  <label>Puntos Visita (points_2)</label>
-                  <select id="src_points_2">
-                    <option value="flexyscore" selected>Flexyscore</option>
-                    <option value="scoresight">ScoreSight</option>
-                    <option value="manual">Manual (Control)</option>
-                  </select>
-                </div>
-                <div class="s-field">
-                  <label>Reloj Partido (timer)</label>
-                  <select id="src_timer">
-                    <option value="scoresight" selected>ScoreSight</option>
-                    <option value="flexyscore">Flexyscore</option>
-                    <option value="manual">Manual (Control)</option>
-                  </select>
+            <div class="row-4">
+              <div class="s-field">
+                <label>Acento / Fondo Pts / Pts</label>
+                <div class="row-3">
+                  <input type="color" id="accentColor" value="#e3b857" title="Acento">
+                  <input type="color" id="scoreBgColor" value="#0c0d10" title="Fondo Puntos">
+                  <input type="color" id="scoreTextColor" value="#e3b857" title="Texto Puntos">
                 </div>
               </div>
+              <div class="s-field">
+                <label>Fondo Reloj / Reloj / Cuarto</label>
+                <div class="row-3">
+                  <input type="color" id="clockBgColor" value="#141519" title="Fondo Reloj">
+                  <input type="color" id="clockTextColor" value="#ffffff" title="Texto Reloj">
+                  <input type="color" id="periodTextColor" value="#e3b857" title="Cuarto">
+                </div>
+              </div>
+              <div class="s-field">
+                <label>Falta Normal / Bonus (5ta)</label>
+                <div class="row-2">
+                  <input type="color" id="foulActiveColor" value="#ffe600" title="Falta Normal">
+                  <input type="color" id="foulBonusColor" value="#ff1744" title="Bonus 5ta">
+                </div>
+              </div>
+              <div class="s-field">
+                <label>Reloj 24s + Colores</label>
+                <label class="s-check"><input type="checkbox" id="showShotClock" checked> Mostrar 24s</label>
+                <div class="row-2">
+                  <input type="color" id="shotBgColor" value="#141519" title="Fondo 24s">
+                  <input type="color" id="shotTextColor" value="#ff2a2a" title="Texto 24s">
+                </div>
+              </div>
+            </div>
+          </div>
 
-              <div class="sb-grid" style="margin-top: 10px;">
-                <div class="s-field">
-                  <label>Cuarto / Período (moment)</label>
-                  <select id="src_period">
-                    <option value="scoresight" selected>ScoreSight</option>
-                    <option value="flexyscore">Flexyscore</option>
-                    <option value="manual">Manual (Control)</option>
-                  </select>
-                </div>
-                <div class="s-field">
-                  <label>Faltas Local (fouls_1)</label>
-                  <select id="src_fouls_1">
-                    <option value="scoresight" selected>ScoreSight</option>
-                    <option value="flexyscore">Flexyscore</option>
-                    <option value="manual">Manual (Control)</option>
-                  </select>
-                </div>
-                <div class="s-field">
-                  <label>Faltas Visita (fouls_2)</label>
-                  <select id="src_fouls_2">
-                    <option value="scoresight" selected>ScoreSight</option>
-                    <option value="flexyscore">Flexyscore</option>
-                    <option value="manual">Manual (Control)</option>
-                  </select>
-                </div>
-                <div class="s-field">
-                  <label>Reloj 24s (shotclock)</label>
-                  <select id="src_shotclock">
-                    <option value="scoresight" selected>ScoreSight</option>
-                    <option value="flexyscore">Flexyscore</option>
-                    <option value="manual">Manual (Control)</option>
-                  </select>
-                </div>
+          <!-- RECUADRO: ORIGEN DE DATOS POR CAMPO -->
+          <div class="box-card">
+            <div class="box-title">
+              <span>Origen de Datos por Campo</span>
+              <span style="font-size:0.68rem; color:var(--muted); text-transform:none;">Flexyscore Base: #20152</span>
+            </div>
+            <div class="row-4">
+              <div class="s-field">
+                <label>API Token (liveid) Flexyscore</label>
+                <input type="text" id="flexyLiveId" placeholder="Pega tu liveid aquí">
+              </div>
+              <div class="s-field">
+                <label>Puntos Local (points_1)</label>
+                <select id="src_points_1">
+                  <option value="flexyscore" selected>Flexyscore</option>
+                  <option value="scoresight">ScoreSight</option>
+                  <option value="manual">Manual (Control)</option>
+                </select>
+              </div>
+              <div class="s-field">
+                <label>Puntos Visita (points_2)</label>
+                <select id="src_points_2">
+                  <option value="flexyscore" selected>Flexyscore</option>
+                  <option value="scoresight">ScoreSight</option>
+                  <option value="manual">Manual (Control)</option>
+                </select>
+              </div>
+              <div class="s-field">
+                <label>Reloj Partido (timer)</label>
+                <select id="src_timer">
+                  <option value="scoresight" selected>ScoreSight</option>
+                  <option value="flexyscore">Flexyscore</option>
+                  <option value="manual">Manual (Control)</option>
+                </select>
+              </div>
+            </div>
+            <div class="row-4">
+              <div class="s-field">
+                <label>Cuarto / Período (moment)</label>
+                <select id="src_period">
+                  <option value="scoresight" selected>ScoreSight</option>
+                  <option value="flexyscore">Flexyscore</option>
+                  <option value="manual">Manual (Control)</option>
+                </select>
+              </div>
+              <div class="s-field">
+                <label>Faltas Local (fouls_1)</label>
+                <select id="src_fouls_1">
+                  <option value="scoresight" selected>ScoreSight</option>
+                  <option value="flexyscore">Flexyscore</option>
+                  <option value="manual">Manual (Control)</option>
+                </select>
+              </div>
+              <div class="s-field">
+                <label>Faltas Visita (fouls_2)</label>
+                <select id="src_fouls_2">
+                  <option value="scoresight" selected>ScoreSight</option>
+                  <option value="flexyscore">Flexyscore</option>
+                  <option value="manual">Manual (Control)</option>
+                </select>
+              </div>
+              <div class="s-field">
+                <label>Reloj 24s (shotclock)</label>
+                <select id="src_shotclock">
+                  <option value="scoresight" selected>ScoreSight</option>
+                  <option value="flexyscore">Flexyscore</option>
+                  <option value="manual">Manual (Control)</option>
+                </select>
               </div>
             </div>
           </div>
         </div>
 
-        <div id="pane-especiales" class="tab-section">
-          <div class="tab-head">
-            <h3>Competencias Especiales</h3>
-            <label class="enable-check"><input type="checkbox" class="mod-enable" data-mod="especiales"> Habilitar en Control</label>
-          </div>
-          <p style="color: var(--muted); font-size: 0.85rem;">Listo para el siguiente paso.</p>
-        </div>
-        <div id="pane-tercios" class="tab-section">
-          <div class="tab-head">
-            <h3>Tercios Inferiores</h3>
-            <label class="enable-check"><input type="checkbox" class="mod-enable" data-mod="tercios"> Habilitar en Control</label>
-          </div>
-          <p style="color: var(--muted); font-size: 0.85rem;">Listo para el siguiente paso.</p>
-        </div>
-        <div id="pane-sponsors" class="tab-section">
-          <div class="tab-head">
-            <h3>Logos de Sponsors</h3>
-            <label class="enable-check"><input type="checkbox" class="mod-enable" data-mod="sponsors"> Habilitar en Control</label>
-          </div>
-          <p style="color: var(--muted); font-size: 0.85rem;">Listo para el siguiente paso.</p>
-        </div>
-        <div id="pane-auspiciadores" class="tab-section">
-          <div class="tab-head">
-            <h3>Logos de Auspiciadores</h3>
-            <label class="enable-check"><input type="checkbox" class="mod-enable" data-mod="auspiciadores"> Habilitar en Control</label>
-          </div>
-          <p style="color: var(--muted); font-size: 0.85rem;">Listo para el siguiente paso.</p>
-        </div>
-        <div id="pane-cg" class="tab-section">
-          <div class="tab-head">
-            <h3>Control de CG (Scroll)</h3>
-            <label class="enable-check"><input type="checkbox" class="mod-enable" data-mod="cg"> Habilitar en Control</label>
-          </div>
-          <p style="color: var(--muted); font-size: 0.85rem;">Listo para el siguiente paso.</p>
-        </div>
-        <div id="pane-equipos" class="tab-section">
-          <div class="tab-head">
-            <h3>Presentación de Equipos</h3>
-            <label class="enable-check"><input type="checkbox" class="mod-enable" data-mod="equipos"> Habilitar en Control</label>
-          </div>
-          <p style="color: var(--muted); font-size: 0.85rem;">Listo para el siguiente paso.</p>
-        </div>
-        <div id="pane-estadisticas" class="tab-section">
-          <div class="tab-head">
-            <h3>Estadísticas</h3>
-            <label class="enable-check"><input type="checkbox" class="mod-enable" data-mod="estadisticas"> Habilitar en Control</label>
-          </div>
-          <p style="color: var(--muted); font-size: 0.85rem;">Listo para el siguiente paso.</p>
-        </div>
+        <div id="pane-especiales" class="tab-section"><div class="tab-head"><h3>Competencias Especiales</h3><label class="enable-check"><input type="checkbox" class="mod-enable" data-mod="especiales"> Habilitar en Control</label></div></div>
+        <div id="pane-tercios" class="tab-section"><div class="tab-head"><h3>Tercios Inferiores</h3><label class="enable-check"><input type="checkbox" class="mod-enable" data-mod="tercios"> Habilitar en Control</label></div></div>
+        <div id="pane-sponsors" class="tab-section"><div class="tab-head"><h3>Logos de Sponsors</h3><label class="enable-check"><input type="checkbox" class="mod-enable" data-mod="sponsors"> Habilitar en Control</label></div></div>
+        <div id="pane-auspiciadores" class="tab-section"><div class="tab-head"><h3>Logos de Auspiciadores</h3><label class="enable-check"><input type="checkbox" class="mod-enable" data-mod="auspiciadores"> Habilitar en Control</label></div></div>
+        <div id="pane-cg" class="tab-section"><div class="tab-head"><h3>Control de CG (Scroll)</h3><label class="enable-check"><input type="checkbox" class="mod-enable" data-mod="cg"> Habilitar en Control</label></div></div>
+        <div id="pane-equipos" class="tab-section"><div class="tab-head"><h3>Presentación de Equipos</h3><label class="enable-check"><input type="checkbox" class="mod-enable" data-mod="equipos"> Habilitar en Control</label></div></div>
+        <div id="pane-estadisticas" class="tab-section"><div class="tab-head"><h3>Estadísticas</h3><label class="enable-check"><input type="checkbox" class="mod-enable" data-mod="estadisticas"> Habilitar en Control</label></div></div>
       </div>
     </section>
   </div>
@@ -453,6 +480,138 @@
     const imgs = { logoLiga: "", logo1: "", logo2: "" };
     const statusEl = document.getElementById("studio-status");
 
+    /* --- AJUSTE AUTOMÁTICO DEL CANVAS (FIT) Y ZOOM --- */
+    const canvasArea = document.getElementById("canvas-area");
+    const stageEl = document.getElementById("stage");
+    const zoomLabel = document.getElementById("zoom-label");
+    let zoomMode = "fit"; // "fit" o número (ej. 0.75, 1.0, 1.25)
+
+    function applyStageFit() {
+      const pad = 20;
+      const availW = Math.max(240, canvasArea.clientWidth - pad);
+      const availH = Math.max(135, canvasArea.clientHeight - pad);
+      let w = availW;
+      let h = Math.round((w * 9) / 16);
+      if (h > availH) {
+        h = availH;
+        w = Math.round((h * 16) / 9);
+      }
+
+      if (zoomMode !== "fit") {
+        w = Math.round(w * zoomMode);
+        h = Math.round(h * zoomMode);
+        zoomLabel.textContent = `${Math.round(zoomMode * 100)}%`;
+      } else {
+        zoomLabel.textContent = "FIT";
+      }
+
+      stageEl.style.width = `${w}px`;
+      stageEl.style.height = `${h}px`;
+      renderPreview(getSbConfig());
+    }
+
+    document.getElementById("zoom-out").addEventListener("click", () => {
+      const cur = zoomMode === "fit" ? 0.85 : Math.max(0.45, zoomMode - 0.15);
+      zoomMode = Number(cur.toFixed(2));
+      applyStageFit();
+    });
+    document.getElementById("zoom-in").addEventListener("click", () => {
+      const cur = zoomMode === "fit" ? 1.15 : Math.min(1.8, zoomMode + 0.15);
+      zoomMode = Number(cur.toFixed(2));
+      applyStageFit();
+    });
+    document.getElementById("zoom-fit").addEventListener("click", () => {
+      zoomMode = "fit";
+      applyStageFit();
+    });
+    window.addEventListener("resize", applyStageFit);
+
+    /* --- BARRA DIVISORIA ARRASTRABLE ENTRE CANVAS Y MENÚ INFERIOR --- */
+    const resizer = document.getElementById("dock-resizer");
+    const dockPanel = document.getElementById("dock-panel");
+    let isResizing = false;
+
+    resizer.addEventListener("mousedown", (e) => {
+      e.preventDefault();
+      isResizing = true;
+    });
+    window.addEventListener("mousemove", (e) => {
+      if (!isResizing) return;
+      const totalH = window.innerHeight;
+      const newDockH = Math.max(170, Math.min(totalH - 180, totalH - e.clientY));
+      dockPanel.style.height = `${newDockH}px`;
+      applyStageFit();
+    });
+    window.addEventListener("mouseup", () => {
+      isResizing = false;
+    });
+
+    /* --- EXTRACCIÓN DE PALETA DE COLORES FUERTES DESDE EL LOGO DE COMPETENCIA --- */
+    function extractStrongColors(imgEl) {
+      const c = document.createElement("canvas");
+      c.width = 48;
+      c.height = 48;
+      const ctx = c.getContext("2d");
+      ctx.drawImage(imgEl, 0, 0, 48, 48);
+      const { data } = ctx.getImageData(0, 0, 48, 48);
+      const buckets = new Map();
+
+      for (let i = 0; i < data.length; i += 4) {
+        const a = data[i + 3];
+        if (a < 140) continue;
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+        const maxC = Math.max(r, g, b);
+        const minC = Math.min(r, g, b);
+        const sat = maxC === 0 ? 0 : (maxC - minC) / maxC;
+        if (sat < 0.22 && maxC > 220) continue; // ignora blancos puros
+
+        const qr = Math.round(r / 32) * 32;
+        const qg = Math.round(g / 32) * 32;
+        const qb = Math.round(b / 32) * 32;
+        const hex = "#" + [
+          Math.min(255, qr),
+          Math.min(255, qg),
+          Math.min(255, qb)
+        ].map((x) => x.toString(16).padStart(2, "0")).join("");
+
+        const score = (1 + sat * 2.5);
+        buckets.set(hex, (buckets.get(hex) || 0) + score);
+      }
+
+      return [...buckets.entries()]
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 6)
+        .map(([hex]) => hex);
+    }
+
+    function renderPalette(colors) {
+      const wrap = document.getElementById("league-palette");
+      wrap.innerHTML = "";
+      if (!colors.length) {
+        wrap.innerHTML = `<span style="font-size:0.7rem; color:var(--muted);">Sin colores destacados</span>`;
+        return;
+      }
+      colors.forEach((hex) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "swatch-btn";
+        btn.style.backgroundColor = hex;
+        btn.title = `Aplicar ${hex}`;
+        btn.addEventListener("click", async () => {
+          const targetId = document.getElementById("paletteTarget").value;
+          const targetInput = document.getElementById(targetId);
+          if (targetInput) {
+            targetInput.value = hex;
+            await saveConfig();
+          }
+        });
+        wrap.appendChild(btn);
+      });
+    }
+
+    /* --- COLORES, ESTILOS Y PREVIEW --- */
     function lum(hex) {
       hex = (hex || "#1c1e24").replace("#", "");
       if (hex.length === 3) hex = hex.split("").map((c) => c + c).join("");
@@ -542,7 +701,9 @@
 
     function renderPreview(cfg) {
       const mount = document.getElementById("studioSbPreview");
-      const s = cfg.boardScale * 0.68;
+      const stageScale = stageEl.clientWidth / 1920;
+      const s = cfg.boardScale * Math.max(0.32, stageScale * 1.15);
+
       const stripe1 = lum(cfg.bg1Color) > 0.55 ? "rgba(0,0,0,0.085)" : "rgba(255,255,255,0.05)";
       const stripe2 = lum(cfg.bg2Color) > 0.55 ? "rgba(0,0,0,0.085)" : "rgba(255,255,255,0.05)";
 
@@ -607,15 +768,11 @@
       renderPreview(cfg);
       await update(ref(db, `${DB_PATH}/modules/marcadores/config`), cfg);
       statusEl.textContent = "Sincronizado";
-      setTimeout(() => { statusEl.textContent = "Listo"; }, 1200);
+      setTimeout(() => { statusEl.textContent = "Listo"; }, 1100);
     }
 
-    document.getElementById("toggle-adv-btn").addEventListener("click", () => {
-      document.getElementById("adv-panel").classList.toggle("is-open");
-    });
-
     document.querySelectorAll("#pane-marcadores input, #pane-marcadores select").forEach((el) => {
-      if (el.type === "file") return;
+      if (el.type === "file" || el.id === "paletteTarget") return;
       el.addEventListener("input", () => renderPreview(getSbConfig()));
       el.addEventListener("change", saveConfig);
     });
@@ -626,9 +783,16 @@
         const key = e.target.dataset.img;
         if (!file || !key) return;
         const reader = new FileReader();
-        reader.onload = async () => {
-          imgs[key] = reader.result;
-          await saveConfig();
+        reader.onload = () => {
+          const img = new Image();
+          img.onload = async () => {
+            imgs[key] = reader.result;
+            if (key === "logoLiga") {
+              renderPalette(extractStrongColors(img));
+            }
+            await saveConfig();
+          };
+          img.src = reader.result;
         };
         reader.readAsDataURL(file);
       });
@@ -680,9 +844,14 @@
               if (sel && cfg.sources[f]) sel.value = cfg.sources[f];
             });
           }
+          if (imgs.logoLiga) {
+            const tempImg = new Image();
+            tempImg.onload = () => renderPalette(extractStrongColors(tempImg));
+            tempImg.src = imgs.logoLiga;
+          }
         }
       }
-      renderPreview(getSbConfig());
+      applyStageFit();
     }, { requireAdmin: true });
 
     document.querySelectorAll(".dock-tab").forEach((tab) => {
