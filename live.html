@@ -8,10 +8,18 @@
     html, body {
       margin: 0;
       padding: 0;
-      width: 1920px;
-      height: 1080px;
+      width: 100vw;
+      height: 100vh;
       background: transparent !important;
       overflow: hidden;
+    }
+
+    /* Lienzo lógico 1920x1080 escalado exacto para HD (720p), FHD (1080p) o 2K (1440p) */
+    #canvas1920 {
+      position: relative;
+      width: 1920px;
+      height: 1080px;
+      transform-origin: top left;
     }
 
     .live-layer {
@@ -133,16 +141,30 @@
   </style>
 </head>
 <body>
-  <div class="social-pill-wrap" id="socialWrap">
-    <div class="social-pill" id="socialCard"></div>
-  </div>
+  <div id="canvas1920">
+    <div class="social-pill-wrap" id="socialWrap">
+      <div class="social-pill" id="socialCard"></div>
+    </div>
 
-  <div id="live-marcadores" class="live-layer" style="left: 14%; top: 76%;">
-    <div id="marcadorMount"></div>
+    <div id="live-marcadores" class="live-layer" style="left: 14%; top: 76%;">
+      <div id="marcadorMount"></div>
+    </div>
   </div>
 
   <script type="module">
     import { db, DB_PATH, ref, onValue } from "./js/firebase.js";
+
+    const canvas1920 = document.getElementById("canvas1920");
+    function fitViewportTo1920() {
+      const sx = window.innerWidth / 1920;
+      const sy = window.innerHeight / 1080;
+      const scale = Math.min(sx, sy);
+      const offsetX = Math.round((window.innerWidth - 1920 * scale) / 2);
+      const offsetY = Math.round((window.innerHeight - 1080 * scale) / 2);
+      canvas1920.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
+    }
+    fitViewportTo1920();
+    window.addEventListener("resize", fitViewportTo1920);
 
     let cfg = {
       flexyBoardId: "20152",
@@ -156,6 +178,8 @@
         fouls_2: "scoresight",
         shotclock: "scoresight"
       },
+      posX: 14,
+      posY: 76,
       fontFamily: "'Barlow Condensed', sans-serif",
       boardScale: 1.0,
       ligaSize: 92,
@@ -296,6 +320,10 @@
 
     function renderEstructura() {
       document.documentElement.style.setProperty("--sb-accent", cfg.accentColor || "#e3b857");
+
+      const layer = document.getElementById("live-marcadores");
+      layer.style.left = `${cfg.posX ?? 14}%`;
+      layer.style.top = `${cfg.posY ?? 76}%`;
 
       const stripe1 = lum(cfg.bg1Color) > 0.55 ? "rgba(0,0,0,0.085)" : "rgba(255,255,255,0.05)";
       const stripe2 = lum(cfg.bg2Color) > 0.55 ? "rgba(0,0,0,0.085)" : "rgba(255,255,255,0.05)";
@@ -547,18 +575,18 @@
       const mod = snap.val();
       const layer = document.getElementById("live-marcadores");
 
-      if (mod.pos) {
-        layer.style.left = `${mod.pos.x ?? 14}%`;
-        layer.style.top = `${mod.pos.y ?? 76}%`;
-      }
-
       if (mod.config) {
         cfg = {
           ...cfg,
           ...mod.config,
+          posX: mod.pos?.x ?? mod.config.posX ?? cfg.posX,
+          posY: mod.pos?.y ?? mod.config.posY ?? cfg.posY,
           sources: { ...cfg.sources, ...(mod.config.sources || {}) }
         };
         renderEstructura();
+      } else if (mod.pos) {
+        layer.style.left = `${mod.pos.x ?? 14}%`;
+        layer.style.top = `${mod.pos.y ?? 76}%`;
       }
 
       feeds = {
