@@ -16,18 +16,18 @@
       padding: 0 20px;
     }
     .ctrl-grid {
-      max-width: 1080px;
+      max-width: 1120px;
       margin: 24px auto;
       padding: 0 20px;
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
       gap: 16px;
     }
     .ctrl-card {
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      gap: 16px;
+      gap: 14px;
     }
     .ctrl-card.is-on {
       border-color: var(--accent);
@@ -44,6 +44,33 @@
     .ctrl-card.is-on .pill {
       background: var(--accent);
       color: #fff;
+    }
+    .quick-score {
+      background: var(--bg-app);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px;
+      font-size: 0.82rem;
+    }
+    .quick-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .q-btn {
+      background: var(--bg-elevated);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 5px 8px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .q-btn:hover {
+      border-color: var(--accent);
     }
   </style>
 </head>
@@ -77,6 +104,32 @@
 
     const grid = document.getElementById("ctrl-grid");
 
+    function buildScoreControls(key, item) {
+      if (key !== "marcadores") return "";
+      const d = item.data || {};
+      const lName = d.localName || "LOC";
+      const vName = d.visitaName || "VIS";
+      const lScore = d.localScore ?? 0;
+      const vScore = d.visitaScore ?? 0;
+
+      return `
+        <div class="quick-score">
+          <div style="display:flex; justify-content:space-between; font-weight:700;">
+            <span>${lName}: ${lScore}</span>
+            <span>${vName}: ${vScore}</span>
+          </div>
+          <div class="quick-row">
+            <button class="q-btn" data-act="local" data-delta="1">+1 L</button>
+            <button class="q-btn" data-act="local" data-delta="2">+2 L</button>
+            <button class="q-btn" data-act="local" data-delta="-1">-1 L</button>
+            <button class="q-btn" data-act="visita" data-delta="1">+1 V</button>
+            <button class="q-btn" data-act="visita" data-delta="2">+2 V</button>
+            <button class="q-btn" data-act="visita" data-delta="-1">-1 V</button>
+          </div>
+        </div>
+      `;
+    }
+
     function paintModules(data) {
       grid.innerHTML = "";
       if (!data) {
@@ -98,6 +151,7 @@
             <span class="pill">${isOn ? "ACTIVO EN LIVE" : "APAGADO"}</span>
             <h3 style="margin-top: 10px; font-size: 1.05rem;">${title}</h3>
           </div>
+          ${buildScoreControls(key, item)}
           <button class="btn ${isOn ? "" : "btn-ghost"}" data-mod="${key}" data-on="${isOn}">
             ${isOn ? "APAGAR (OFF)" : "ENCENDER (ON)"}
           </button>
@@ -114,6 +168,21 @@
           const mod = btn.dataset.mod;
           const nextState = btn.dataset.on !== "true";
           await update(ref(db, `${DB_PATH}/modules/${mod}`), { on: nextState });
+        });
+      });
+
+      grid.querySelectorAll("button.q-btn").forEach((qBtn) => {
+        qBtn.addEventListener("click", async () => {
+          const side = qBtn.dataset.act;
+          const delta = parseInt(qBtn.dataset.delta, 10);
+          const curData = data.marcadores?.data || {};
+          if (side === "local") {
+            const nextVal = Math.max(0, (curData.localScore || 0) + delta);
+            await update(ref(db, `${DB_PATH}/modules/marcadores/data`), { localScore: nextVal });
+          } else {
+            const nextVal = Math.max(0, (curData.visitaScore || 0) + delta);
+            await update(ref(db, `${DB_PATH}/modules/marcadores/data`), { visitaScore: nextVal });
+          }
         });
       });
     }
