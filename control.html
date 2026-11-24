@@ -2,236 +2,838 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0f1116">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Control — Studio TF 2.0</title>
+  <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="css/base.css">
   <style>
-    .ctrl-bar {
-      height: 52px;
-      background: var(--bg-surface);
-      border-bottom: 1px solid var(--border);
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg-app);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .ctrl-topbar {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 20px;
+      gap: 10px;
+      padding: 10px 16px;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
     }
-    .ctrl-grid {
-      max-width: 1140px;
-      margin: 24px auto;
-      padding: 0 20px;
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(275px, 1fr));
-      gap: 16px;
+
+    .brand-link {
+      font-weight: 800;
+      letter-spacing: 1px;
+      cursor: pointer;
+      user-select: none;
+      font-size: 1rem;
     }
-    .ctrl-card { display: flex; flex-direction: column; justify-content: space-between; gap: 14px; }
-    .ctrl-card.is-on { border-color: var(--accent); }
-    .pill {
-      display: inline-block;
-      font-size: 0.7rem;
+    .brand-link span { color: var(--accent); }
+
+    .op-alert {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background: rgba(245, 158, 11, 0.16);
+      border-bottom: 1px solid #f59e0b;
+      color: #fde68a;
+      padding: 8px 16px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      flex-wrap: wrap;
+    }
+    .op-alert.is-active { display: flex; }
+
+    .ctrl-tabs {
+      display: flex;
+      gap: 6px;
+      padding: 8px 16px;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;
+    }
+    .ctrl-tab {
+      background: var(--bg-app);
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 7px 14px;
+      border-radius: 7px;
+      font-size: 0.78rem;
       font-weight: 700;
-      padding: 3px 8px;
-      border-radius: 4px;
-      background: var(--bg-elevated);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .ctrl-tab.is-active {
+      background: var(--accent);
+      color: #111;
+      border-color: var(--accent);
+    }
+
+    .ctrl-main {
+      flex: 1;
+      padding: 14px;
+      max-width: 1320px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .scoreboard-monitor {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 12px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 16px;
+      margin-bottom: 14px;
+    }
+    .mon-team {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .mon-name {
+      font-size: 0.9rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-align: center;
+    }
+    .mon-pts {
+      font-size: 2.5rem;
+      font-weight: 900;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+      color: var(--accent);
+    }
+    .mon-fouls {
+      font-size: 0.75rem;
+      font-weight: 700;
       color: var(--muted);
     }
-    .ctrl-card.is-on .pill { background: var(--accent); color: #fff; }
-    .sb-box {
+    .mon-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 14px;
       background: var(--bg-app);
       border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px;
-      font-size: 0.8rem;
+      border-radius: 10px;
     }
-    .sb-row { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 8px; }
-    .q-btn {
-      background: var(--bg-elevated);
-      color: var(--text);
-      border: 1px solid var(--border);
+    .mon-timer {
+      font-size: 1.85rem;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+    }
+    .mon-period {
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: var(--accent);
+      background: rgba(255,255,255,0.06);
+      padding: 2px 10px;
       border-radius: 5px;
-      padding: 5px 8px;
-      font-size: 0.74rem;
+    }
+
+    .control-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.15fr 1fr;
+      gap: 14px;
+      align-items: start;
+    }
+    .control-grid.no-sides {
+      grid-template-columns: minmax(280px, 520px);
+      justify-content: center;
+    }
+    @media (max-width: 860px) {
+      .control-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .col-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .col-title {
+      font-size: 0.8rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      color: var(--accent);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .pts-pair {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .c-btn {
+      border: 1px solid var(--border);
+      background: var(--bg-app);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 12px 10px;
+      font-size: 0.95rem;
+      font-weight: 800;
+      cursor: pointer;
+      touch-action: manipulation;
+      transition: transform 0.06s ease, background 0.15s ease;
+    }
+    .c-btn:active { transform: scale(0.97); }
+    .c-btn.plus {
+      background: rgba(34, 197, 94, 0.16);
+      border-color: rgba(34, 197, 94, 0.45);
+      color: #86efac;
+    }
+    .c-btn.minus {
+      background: rgba(239, 68, 68, 0.14);
+      border-color: rgba(239, 68, 68, 0.4);
+      color: #fca5a5;
+    }
+    .c-btn.warn {
+      background: rgba(245, 158, 11, 0.16);
+      border-color: rgba(245, 158, 11, 0.45);
+      color: #fde68a;
+    }
+    .c-btn.live-on {
+      background: #16a34a;
+      border-color: #22c55e;
+      color: #ffffff;
+      font-size: 1rem;
+      padding: 14px;
+    }
+    .c-btn.live-off {
+      background: #dc2626;
+      border-color: #ef4444;
+      color: #ffffff;
+      font-size: 1rem;
+      padding: 14px;
+    }
+    .c-btn.running {
+      background: #d97706;
+      border-color: #f59e0b;
+      color: #111;
+    }
+
+    .fouls-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 6px;
+    }
+
+    .time-edit-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 6px;
+      align-items: center;
+    }
+    .time-edit-row input {
+      width: 100%;
+      background: var(--bg-app);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px;
+      border-radius: 7px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .preset-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+    .preset-btn {
+      background: var(--bg-app);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 7px 6px;
+      border-radius: 7px;
+      font-size: 0.76rem;
       font-weight: 700;
       cursor: pointer;
     }
-    .q-btn:hover { border-color: var(--accent); }
+    .preset-btn:hover { color: var(--text); border-color: var(--accent); }
+
+    .period-row {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 8px;
+      align-items: center;
+    }
+    .period-badge {
+      padding: 8px 16px;
+      background: var(--bg-app);
+      border: 1px solid var(--accent);
+      border-radius: 8px;
+      font-weight: 900;
+      font-size: 1rem;
+      color: var(--accent);
+      min-width: 72px;
+      text-align: center;
+    }
+
+    .sub-label {
+      font-size: 0.72rem;
+      color: var(--muted);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .hidden { display: none !important; }
   </style>
 </head>
 <body>
-  <header class="ctrl-bar">
-    <div style="font-weight: 800;">CONTROL <span style="color: var(--accent);">TF 2.0</span></div>
-    <div style="display: flex; gap: 8px;">
-      <button id="sync-btn" class="btn" style="background: #2563eb; padding: 7px 14px; font-size: 0.75rem;">SYNC</button>
-      <button id="to-studio-btn" class="btn btn-ghost" style="padding: 7px 14px; font-size: 0.75rem;" onclick="location.href='studio.html'">Estudio</button>
-      <button class="btn btn-ghost" style="padding: 7px 14px; font-size: 0.75rem;" onclick="location.href='index.html'">Inicio</button>
+  <header class="ctrl-topbar">
+    <div class="brand-link" onclick="location.href='index.html'" title="Volver al menú principal">
+      STUDIO <span>TF 2.0</span>
+    </div>
+    <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+      <span id="op-badge" style="font-size:0.74rem; color:var(--muted);">Operador listo</span>
+      <button type="button" class="btn btn-ghost" style="padding:6px 11px; font-size:0.75rem;" onclick="location.href='studio.html'">Estudio</button>
     </div>
   </header>
 
-  <main id="ctrl-grid" class="ctrl-grid">
-    <p style="color: var(--muted);">Conectando con el estudio...</p>
+  <div id="multiOpAlert" class="op-alert">
+    <span id="multiOpText">Otro operador está usando este control en este momento.</span>
+    <button type="button" id="takeControlBtn" class="btn" style="padding:4px 10px; font-size:0.74rem;">Tomar Control</button>
+  </div>
+
+  <nav class="ctrl-tabs" id="ctrlTabs">
+    <button type="button" class="ctrl-tab is-active" data-pane="tab-marcadores">Marcadores</button>
+    <button type="button" class="ctrl-tab" data-pane="tab-especiales">Competencias Especiales</button>
+  </nav>
+
+  <main class="ctrl-main">
+    <section id="tab-marcadores">
+      <div class="scoreboard-monitor">
+        <div class="mon-team">
+          <div class="mon-name" id="monName1">LOCAL</div>
+          <div class="mon-pts" id="monPts1">0</div>
+          <div class="mon-fouls">Faltas: <span id="monFouls1">0</span>/5</div>
+        </div>
+
+        <div class="mon-center">
+          <div class="mon-timer" id="monTimer">10:00</div>
+          <div class="mon-period" id="monPeriod">Q1</div>
+          <div style="font-size:0.68rem; color:var(--muted);" id="monSourceHint">Sincronizado</div>
+        </div>
+
+        <div class="mon-team">
+          <div class="mon-name" id="monName2">VISITA</div>
+          <div class="mon-pts" id="monPts2">0</div>
+          <div class="mon-fouls">Faltas: <span id="monFouls2">0</span>/5</div>
+        </div>
+      </div>
+
+      <div class="control-grid" id="controlGrid">
+        <!-- COLUMNA IZQUIERDA: LOCAL -->
+        <div class="col-card" id="colLocal">
+          <div class="col-title">
+            <span id="titleLocal">LOCAL</span>
+            <span style="font-size:0.68rem; color:var(--muted);">MANUAL</span>
+          </div>
+
+          <div id="localPointsBox" style="display:flex; flex-direction:column; gap:8px;">
+            <span class="sub-label">Puntos Local</span>
+            <div class="pts-pair">
+              <button type="button" class="c-btn plus" data-pts="1" data-delta="1">+1</button>
+              <button type="button" class="c-btn minus" data-pts="1" data-delta="-1">-1</button>
+            </div>
+            <div class="pts-pair">
+              <button type="button" class="c-btn plus" data-pts="1" data-delta="2">+2</button>
+              <button type="button" class="c-btn minus" data-pts="1" data-delta="-2">-2</button>
+            </div>
+            <div class="pts-pair">
+              <button type="button" class="c-btn plus" data-pts="1" data-delta="3">+3</button>
+              <button type="button" class="c-btn minus" data-pts="1" data-delta="-3">-3</button>
+            </div>
+          </div>
+
+          <div id="localFoulsBox" style="display:flex; flex-direction:column; gap:8px;">
+            <span class="sub-label">Faltas Local (FIBA)</span>
+            <div class="fouls-row">
+              <button type="button" class="c-btn plus" data-foul="1" data-delta="1">+1 Falta</button>
+              <button type="button" class="c-btn minus" data-foul="1" data-delta="-1">-1 Falta</button>
+              <button type="button" class="c-btn warn" data-foul="1" data-delta="reset">Reset</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- COLUMNA CENTRAL: GENERAL -->
+        <div class="col-card" id="colGeneral">
+          <div class="col-title">
+            <span>Control General</span>
+            <span id="modStatusTag" style="font-size:0.68rem; color:var(--muted);">OFF AIR</span>
+          </div>
+
+          <button type="button" id="toggleLiveBtn" class="c-btn live-off">MOSTRAR MARCADOR EN LIVE</button>
+
+          <div id="manualTimerBox" style="display:flex; flex-direction:column; gap:8px; border-top:1px solid var(--border); padding-top:10px;">
+            <span class="sub-label">Reloj de Partido (FIBA Cuenta Regresiva)</span>
+            <button type="button" id="timerStartStopBtn" class="c-btn plus">▶ Iniciar Tiempo</button>
+
+            <div class="preset-row">
+              <button type="button" class="preset-btn" data-preset-min="10" data-preset-sec="0">10:00 Adulto</button>
+              <button type="button" class="preset-btn" data-preset-min="8" data-preset-sec="0">08:00 Formativa</button>
+              <button type="button" class="preset-btn" data-preset-min="5" data-preset-sec="0">05:00 OT</button>
+            </div>
+
+            <div class="time-edit-row">
+              <input type="number" id="editMin" min="0" max="59" value="10" placeholder="Min">
+              <input type="number" id="editSec" min="0" max="59" value="0" placeholder="Seg">
+              <button type="button" id="applyTimeBtn" class="c-btn" style="padding:8px 12px; font-size:0.8rem;">Fijar</button>
+            </div>
+          </div>
+
+          <div id="manualPeriodBox" style="display:flex; flex-direction:column; gap:8px; border-top:1px solid var(--border); padding-top:10px;">
+            <span class="sub-label">Cuarto / Tiempo Extra (FIBA)</span>
+            <div class="period-row">
+              <button type="button" id="periodMinusBtn" class="c-btn minus">− Cuarto</button>
+              <div class="period-badge" id="ctrlPeriodLabel">Q1</div>
+              <button type="button" id="periodPlusBtn" class="c-btn plus">+ Cuarto</button>
+            </div>
+            <span style="font-size:0.68rem; color:var(--muted);">Entre Q1–Q4 resetea faltas y vuelve al tiempo base; en OT mantiene faltas.</span>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:8px; border-top:1px solid var(--border); padding-top:10px;">
+            <span class="sub-label">Redes Sociales (@tiempofuera_cl)</span>
+            <div class="pts-pair">
+              <button type="button" class="c-btn" data-social="ig">Mostrar Instagram</button>
+              <button type="button" class="c-btn" data-social="yt">Mostrar YouTube</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- COLUMNA DERECHA: VISITA -->
+        <div class="col-card" id="colVisita">
+          <div class="col-title">
+            <span id="titleVisita">VISITA</span>
+            <span style="font-size:0.68rem; color:var(--muted);">MANUAL</span>
+          </div>
+
+          <div id="visitaPointsBox" style="display:flex; flex-direction:column; gap:8px;">
+            <span class="sub-label">Puntos Visita</span>
+            <div class="pts-pair">
+              <button type="button" class="c-btn plus" data-pts="2" data-delta="1">+1</button>
+              <button type="button" class="c-btn minus" data-pts="2" data-delta="-1">-1</button>
+            </div>
+            <div class="pts-pair">
+              <button type="button" class="c-btn plus" data-pts="2" data-delta="2">+2</button>
+              <button type="button" class="c-btn minus" data-pts="2" data-delta="-2">-2</button>
+            </div>
+            <div class="pts-pair">
+              <button type="button" class="c-btn plus" data-pts="2" data-delta="3">+3</button>
+              <button type="button" class="c-btn minus" data-pts="2" data-delta="-3">-3</button>
+            </div>
+          </div>
+
+          <div id="visitaFoulsBox" style="display:flex; flex-direction:column; gap:8px;">
+            <span class="sub-label">Faltas Visita (FIBA)</span>
+            <div class="fouls-row">
+              <button type="button" class="c-btn plus" data-foul="2" data-delta="1">+1 Falta</button>
+              <button type="button" class="c-btn minus" data-foul="2" data-delta="-1">-1 Falta</button>
+              <button type="button" class="c-btn warn" data-foul="2" data-delta="reset">Reset</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-especiales" class="hidden">
+      <div class="col-card" style="max-width:540px; margin:0 auto;">
+        <div class="col-title">
+          <span>Competencias Especiales</span>
+          <span style="font-size:0.68rem; color:var(--muted);">PRÓXIMO MÓDULO</span>
+        </div>
+        <p style="font-size:0.84rem; color:var(--muted); margin:0;">
+          Aquí activaremos el selector entre <strong>Concurso de Triples</strong> y <strong>Concurso de Tiros Libres</strong> con su encendido en vivo y controles dedicados.
+        </p>
+      </div>
+    </section>
   </main>
 
   <script type="module">
-    import { db, DB_PATH, ref, update, get, onValue, requireSession, emailToKey } from "./js/firebase.js";
-    import { pushToFlexyscore } from "./js/flexyscore-api.js";
+    import { db, DB_PATH, ref, update, onValue, requireSession } from "./js/firebase.js";
 
-    const LABELS = {
-      marcadores: "Marcadores",
-      especiales: "Competencias Especiales",
-      tercios: "Tercios Inferiores",
-      sponsors: "Logos de Sponsors",
-      auspiciadores: "Logos de Auspiciadores",
-      cg: "Control de CG (Scroll)",
-      equipos: "Presentación de Equipos",
-      estadisticas: "Estadísticas"
+    const SESSION_ID = `op_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+    let operatorName = "Operador";
+    let hasControlLock = true;
+
+    let modState = {
+      enabled: true,
+      on: false,
+      config: {},
+      feeds: {
+        manual: { points_1: 0, points_2: 0, timer: "10:00", period: 1, fouls_1: 0, fouls_2: 0 },
+        scoresight: {},
+        flexyscore: {}
+      }
     };
 
-    const grid = document.getElementById("ctrl-grid");
+    let timerRunning = false;
+    let remainingSec = 600;
+    let quarterBaseSec = 600; // 10:00 por defecto; se actualiza con presets de 10:00 o 08:00
+    let timerInterval = null;
 
-    function getCurrentPoints(mod, srcMap) {
-      const f1Src = srcMap.points_1 || "flexyscore";
-      const f2Src = srcMap.points_2 || "flexyscore";
-      const p1 = Number((mod.feeds?.[f1Src]?.points_1 ?? mod.liveData?.points_1 ?? 0)) || 0;
-      const p2 = Number((mod.feeds?.[f2Src]?.points_2 ?? mod.liveData?.points_2 ?? 0)) || 0;
-      return { p1, p2, f1Src, f2Src };
+    function formatSec(sec) {
+      const s = Math.max(0, Math.floor(sec));
+      const mm = String(Math.floor(s / 60)).padStart(2, "0");
+      const ss = String(s % 60).padStart(2, "0");
+      return `${mm}:${ss}`;
     }
 
-    function renderMarcadorWidget(mod) {
-      const cfg = mod.config || {};
-      const src = cfg.sources || {};
-      const { p1, p2, f1Src, f2Src } = getCurrentPoints(mod, src);
-
-      return `
-        <div class="sb-box">
-          <div style="display:flex; justify-content:space-between; font-weight:800; font-size:0.9rem;">
-            <span>${cfg.name1 || "LOCAL"}: ${p1}</span>
-            <span>${cfg.name2 || "VISITA"}: ${p2}</span>
-          </div>
-          <div style="color:var(--muted); font-size:0.7rem; margin-top:4px;">
-            Pts L: <strong>${f1Src}</strong> · Pts V: <strong>${f2Src}</strong> · Reloj: <strong>${src.timer || "scoresight"}</strong>
-          </div>
-          <div class="sb-row">
-            <button class="q-btn" data-pts="1" data-d="1">+1 L</button>
-            <button class="q-btn" data-pts="1" data-d="2">+2 L</button>
-            <button class="q-btn" data-pts="1" data-d="3">+3 L</button>
-            <button class="q-btn" data-pts="1" data-d="-1">-1 L</button>
-            <button class="q-btn" data-pts="2" data-d="1">+1 V</button>
-            <button class="q-btn" data-pts="2" data-d="2">+2 V</button>
-            <button class="q-btn" data-pts="2" data-d="3">+3 V</button>
-            <button class="q-btn" data-pts="2" data-d="-1">-1 V</button>
-          </div>
-          <div class="sb-row">
-            <button class="q-btn" data-social="ig">📸 IG Now</button>
-            <button class="q-btn" data-social="yt">▶️ YT Now</button>
-          </div>
-        </div>
-      `;
+    function parseTimerToSec(str) {
+      const parts = String(str || "10:00").split(":");
+      if (parts.length !== 2) return 600;
+      const m = parseInt(parts[0], 10) || 0;
+      const s = parseInt(parts[1], 10) || 0;
+      return m * 60 + s;
     }
 
-    function paint(data, allowedScope) {
-      grid.innerHTML = "";
-      if (!data) {
-        grid.innerHTML = "<p style='color:var(--muted);'>No hay módulos habilitados en el Estudio.</p>";
-        return;
+    function formatPeriodFiba(p) {
+      const n = parseInt(String(p ?? "1").replace(/[^0-9]/g, ""), 10) || 1;
+      return n <= 4 ? `Q${n}` : `OT${n - 4}`;
+    }
+
+    function getSourceFor(field) {
+      return modState.config?.sources?.[field] || "manual";
+    }
+
+    function readEffectiveValue(field, altKeys = []) {
+      const src = getSourceFor(field);
+      const bucket = modState.feeds?.[src] || {};
+      for (const k of [field, ...altKeys]) {
+        if (bucket[k] !== undefined && bucket[k] !== null && bucket[k] !== "") {
+          return bucket[k];
+        }
+      }
+      const fallback = modState.feeds?.manual || {};
+      return fallback[field];
+    }
+
+    function updateConditionalVisibility() {
+      const p1Manual = getSourceFor("points_1") === "manual";
+      const p2Manual = getSourceFor("points_2") === "manual";
+      const f1Manual = getSourceFor("fouls_1") === "manual";
+      const f2Manual = getSourceFor("fouls_2") === "manual";
+      const tManual = getSourceFor("timer") === "manual";
+      const qManual = getSourceFor("period") === "manual";
+
+      document.getElementById("localPointsBox").classList.toggle("hidden", !p1Manual);
+      document.getElementById("localFoulsBox").classList.toggle("hidden", !f1Manual);
+      const showLocalCol = p1Manual || f1Manual;
+      document.getElementById("colLocal").classList.toggle("hidden", !showLocalCol);
+
+      document.getElementById("visitaPointsBox").classList.toggle("hidden", !p2Manual);
+      document.getElementById("visitaFoulsBox").classList.toggle("hidden", !f2Manual);
+      const showVisitaCol = p2Manual || f2Manual;
+      document.getElementById("colVisita").classList.toggle("hidden", !showVisitaCol);
+
+      document.getElementById("manualTimerBox").classList.toggle("hidden", !tManual);
+      document.getElementById("manualPeriodBox").classList.toggle("hidden", !qManual);
+
+      const grid = document.getElementById("controlGrid");
+      grid.classList.toggle("no-sides", !showLocalCol && !showVisitaCol);
+    }
+
+    function renderMonitor() {
+      const cfg = modState.config || {};
+      const n1 = cfg.name1 || "LOCAL";
+      const n2 = cfg.name2 || "VISITA";
+      document.getElementById("monName1").textContent = n1;
+      document.getElementById("monName2").textContent = n2;
+      document.getElementById("titleLocal").textContent = n1;
+      document.getElementById("titleVisita").textContent = n2;
+
+      const pts1 = parseInt(readEffectiveValue("points_1", ["points1", "score_1"]) ?? 0, 10) || 0;
+      const pts2 = parseInt(readEffectiveValue("points_2", ["points2", "score_2"]) ?? 0, 10) || 0;
+      const f1 = parseInt(readEffectiveValue("fouls_1", ["fouls1"]) ?? 0, 10) || 0;
+      const f2 = parseInt(readEffectiveValue("fouls_2", ["fouls2"]) ?? 0, 10) || 0;
+      const per = readEffectiveValue("period", ["moment"]) ?? 1;
+      const tmr = readEffectiveValue("timer") ?? "10:00";
+
+      document.getElementById("monPts1").textContent = pts1;
+      document.getElementById("monPts2").textContent = pts2;
+      document.getElementById("monFouls1").textContent = f1;
+      document.getElementById("monFouls2").textContent = f2;
+      document.getElementById("monTimer").textContent = tmr;
+      document.getElementById("monPeriod").textContent = formatPeriodFiba(per);
+      document.getElementById("ctrlPeriodLabel").textContent = formatPeriodFiba(per);
+
+      const liveBtn = document.getElementById("toggleLiveBtn");
+      const statusTag = document.getElementById("modStatusTag");
+      if (modState.on) {
+        liveBtn.textContent = "EN VIVO — OCULTAR MARCADOR";
+        liveBtn.classList.remove("live-off");
+        liveBtn.classList.add("live-on");
+        statusTag.textContent = "ON AIR";
+        statusTag.style.color = "#4ade80";
+      } else {
+        liveBtn.textContent = "MOSTRAR MARCADOR EN LIVE";
+        liveBtn.classList.remove("live-on");
+        liveBtn.classList.add("live-off");
+        statusTag.textContent = "OFF AIR";
+        statusTag.style.color = "var(--muted)";
       }
 
-      let shown = 0;
-      Object.entries(LABELS).forEach(([key, title]) => {
-        if (allowedScope === "marcadores" && key !== "marcadores") return;
-        const item = data[key];
-        if (!item?.enabled) return;
-        shown++;
+      updateConditionalVisibility();
+    }
 
-        const isOn = Boolean(item.on);
-        const card = document.createElement("article");
-        card.className = `card ctrl-card ${isOn ? "is-on" : ""}`;
-        card.innerHTML = `
-          <div>
-            <span class="pill">${isOn ? "ACTIVO EN LIVE" : "APAGADO"}</span>
-            <h3 style="margin-top: 10px; font-size: 1.05rem;">${title}</h3>
-          </div>
-          ${key === "marcadores" ? renderMarcadorWidget(item) : ""}
-          <button class="btn ${isOn ? "" : "btn-ghost"}" data-mod="${key}" data-on="${isOn}">
-            ${isOn ? "APAGAR (OFF)" : "ENCENDER (ON)"}
-          </button>
-        `;
-        grid.appendChild(card);
+    async function writeManual(patch) {
+      const current = modState.feeds?.manual || {};
+      const next = { ...current, ...patch };
+      modState.feeds.manual = next;
+      renderMonitor();
+      await update(ref(db, `${DB_PATH}/modules/marcadores/feeds/manual`), patch);
+    }
+
+    document.querySelectorAll("[data-pts]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const team = btn.dataset.pts;
+        const delta = parseInt(btn.dataset.delta, 10);
+        const key = team === "1" ? "points_1" : "points_2";
+        const cur = parseInt(modState.feeds?.manual?.[key] ?? 0, 10) || 0;
+        const next = Math.max(0, cur + delta);
+        await writeManual({ [key]: next });
       });
+    });
 
-      if (shown === 0) {
-        grid.innerHTML = "<p style='color:var(--muted);'>Habilita módulos desde las pestañas del Estudio.</p>";
+    document.querySelectorAll("[data-foul]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const team = btn.dataset.foul;
+        const key = team === "1" ? "fouls_1" : "fouls_2";
+        if (btn.dataset.delta === "reset") {
+          await writeManual({ [key]: 0 });
+          return;
+        }
+        const delta = parseInt(btn.dataset.delta, 10);
+        const cur = parseInt(modState.feeds?.manual?.[key] ?? 0, 10) || 0;
+        const next = Math.max(0, Math.min(5, cur + delta));
+        await writeManual({ [key]: next });
+      });
+    });
+
+    /* --- CAMBIO DE CUARTO / OT (FIBA) --- */
+    async function applyPeriodTransition(nextPeriod) {
+      stopTimerLoop();
+      const isOvertime = nextPeriod > 4;
+      const targetSec = isOvertime ? 300 : quarterBaseSec; // 05:00 en OT, o 10:00 / 08:00 según base de cuartos
+      remainingSec = targetSec;
+      document.getElementById("editMin").value = Math.floor(targetSec / 60);
+      document.getElementById("editSec").value = targetSec % 60;
+
+      const patch = {
+        period: nextPeriod,
+        timer: formatSec(targetSec)
+      };
+
+      // En cuartos regulares (Q1..Q4) se resetean faltas; al pasar a OT se mantienen las faltas acumuladas
+      if (!isOvertime) {
+        patch.fouls_1 = 0;
+        patch.fouls_2 = 0;
       }
 
-      grid.querySelectorAll("button[data-mod]").forEach((btn) => {
-        btn.addEventListener("click", async () => {
-          const mod = btn.dataset.mod;
-          const next = btn.dataset.on !== "true";
-          await update(ref(db, `${DB_PATH}/modules/${mod}`), { on: next });
+      await writeManual(patch);
+    }
+
+    document.getElementById("periodMinusBtn").addEventListener("click", async () => {
+      const cur = parseInt(String(modState.feeds?.manual?.period ?? "1").replace(/[^0-9]/g, ""), 10) || 1;
+      const next = Math.max(1, cur - 1);
+      await applyPeriodTransition(next);
+    });
+
+    document.getElementById("periodPlusBtn").addEventListener("click", async () => {
+      const cur = parseInt(String(modState.feeds?.manual?.period ?? "1").replace(/[^0-9]/g, ""), 10) || 1;
+      const next = cur + 1;
+      await applyPeriodTransition(next);
+    });
+
+    /* --- RELOJ MANUAL FIBA --- */
+    const startStopBtn = document.getElementById("timerStartStopBtn");
+
+    function stopTimerLoop() {
+      timerRunning = false;
+      clearInterval(timerInterval);
+      timerInterval = null;
+      startStopBtn.textContent = "▶ Iniciar Tiempo";
+      startStopBtn.classList.remove("running");
+      startStopBtn.classList.add("plus");
+    }
+
+    function startTimerLoop() {
+      if (timerRunning) return;
+      timerRunning = true;
+      startStopBtn.textContent = "⏸ Detener Tiempo";
+      startStopBtn.classList.remove("plus");
+      startStopBtn.classList.add("running");
+
+      timerInterval = setInterval(async () => {
+        if (remainingSec <= 0) {
+          stopTimerLoop();
+          await writeManual({ timer: "00:00" });
+          return;
+        }
+        remainingSec -= 1;
+        const formatted = formatSec(remainingSec);
+        document.getElementById("editMin").value = Math.floor(remainingSec / 60);
+        document.getElementById("editSec").value = remainingSec % 60;
+        await writeManual({ timer: formatted });
+      }, 1000);
+    }
+
+    startStopBtn.addEventListener("click", () => {
+      if (timerRunning) stopTimerLoop();
+      else startTimerLoop();
+    });
+
+    document.querySelectorAll("[data-preset-min]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        stopTimerLoop();
+        const m = parseInt(btn.dataset.presetMin, 10) || 0;
+        const s = parseInt(btn.dataset.presetSec, 10) || 0;
+        const total = m * 60 + s;
+        remainingSec = total;
+        if (m === 10 || m === 8) {
+          quarterBaseSec = total;
+        }
+        document.getElementById("editMin").value = m;
+        document.getElementById("editSec").value = s;
+        await writeManual({ timer: formatSec(remainingSec) });
+      });
+    });
+
+    document.getElementById("applyTimeBtn").addEventListener("click", async () => {
+      stopTimerLoop();
+      const m = Math.max(0, Math.min(59, parseInt(document.getElementById("editMin").value, 10) || 0));
+      const s = Math.max(0, Math.min(59, parseInt(document.getElementById("editSec").value, 10) || 0));
+      remainingSec = m * 60 + s;
+      await writeManual({ timer: formatSec(remainingSec) });
+    });
+
+    document.getElementById("toggleLiveBtn").addEventListener("click", async () => {
+      const nextOn = !modState.on;
+      await update(ref(db, `${DB_PATH}/modules/marcadores`), {
+        enabled: true,
+        on: nextOn
+      });
+    });
+
+    document.querySelectorAll("[data-social]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        await update(ref(db, `${DB_PATH}/modules/marcadores/cmd`), {
+          action: "social_now",
+          network: btn.dataset.social,
+          ts: Date.now()
         });
       });
+    });
 
-      grid.querySelectorAll("button[data-pts]").forEach((btn) => {
-        btn.addEventListener("click", async () => {
-          const team = btn.dataset.pts;
-          const delta = parseInt(btn.dataset.d, 10);
-          const mItem = data.marcadores || {};
-          const cfg = mItem.config || {};
-          const src = cfg.sources || {};
-          const { p1, p2, f1Src, f2Src } = getCurrentPoints(mItem, src);
+    document.querySelectorAll(".ctrl-tab").forEach((tab) => {
+      tab.addEventListener("click", () => {
+        document.querySelectorAll(".ctrl-tab").forEach((t) => t.classList.remove("is-active"));
+        tab.classList.add("is-active");
+        const target = tab.dataset.pane;
+        document.getElementById("tab-marcadores").classList.toggle("hidden", target !== "tab-marcadores");
+        document.getElementById("tab-especiales").classList.toggle("hidden", target !== "tab-especiales");
+      });
+    });
 
-          const nextP1 = team === "1" ? Math.max(0, p1 + delta) : p1;
-          const nextP2 = team === "2" ? Math.max(0, p2 + delta) : p2;
-          const targetFeed = team === "1" ? f1Src : f2Src;
-          const field = team === "1" ? "points_1" : "points_2";
-          const nextVal = team === "1" ? nextP1 : nextP2;
+    async function claimControl() {
+      hasControlLock = true;
+      document.getElementById("multiOpAlert").classList.remove("is-active");
+      await update(ref(db, `${DB_PATH}/modules/marcadores/activeOperator`), {
+        sessionId: SESSION_ID,
+        name: operatorName,
+        ts: Date.now()
+      });
+    }
 
-          await update(ref(db, `${DB_PATH}/modules/marcadores/feeds/${targetFeed}`), {
-            [field]: nextVal
-          });
+    document.getElementById("takeControlBtn").addEventListener("click", claimControl);
 
-          if ((f1Src === "flexyscore" || f2Src === "flexyscore") && cfg.flexyLiveId) {
-            try {
-              await pushToFlexyscore(cfg.flexyLiveId, {
-                points_1: nextP1,
-                points_2: nextP2,
-                generictoggle: 1
-              });
-            } catch (_) {}
+    setInterval(async () => {
+      if (hasControlLock) {
+        await update(ref(db, `${DB_PATH}/modules/marcadores/activeOperator`), {
+          sessionId: SESSION_ID,
+          name: operatorName,
+          ts: Date.now()
+        });
+      }
+    }, 15000);
+
+    requireSession(async (user) => {
+      operatorName = user?.displayName || user?.email || "Operador";
+      document.getElementById("op-badge").textContent = `Operador: ${operatorName}`;
+      await claimControl();
+
+      onValue(ref(db, `${DB_PATH}/modules/marcadores`), (snap) => {
+        if (!snap.exists()) return;
+        const val = snap.val();
+
+        const lock = val.activeOperator;
+        if (lock && lock.sessionId && lock.sessionId !== SESSION_ID && (Date.now() - (lock.ts || 0)) < 45000) {
+          hasControlLock = false;
+          document.getElementById("multiOpText").textContent =
+            `Aviso: "${lock.name || "Otro operador"}" está operando este marcador ahora mismo.`;
+          document.getElementById("multiOpAlert").classList.add("is-active");
+        } else {
+          document.getElementById("multiOpAlert").classList.remove("is-active");
+        }
+
+        modState = {
+          enabled: val.enabled !== false,
+          on: Boolean(val.on),
+          config: val.config || {},
+          feeds: {
+            manual: {
+              points_1: 0,
+              points_2: 0,
+              timer: "10:00",
+              period: 1,
+              fouls_1: 0,
+              fouls_2: 0,
+              ...(val.feeds?.manual || {})
+            },
+            scoresight: { ...(val.liveData || {}), ...(val.feeds?.scoresight || {}) },
+            flexyscore: { ...(val.feeds?.flexyscore || {}) }
           }
-        });
-      });
+        };
 
-      grid.querySelectorAll("button[data-social]").forEach((btn) => {
-        btn.addEventListener("click", async () => {
-          await update(ref(db, `${DB_PATH}/modules/marcadores/cmd`), {
-            action: "social_now",
-            network: btn.dataset.social,
-            ts: Date.now()
-          });
-        });
-      });
-    }
+        if (!timerRunning && modState.feeds.manual.timer) {
+          remainingSec = parseTimerToSec(modState.feeds.manual.timer);
+          document.getElementById("editMin").value = Math.floor(remainingSec / 60);
+          document.getElementById("editSec").value = remainingSec % 60;
+        }
 
-    requireSession(async (user, role) => {
-      if (role !== "admin") {
-        document.getElementById("to-studio-btn").style.display = "none";
-      }
-
-      let scope = "all";
-      if (role === "control" && user.email) {
-        const uSnap = await get(ref(db, `${DB_PATH}/controlUsers/${emailToKey(user.email)}`));
-        if (uSnap.exists()) scope = uSnap.val().scope || "all";
-      }
-
-      const modulesRef = ref(db, `${DB_PATH}/modules`);
-      onValue(modulesRef, (snap) => paint(snap.val(), scope));
-
-      document.getElementById("sync-btn").addEventListener("click", async (e) => {
-        const btn = e.currentTarget;
-        btn.textContent = "SINCRONIZANDO...";
-        const snap = await get(modulesRef);
-        paint(snap.val(), scope);
-        await update(ref(db, DB_PATH), { syncedAt: Date.now() });
-        setTimeout(() => { btn.textContent = "SYNC"; }, 700);
+        renderMonitor();
       });
     });
   </script>
