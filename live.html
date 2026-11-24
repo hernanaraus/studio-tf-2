@@ -3,119 +3,566 @@
 <head>
   <meta charset="UTF-8">
   <title>Live — Studio TF 2.0</title>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;1,700;1,800&family=Bebas+Neue&family=Chakra+Petch:wght@600;700&family=Oswald:wght@600;700&family=Rajdhani:wght@600;700&family=Russo+One&family=Teko:wght@600;700&display=swap" rel="stylesheet">
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body {
+      margin: 0;
+      padding: 0;
       width: 1920px;
       height: 1080px;
-      background: transparent;
+      background: transparent !important;
       overflow: hidden;
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     }
-    .live-item {
+
+    .live-layer {
       position: absolute;
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.2s ease;
+      transition: opacity 0.28s ease;
     }
-    .live-item.is-visible {
+
+    .live-layer.is-visible {
       opacity: 1;
     }
-    .live-sb {
+
+    .social-pill-wrap {
+      position: absolute;
+      top: 44px;
+      left: 48px;
+      transform: translateX(-36px) scale(var(--social-scale, 1.35));
+      transform-origin: top left;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.45s ease, transform 0.45s ease;
+      z-index: 30;
+    }
+
+    .social-pill-wrap.pos-top-right {
+      left: auto;
+      right: 48px;
+      transform-origin: top right;
+      transform: translateX(36px) scale(var(--social-scale, 1.35));
+    }
+
+    .social-pill-wrap.active {
+      opacity: 1;
+      transform: translateX(0) scale(var(--social-scale, 1.35));
+    }
+
+    .social-pill {
       display: flex;
       align-items: center;
-      gap: 16px;
-      background: rgba(14, 14, 18, 0.95);
-      color: #fff;
-      padding: 12px 22px;
-      border-radius: 8px;
-      border: 1px solid rgba(255, 255, 255, 0.16);
-      font-weight: 800;
-      font-size: 28px;
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
-    }
-    .live-sb.style-compact {
-      font-size: 22px;
-      padding: 8px 16px;
-      border-radius: 5px;
-    }
-    .live-team {
-      display: inline-flex;
-      align-items: center;
       gap: 12px;
-      background: #1d1e26;
-      padding: 6px 14px;
-      border-radius: 5px;
-      border-left: 6px solid #e11d2e;
+      background: #14171f;
+      border: 2px solid var(--sb-accent, #e3b857);
+      border-radius: 10px;
+      padding: 9px 18px 9px 13px;
+      white-space: nowrap;
+      font-family: 'Barlow Condensed', sans-serif;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.55);
     }
-    .live-score {
-      font-variant-numeric: tabular-nums;
+
+    .social-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    .live-meta {
-      font-size: 20px;
-      color: #e4e4ee;
-      border-left: 2px solid rgba(255, 255, 255, 0.22);
-      padding-left: 16px;
-      font-variant-numeric: tabular-nums;
+
+    .social-icon.ig {
+      background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
+    }
+
+    .social-icon.yt {
+      background: linear-gradient(135deg, #ff1e1e 0%, #b80000 100%);
+    }
+
+    .social-texts {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.05;
+    }
+
+    .social-cta {
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--sb-accent, #e3b857);
+    }
+
+    .social-handle {
+      font-size: 22px;
+      font-weight: 800;
+      color: #ffffff;
+    }
+
+    @keyframes basketBurst {
+      0% { opacity: 0; transform: translate(-50%, 6px) scale(0.55); }
+      25% { opacity: 1; transform: translate(-50%, -18px) scale(1.28); }
+      75% { opacity: 1; transform: translate(-50%, -24px) scale(1.12); }
+      100% { opacity: 0; transform: translate(-50%, -32px) scale(0.95); }
+    }
+
+    .pts-pop-badge {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      font-weight: 900;
+      font-size: 26px;
+      line-height: 1;
+      padding: 3px 10px;
+      border-radius: 7px;
+      z-index: 30;
+      animation: basketBurst 1.15s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    .pts-pop-badge.triple {
+      background: #f59e0b;
+      color: #111;
+      border: 1.5px solid #fff;
+    }
+
+    .pts-pop-badge.doble {
+      background: #fff;
+      color: #111;
+      border: 1.5px solid var(--sb-accent, #e3b857);
     }
   </style>
 </head>
 <body>
-  <div id="live-marcadores" class="live-item">
-    <div id="live-sb-box" class="live-sb">
-      <span id="live-local-team" class="live-team">
-        <span id="live-local-name">LOC</span>
-        <span id="live-local-score" class="live-score">0</span>
-      </span>
-      <span style="color: #9898a6;">-</span>
-      <span id="live-visita-team" class="live-team">
-        <span id="live-visita-score" class="live-score">0</span>
-        <span id="live-visita-name">VIS</span>
-      </span>
-      <span id="live-meta" class="live-meta">1° · 10:00</span>
-    </div>
+  <div class="social-pill-wrap" id="socialWrap">
+    <div class="social-pill" id="socialCard"></div>
+  </div>
+
+  <div id="live-marcadores" class="live-layer" style="left: 14%; top: 76%;">
+    <div id="marcadorMount"></div>
   </div>
 
   <script type="module">
     import { db, DB_PATH, ref, onValue } from "./js/firebase.js";
 
-    function renderMarcador(data = {}) {
-      const box = document.getElementById("live-sb-box");
-      box.classList.toggle("style-compact", data.style === "compact");
+    const FLEXY_ENDPOINT = "https://www.live.flexyscore.net/dirette/in_dispatchers/apidispatcher.php";
 
-      const localTeam = document.getElementById("live-local-team");
-      const visitaTeam = document.getElementById("live-visita-team");
-      localTeam.style.borderLeftColor = data.localColor || "#e11d2e";
-      visitaTeam.style.borderLeftColor = data.visitaColor || "#2563eb";
+    let cfg = {
+      flexyBoardId: "20152",
+      flexyLiveId: "",
+      sources: {
+        points_1: "flexyscore",
+        points_2: "flexyscore",
+        timer: "scoresight",
+        period: "scoresight",
+        fouls_1: "scoresight",
+        fouls_2: "scoresight",
+        shotclock: "scoresight"
+      },
+      fontFamily: "'Barlow Condensed', sans-serif",
+      boardScale: 1.0,
+      ligaSize: 92,
+      teamLogoSize: 44,
+      teamFontSize: 25,
+      scoreBoxSize: 48,
+      clockFontSize: 32,
+      accentColor: "#e3b857",
+      foulActiveColor: "#ffe600",
+      foulBonusColor: "#ff1744",
+      name1: "LOCAL",
+      bg1Color: "#1c1e24",
+      text1Color: "#ffffff",
+      name2: "VISITA",
+      bg2Color: "#1c1e24",
+      text2Color: "#ffffff",
+      scoreBgColor: "#0c0d10",
+      scoreTextColor: "#e3b857",
+      shotBgColor: "#141519",
+      shotTextColor: "#ff2a2a",
+      clockBgColor: "#141519",
+      clockTextColor: "#ffffff",
+      periodTextColor: "#e3b857",
+      showShotClock: true,
+      topBadgeEnabled: false,
+      topTextValue: "",
+      logoLiga: "",
+      logo1: "",
+      logo2: "",
+      socialAutoEnabled: true,
+      socialPosition: "top-left",
+      socialScale: 1.35,
+      socialIntervalSec: 150
+    };
 
-      document.getElementById("live-local-name").textContent = data.localName || "LOC";
-      document.getElementById("live-local-score").textContent = data.localScore ?? 0;
-      document.getElementById("live-visita-name").textContent = data.visitaName || "VIS";
-      document.getElementById("live-visita-score").textContent = data.visitaScore ?? 0;
-      document.getElementById("live-meta").textContent = `${data.period || "1°"} · ${data.clock || "10:00"}`;
+    let feeds = {
+      scoresight: {},
+      flexyscore: {},
+      manual: {}
+    };
+
+    let prevPts1 = null;
+    let prevPts2 = null;
+    let lastCmdTs = 0;
+
+    function lum(hex) {
+      hex = (hex || "#1c1e24").replace("#", "");
+      if (hex.length === 3) hex = hex.split("").map((c) => c + c).join("");
+      const r = parseInt(hex.substring(0, 2), 16) || 0;
+      const g = parseInt(hex.substring(2, 4), 16) || 0;
+      const b = parseInt(hex.substring(4, 6), 16) || 0;
+      return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
     }
 
-    onValue(ref(db, `${DB_PATH}/modules`), (snap) => {
-      const mods = snap.val() || {};
-      Object.entries(mods).forEach(([key, cfg]) => {
-        const el = document.getElementById(`live-${key}`);
-        if (!el) return;
+    function shade(hex, pct) {
+      hex = (hex || "#1c1e24").replace("#", "");
+      let r = parseInt(hex.substring(0, 2), 16) || 0;
+      let g = parseInt(hex.substring(2, 4), 16) || 0;
+      let b = parseInt(hex.substring(4, 6), 16) || 0;
+      if (pct >= 0) {
+        r = Math.min(255, Math.floor(r + (255 - r) * pct));
+        g = Math.min(255, Math.floor(g + (255 - g) * pct));
+        b = Math.min(255, Math.floor(b + (255 - b) * pct));
+      } else {
+        const f = 1 + pct;
+        r = Math.max(0, Math.floor(r * f));
+        g = Math.max(0, Math.floor(g * f));
+        b = Math.max(0, Math.floor(b * f));
+      }
+      return "#" + [r, g, b].map((x) => x.toString(16).padStart(2, "0")).join("");
+    }
 
-        if (cfg.pos) {
-          el.style.left = `${cfg.pos.x ?? 5}%`;
-          el.style.top = `${cfg.pos.y ?? 6}%`;
+    function resolveField(fieldName, altKeys = []) {
+      const srcMap = cfg.sources || {};
+      const src = srcMap[fieldName] || "manual";
+      const bucket = feeds[src] || {};
+      for (const k of [fieldName, ...altKeys]) {
+        if (bucket[k] !== undefined && bucket[k] !== null && bucket[k] !== "") {
+          return bucket[k];
         }
+      }
+      return undefined;
+    }
 
-        if (key === "marcadores") {
-          renderMarcador(cfg.data);
-        }
-
-        if (cfg.enabled && cfg.on) {
-          el.classList.add("is-visible");
+    function actualizarFaltas(id, cantidad) {
+      const cont = document.getElementById(id);
+      if (!cont) return;
+      const barras = cont.querySelectorAll(".foul-bar");
+      const num = parseInt(cantidad, 10) || 0;
+      barras.forEach((b, idx) => {
+        const n = idx + 1;
+        if (n <= num) {
+          b.style.background = n === 5 ? cfg.foulBonusColor : cfg.foulActiveColor;
+          b.style.border = "1px solid #111111";
         } else {
-          el.classList.remove("is-visible");
+          b.style.background = "rgba(0,0,0,0.35)";
+          b.style.border = "1px solid rgba(255,255,255,0.45)";
         }
       });
+    }
+
+    function formatearPeriodo(momentRaw) {
+      const n = parseInt(String(momentRaw ?? "").replace(/[^0-9]/g, ""), 10);
+      if (isNaN(n) || n <= 0) return "Q1";
+      return n <= 4 ? "Q" + n : "OT" + (n - 4);
+    }
+
+    function animarCanasta(slotId, ptsId, val, delta) {
+      const slot = document.getElementById(slotId);
+      const el = document.getElementById(ptsId);
+      if (!slot || !el) return;
+      const badge = document.createElement("div");
+      badge.className = "pts-pop-badge " + (delta === 3 ? "triple" : "doble");
+      badge.textContent = "+" + delta;
+      slot.appendChild(badge);
+      setTimeout(() => { el.textContent = val; }, 340);
+      setTimeout(() => badge.remove(), 1200);
+    }
+
+    function renderEstructura() {
+      document.documentElement.style.setProperty("--sb-accent", cfg.accentColor || "#e3b857");
+
+      const stripe1 = lum(cfg.bg1Color) > 0.55 ? "rgba(0,0,0,0.085)" : "rgba(255,255,255,0.05)";
+      const stripe2 = lum(cfg.bg2Color) > 0.55 ? "rgba(0,0,0,0.085)" : "rgba(255,255,255,0.05)";
+      const foulsBase = Array.from({ length: 5 }, (_, i) => `<span class="foul-bar" data-idx="${i + 1}"></span>`).join("");
+
+      const topHtml = cfg.topBadgeEnabled && cfg.topTextValue
+        ? `<div style="position:absolute;top:-22px;left:50%;transform:translateX(-50%);background:${cfg.scoreBgColor};border:1.5px solid ${cfg.accentColor};border-radius:6px;padding:2px 12px;font-size:16px;font-weight:800;color:#fff;white-space:nowrap;">${cfg.topTextValue}</div>`
+        : "";
+
+      const shotHtml = cfg.showShotClock
+        ? `<div id="shotclock" style="position:absolute;bottom:-17px;left:50%;transform:translateX(-50%);background:${cfg.shotBgColor};color:${cfg.shotTextColor};border:1.5px solid ${cfg.accentColor};border-radius:6px;font-size:19px;font-weight:800;padding:0 7px;min-width:36px;text-align:center;"></div>`
+        : "";
+
+      document.getElementById("marcadorMount").innerHTML = `
+        <style>
+          .lm-bar {
+            transform: scale(${cfg.boardScale || 1});
+            transform-origin: top left;
+            display: inline-flex;
+            align-items: center;
+            height: 92px;
+            font-family: ${cfg.fontFamily};
+            user-select: none;
+          }
+          .lm-wing {
+            position: relative;
+            display: flex;
+            align-items: center;
+            height: 60px;
+            min-width: 205px;
+            padding: 0 14px;
+            gap: 10px;
+            overflow: hidden;
+            border-top: 1.5px solid ${cfg.accentColor};
+            border-bottom: 2px solid ${cfg.accentColor};
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.22);
+          }
+          .lm-wing.home {
+            background: linear-gradient(90deg, ${shade(cfg.bg1Color, -0.14)} 0%, ${cfg.bg1Color} 45%, ${shade(cfg.bg1Color, 0.2)} 100%);
+            border-left: 1.5px solid ${cfg.accentColor};
+            border-radius: 10px 0 0 10px;
+          }
+          .lm-wing.home::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: repeating-linear-gradient(-45deg, ${stripe1} 0px, ${stripe1} 2px, transparent 2px, transparent 6px);
+            pointer-events: none;
+          }
+          .lm-wing.away {
+            flex-direction: row-reverse;
+            background: linear-gradient(270deg, ${shade(cfg.bg2Color, -0.14)} 0%, ${cfg.bg2Color} 45%, ${shade(cfg.bg2Color, 0.2)} 100%);
+            border-radius: 0;
+          }
+          .lm-wing.away::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: repeating-linear-gradient(45deg, ${stripe2} 0px, ${stripe2} 2px, transparent 2px, transparent 6px);
+            pointer-events: none;
+          }
+          .lm-name {
+            font-size: ${cfg.teamFontSize || 25}px;
+            font-weight: 800;
+            text-transform: uppercase;
+            line-height: 1;
+            position: relative;
+            z-index: 2;
+          }
+          .lm-fouls {
+            display: flex;
+            gap: 5px;
+            margin-top: 6px;
+            position: relative;
+            z-index: 2;
+          }
+          .foul-bar {
+            width: 19px;
+            height: 5px;
+            border-radius: 2px;
+            display: inline-block;
+          }
+          .lm-scores {
+            position: relative;
+            display: flex;
+            align-items: center;
+            height: 68px;
+            padding: 0 14px;
+            gap: 8px;
+            background: linear-gradient(180deg, ${shade(cfg.scoreBgColor, 0.14)} 0%, ${cfg.scoreBgColor} 55%, ${shade(cfg.scoreBgColor, -0.18)} 100%);
+            border: 2px solid ${cfg.accentColor};
+            border-radius: 9px;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.22);
+            z-index: 3;
+          }
+          .lm-slot {
+            position: relative;
+            min-width: 54px;
+            text-align: center;
+          }
+          .lm-pts {
+            font-size: ${cfg.scoreBoxSize || 48}px;
+            font-weight: 800;
+            color: ${cfg.scoreTextColor};
+            font-variant-numeric: tabular-nums;
+            line-height: 0.92;
+          }
+          .lm-clock {
+            display: flex;
+            align-items: center;
+            height: 60px;
+            padding: 0 14px;
+            gap: 10px;
+            background: linear-gradient(180deg, ${shade(cfg.clockBgColor, 0.14)} 0%, ${cfg.clockBgColor} 55%, ${shade(cfg.clockBgColor, -0.16)} 100%);
+            border: 1.5px solid ${cfg.accentColor};
+            border-radius: 0 10px 10px 0;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.2);
+          }
+          .lm-timer {
+            font-size: ${cfg.clockFontSize || 32}px;
+            font-weight: 700;
+            color: ${cfg.clockTextColor};
+            font-variant-numeric: tabular-nums;
+          }
+          .lm-period {
+            font-size: ${Math.round((cfg.clockFontSize || 32) * 0.72)}px;
+            font-weight: 800;
+            color: ${cfg.periodTextColor};
+            background: rgba(255,255,255,0.08);
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.2);
+          }
+        </style>
+        <div class="lm-bar">
+          ${cfg.logoLiga ? `<img src="${cfg.logoLiga}" style="height:${cfg.ligaSize || 92}px;margin-right:10px;object-fit:contain;">` : ""}
+          <div class="lm-wing home">
+            ${cfg.logo1 ? `<img src="${cfg.logo1}" style="height:${cfg.teamLogoSize || 44}px;width:${cfg.teamLogoSize || 44}px;object-fit:contain;position:relative;z-index:2;">` : ""}
+            <div style="display:flex;flex-direction:column;align-items:center;flex:1;">
+              <div class="lm-name" style="color:${cfg.text1Color};">${cfg.name1}</div>
+              <div class="lm-fouls" id="fouls1">${foulsBase}</div>
+            </div>
+          </div>
+          <div class="lm-scores">
+            ${topHtml}
+            <div class="lm-slot" id="slotPoints1"><div class="lm-pts" id="points1">0</div></div>
+            <span style="color:${cfg.accentColor};font-size:28px;font-weight:800;">-</span>
+            <div class="lm-slot" id="slotPoints2"><div class="lm-pts" id="points2">0</div></div>
+            ${shotHtml}
+          </div>
+          <div class="lm-wing away">
+            ${cfg.logo2 ? `<img src="${cfg.logo2}" style="height:${cfg.teamLogoSize || 44}px;width:${cfg.teamLogoSize || 44}px;object-fit:contain;position:relative;z-index:2;">` : ""}
+            <div style="display:flex;flex-direction:column;align-items:center;flex:1;">
+              <div class="lm-name" style="color:${cfg.text2Color};">${cfg.name2}</div>
+              <div class="lm-fouls" id="fouls2">${foulsBase}</div>
+            </div>
+          </div>
+          <div class="lm-clock">
+            <div class="lm-timer" id="timer">10:00</div>
+            <div class="lm-period" id="period">Q1</div>
+          </div>
+        </div>
+      `;
+      aplicarDatos(true);
+    }
+
+    function aplicarDatos(esInicial = false) {
+      const p1Raw = String(resolveField("points_1", ["points1", "score_1", "score1"]) ?? "").replace(/[^0-9]/g, "");
+      const p2Raw = String(resolveField("points_2", ["points2", "score_2", "score2"]) ?? "").replace(/[^0-9]/g, "");
+
+      if (p1Raw !== "") {
+        const n1 = parseInt(p1Raw, 10);
+        const el1 = document.getElementById("points1");
+        if (el1) {
+          if (!esInicial && prevPts1 !== null && (n1 - prevPts1 === 2 || n1 - prevPts1 === 3)) {
+            animarCanasta("slotPoints1", "points1", p1Raw, n1 - prevPts1);
+          } else {
+            el1.textContent = p1Raw;
+          }
+        }
+        prevPts1 = n1;
+      }
+
+      if (p2Raw !== "") {
+        const n2 = parseInt(p2Raw, 10);
+        const el2 = document.getElementById("points2");
+        if (el2) {
+          if (!esInicial && prevPts2 !== null && (n2 - prevPts2 === 2 || n2 - prevPts2 === 3)) {
+            animarCanasta("slotPoints2", "points2", p2Raw, n2 - prevPts2);
+          } else {
+            el2.textContent = p2Raw;
+          }
+        }
+        prevPts2 = n2;
+      }
+
+      const tVal = resolveField("timer");
+      if (tVal !== undefined) {
+        const tEl = document.getElementById("timer");
+        if (tEl) tEl.textContent = tVal;
+      }
+
+      const qVal = resolveField("period", ["moment"]);
+      if (qVal !== undefined) {
+        const perEl = document.getElementById("period");
+        if (perEl) perEl.textContent = formatearPeriodo(qVal);
+      }
+
+      const f1Val = resolveField("fouls_1", ["fouls1"]);
+      if (f1Val !== undefined) actualizarFaltas("fouls1", f1Val);
+
+      const f2Val = resolveField("fouls_2", ["fouls2"]);
+      if (f2Val !== undefined) actualizarFaltas("fouls2", f2Val);
+
+      const scVal = resolveField("shotclock", ["shot_clock", "shot"]);
+      if (cfg.showShotClock && scVal !== undefined) {
+        const scEl = document.getElementById("shotclock");
+        if (scEl) scEl.textContent = String(scVal).replace(/[^0-9]/g, "");
+      }
+    }
+
+    let turnoSocial = 0;
+    let socialTimer = null;
+
+    function mostrarSocial(net) {
+      if (net === "ig") turnoSocial = 0;
+      if (net === "yt") turnoSocial = 1;
+      const wrap = document.getElementById("socialWrap");
+      const card = document.getElementById("socialCard");
+      wrap.classList.toggle("pos-top-right", cfg.socialPosition === "top-right");
+      wrap.style.setProperty("--social-scale", cfg.socialScale || 1.35);
+
+      card.innerHTML = turnoSocial === 0
+        ? `<div class="social-icon ig"><span style="color:#fff;font-weight:900;">IG</span></div><div class="social-texts"><span class="social-cta">Síguenos en Instagram</span><span class="social-handle">@tiempofuera_cl</span></div>`
+        : `<div class="social-icon yt"><span style="color:#fff;font-weight:900;">YT</span></div><div class="social-texts"><span class="social-cta">¡Suscríbete en YouTube!</span><span class="social-handle">@tiempofuera_cl</span></div>`;
+
+      turnoSocial = (turnoSocial + 1) % 2;
+      wrap.classList.add("active");
+      clearTimeout(socialTimer);
+      socialTimer = setTimeout(() => wrap.classList.remove("active"), 11000);
+    }
+
+    setInterval(() => {
+      if (cfg.socialAutoEnabled) {
+        mostrarSocial();
+      }
+    }, (cfg.socialIntervalSec || 150) * 1000);
+
+    onValue(ref(db, `${DB_PATH}/modules/marcadores`), (snap) => {
+      if (!snap.exists()) return;
+      const mod = snap.val();
+      const layer = document.getElementById("live-marcadores");
+
+      if (mod.pos) {
+        layer.style.left = `${mod.pos.x ?? 14}%`;
+        layer.style.top = `${mod.pos.y ?? 76}%`;
+      }
+
+      if (mod.config) {
+        cfg = {
+          ...cfg,
+          ...mod.config,
+          sources: { ...cfg.sources, ...(mod.config.sources || {}) }
+        };
+        renderEstructura();
+      }
+
+      feeds = {
+        scoresight: { ...(mod.liveData || {}), ...(mod.feeds?.scoresight || {}) },
+        flexyscore: { ...(mod.feeds?.flexyscore || {}) },
+        manual: { ...(mod.feeds?.manual || {}) }
+      };
+      aplicarDatos(false);
+
+      if (mod.cmd?.action === "social_now" && mod.cmd.ts && mod.cmd.ts !== lastCmdTs) {
+        lastCmdTs = mod.cmd.ts;
+        mostrarSocial(mod.cmd.network);
+      }
+
+      if (mod.enabled && mod.on) {
+        layer.classList.add("is-visible");
+      } else {
+        layer.classList.remove("is-visible");
+      }
     });
   </script>
 </body>
