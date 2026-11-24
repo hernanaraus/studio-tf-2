@@ -2,206 +2,647 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Live — Studio TF 2.0</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Estudio — Studio TF 2.0</title>
   <link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;1,700;1,800&family=Bebas+Neue&family=Chakra+Petch:wght@600;700&family=Oswald:wght@600;700&family=Rajdhani:wght@600;700&family=Russo+One&family=Teko:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/studio.css">
   <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      width: 1920px;
-      height: 1080px;
-      background: transparent !important;
-      overflow: hidden;
-    }
-
-    .live-layer {
-      position: absolute;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.28s ease;
-    }
-
-    .live-layer.is-visible {
-      opacity: 1;
-    }
-
-    .social-pill-wrap {
-      position: absolute;
-      top: 44px;
-      left: 48px;
-      transform: translateX(-36px) scale(var(--social-scale, 1.35));
-      transform-origin: top left;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.45s ease, transform 0.45s ease;
-      z-index: 30;
-    }
-
-    .social-pill-wrap.pos-top-right {
-      left: auto;
-      right: 48px;
-      transform-origin: top right;
-      transform: translateX(36px) scale(var(--social-scale, 1.35));
-    }
-
-    .social-pill-wrap.active {
-      opacity: 1;
-      transform: translateX(0) scale(var(--social-scale, 1.35));
-    }
-
-    .social-pill {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      background: #14171f;
-      border: 2px solid var(--sb-accent, #e3b857);
-      border-radius: 10px;
-      padding: 9px 18px 9px 13px;
+    .brand-link {
+      font-weight: 800;
+      letter-spacing: 1px;
+      cursor: pointer;
+      user-select: none;
       white-space: nowrap;
-      font-family: 'Barlow Condensed', sans-serif;
-      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.55);
     }
+    .brand-link span { color: var(--accent); }
 
-    .social-icon {
-      width: 36px;
-      height: 36px;
-      border-radius: 8px;
-      display: flex;
+    .zoom-bar {
+      display: inline-flex;
       align-items: center;
-      justify-content: center;
+      gap: 4px;
+      background: var(--bg-app);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 2px 6px;
+      font-size: 0.72rem;
+      font-weight: 700;
     }
-
-    .social-icon.ig {
-      background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
+    .zoom-btn {
+      background: transparent;
+      color: var(--text);
+      border: none;
+      padding: 3px 7px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 800;
     }
+    .zoom-btn:hover { background: var(--bg-elevated); color: var(--accent); }
 
-    .social-icon.yt {
-      background: linear-gradient(135deg, #ff1e1e 0%, #b80000 100%);
+    .base-three-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+      gap: 12px;
+      margin-bottom: 14px;
     }
-
-    .social-texts {
+    .box-card {
+      background: var(--bg-app);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
       display: flex;
       flex-direction: column;
-      line-height: 1.05;
+      gap: 9px;
     }
-
-    .social-cta {
-      font-size: 14px;
-      font-weight: 700;
+    .box-title {
+      font-size: 0.76rem;
       text-transform: uppercase;
-      letter-spacing: 1px;
-      color: var(--sb-accent, #e3b857);
-    }
-
-    .social-handle {
-      font-size: 22px;
+      letter-spacing: 0.7px;
+      color: var(--accent);
       font-weight: 800;
-      color: #ffffff;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      padding-bottom: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
+    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .row-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .row-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(175px, 1fr)); gap: 10px; }
 
-    @keyframes basketBurst {
-      0% { opacity: 0; transform: translate(-50%, 6px) scale(0.55); }
-      25% { opacity: 1; transform: translate(-50%, -18px) scale(1.28); }
-      75% { opacity: 1; transform: translate(-50%, -24px) scale(1.12); }
-      100% { opacity: 0; transform: translate(-50%, -32px) scale(0.95); }
+    .s-field { display: flex; flex-direction: column; gap: 3px; }
+    .s-field label {
+      font-size: 0.7rem;
+      color: var(--muted);
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
     }
+    .s-field label span.v { color: var(--text); font-variant-numeric: tabular-nums; }
+    .s-field input[type="text"],
+    .s-field input[type="number"],
+    .s-field select {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 8px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      width: 100%;
+    }
+    .s-field input[type="color"] {
+      width: 100%;
+      height: 28px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--bg-surface);
+      cursor: pointer;
+      padding: 2px;
+    }
+    .s-field input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+    .s-check {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .mini-file {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      background: var(--bg-surface);
+      border: 1px dashed var(--border);
+      padding: 5px;
+      border-radius: 6px;
+    }
+    .mini-file input[type="file"] { font-size: 0.68rem; color: var(--muted); width: 100%; }
 
-    .pts-pop-badge {
-      position: absolute;
-      top: -12px;
-      left: 50%;
-      font-weight: 900;
-      font-size: 26px;
-      line-height: 1;
-      padding: 3px 10px;
-      border-radius: 7px;
-      z-index: 30;
-      animation: basketBurst 1.15s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    .palette-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 7px 9px;
     }
-
-    .pts-pop-badge.triple {
-      background: #f59e0b;
-      color: #111;
-      border: 1.5px solid #fff;
+    .palette-swatches {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 6px;
+      flex-wrap: wrap;
     }
-
-    .pts-pop-badge.doble {
-      background: #fff;
-      color: #111;
-      border: 1.5px solid var(--sb-accent, #e3b857);
+    .swatch-btn {
+      width: 24px;
+      height: 24px;
+      border-radius: 5px;
+      border: 1.5px solid rgba(255,255,255,0.6);
+      cursor: pointer;
     }
+    .swatch-btn:hover { transform: scale(1.1); border-color: #fff; }
   </style>
 </head>
 <body>
-  <div class="social-pill-wrap" id="socialWrap">
-    <div class="social-pill" id="socialCard"></div>
-  </div>
+  <div class="studio-shell">
+    <header class="studio-topbar">
+      <div class="brand-link" onclick="location.href='index.html'" title="Ir al menú principal">
+        STUDIO <span>TF 2.0</span>
+      </div>
 
-  <div id="live-marcadores" class="live-layer" style="left: 14%; top: 76%;">
-    <div id="marcadorMount"></div>
+      <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+        <span id="studio-status" style="font-size: 0.73rem; color: var(--muted); margin-right: 4px;">Listo</span>
+
+        <div class="zoom-bar">
+          <button type="button" class="zoom-btn" id="zoom-out" title="Alejar">−</button>
+          <span id="zoom-label" style="min-width: 40px; text-align: center;">FIT</span>
+          <button type="button" class="zoom-btn" id="zoom-in" title="Acercar">+</button>
+          <button type="button" class="zoom-btn" id="zoom-fit" title="Ajustar al recuadro">Ajustar</button>
+        </div>
+
+        <button id="grid-toggle" type="button" class="btn btn-ghost" style="padding: 5px 10px; font-size: 0.72rem;">Grilla: ON</button>
+        <button id="snap-toggle" type="button" class="btn btn-ghost" style="padding: 5px 10px; font-size: 0.72rem;">Snap: ON</button>
+        <button id="center-x-btn" type="button" class="btn btn-ghost" style="padding: 5px 10px; font-size: 0.72rem;">Centrar X</button>
+        <button id="save-publish-btn" type="button" class="btn" style="padding: 5px 12px; font-size: 0.72rem;">Guardar y Sincronizar</button>
+        <button type="button" class="btn btn-ghost" style="padding: 5px 10px; font-size: 0.72rem;" onclick="location.href='control.html'">Control</button>
+      </div>
+    </header>
+
+    <main id="canvas-area" class="canvas-area">
+      <div id="stage" class="stage-16x9">
+        <div id="stage-grid" class="stage-grid"></div>
+        <div class="overlay-box" data-module="marcadores" style="left: 14%; top: 76%;">
+          <div id="studioSbPreview"></div>
+        </div>
+      </div>
+    </main>
+
+    <div id="dock-resizer" class="dock-resizer" title="Arrastra para ajustar el alto del panel"></div>
+
+    <section id="dock-panel" class="dock-panel">
+      <nav class="dock-tabs">
+        <button class="dock-tab is-active" data-target="marcadores">Marcadores</button>
+        <button class="dock-tab" data-target="especiales">Competencias Especiales</button>
+        <button class="dock-tab" data-target="tercios">Tercios Inferiores</button>
+        <button class="dock-tab" data-target="sponsors">Logos de Sponsors</button>
+        <button class="dock-tab" data-target="auspiciadores">Logos de Auspiciadores</button>
+        <button class="dock-tab" data-target="cg">Control de CG (Scroll)</button>
+        <button class="dock-tab" data-target="equipos">Presentación de Equipos</button>
+        <button class="dock-tab" data-target="estadisticas">Estadísticas</button>
+      </nav>
+
+      <div class="dock-body">
+        <!-- PESTAÑA 1: MARCADORES -->
+        <div id="pane-marcadores" class="tab-section is-active">
+          <div class="tab-head">
+            <h3>Marcadores Broadcast (Tiempo Fuera)</h3>
+            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+              <button id="swap-teams-btn" type="button" class="btn btn-ghost" style="padding: 5px 10px; font-size: 0.72rem;">⇄ Intercambiar Local/Visita</button>
+              <label class="enable-check"><input type="checkbox" class="mod-enable" data-mod="marcadores"> Habilitar en Control</label>
+            </div>
+          </div>
+
+          <!-- 3 RECUADROS DE PERSONALIZACIÓN BASE -->
+          <div class="base-three-grid">
+            <!-- Recuadro 1: Local -->
+            <div class="box-card">
+              <div class="box-title">1. Equipo Local</div>
+              <div class="s-field">
+                <label>Nombre / Sigla Local</label>
+                <input type="text" id="name1" value="LOCAL">
+              </div>
+              <div class="row-2">
+                <div class="s-field">
+                  <label>Color Fondo</label>
+                  <input type="color" id="bg1Color" value="#1c1e24">
+                </div>
+                <div class="s-field">
+                  <label>Color Texto</label>
+                  <input type="color" id="text1Color" value="#ffffff">
+                </div>
+              </div>
+              <div class="s-field">
+                <label>Logo Local</label>
+                <div class="mini-file">
+                  <input type="file" accept="image/*" data-img="logo1">
+                </div>
+              </div>
+            </div>
+
+            <!-- Recuadro 2: Visita -->
+            <div class="box-card">
+              <div class="box-title">2. Equipo Visita</div>
+              <div class="s-field">
+                <label>Nombre / Sigla Visita</label>
+                <input type="text" id="name2" value="VISITA">
+              </div>
+              <div class="row-2">
+                <div class="s-field">
+                  <label>Color Fondo</label>
+                  <input type="color" id="bg2Color" value="#1c1e24">
+                </div>
+                <div class="s-field">
+                  <label>Color Texto</label>
+                  <input type="color" id="text2Color" value="#ffffff">
+                </div>
+              </div>
+              <div class="s-field">
+                <label>Logo Visita</label>
+                <div class="mini-file">
+                  <input type="file" accept="image/*" data-img="logo2">
+                </div>
+              </div>
+            </div>
+
+            <!-- Recuadro 3: Competencia / Torneo + Etiqueta Superior -->
+            <div class="box-card">
+              <div class="box-title">3. Competencia / Etiqueta Superior</div>
+              <div class="s-field">
+                <label>Logo Competencia</label>
+                <div class="mini-file">
+                  <input type="file" accept="image/*" id="leagueLogoInput" data-img="logoLiga">
+                </div>
+              </div>
+
+              <div class="palette-box">
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; flex-wrap:wrap;">
+                  <span style="font-size:0.68rem; color:var(--muted); font-weight:700;">Colores sugeridos del logo:</span>
+                  <select id="paletteTarget" style="width:auto; padding:2px 6px; font-size:0.7rem;">
+                    <option value="accentColor">Aplicar a: Acento/Borde</option>
+                    <option value="scoreTextColor">Aplicar a: Puntos</option>
+                    <option value="scoreBgColor">Aplicar a: Fondo Puntos</option>
+                    <option value="bg1Color">Aplicar a: Fondo Local</option>
+                    <option value="bg2Color">Aplicar a: Fondo Visita</option>
+                  </select>
+                </div>
+                <div id="league-palette" class="palette-swatches">
+                  <span style="font-size:0.7rem; color:var(--muted);">Sube un logo para detectar colores</span>
+                </div>
+              </div>
+
+              <div class="row-2">
+                <div class="s-field">
+                  <label class="s-check" style="margin-top:0;"><input type="checkbox" id="topBadgeEnabled"> Etiqueta Superior</label>
+                  <select id="topBadgeType">
+                    <option value="text">Modo: Texto</option>
+                    <option value="image">Modo: Imagen</option>
+                  </select>
+                </div>
+                <div class="s-field" id="topTextBox">
+                  <label>Texto Etiqueta</label>
+                  <input type="text" id="topTextValue" placeholder="GRAN FINAL">
+                </div>
+                <div class="s-field" id="topImageBox" style="display:none;">
+                  <label>Imagen Etiqueta</label>
+                  <div class="mini-file">
+                    <input type="file" accept="image/*" data-img="logoTop">
+                  </div>
+                </div>
+              </div>
+
+              <div class="s-field">
+                <label class="s-check" style="margin-top:0;"><input type="checkbox" id="socialAutoEnabled" checked> Auto-rotación RRSS (@tiempofuera_cl)</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- RECUADRO GRANDE: PERSONALIZACIÓN AVANZADA -->
+          <div class="box-card" style="margin-bottom: 14px;">
+            <div class="box-title">Personalización Avanzada (Etiqueta Superior, Tamaños, Fuente y Colores)</div>
+            <div class="row-4">
+              <div class="s-field">
+                <label>Altura Etiqueta Sup. <span class="v" id="v_topBadgeOffsetY">-24px</span></label>
+                <input type="range" id="topBadgeOffsetY" min="-55" max="10" value="-24">
+              </div>
+              <div class="s-field">
+                <label>Tamaño Texto Etiqueta <span class="v" id="v_topBadgeFontSize">16px</span></label>
+                <input type="range" id="topBadgeFontSize" min="11" max="26" value="16">
+              </div>
+              <div class="s-field">
+                <label>Tamaño Imagen Etiqueta <span class="v" id="v_topBadgeMaxSize">36px</span></label>
+                <input type="range" id="topBadgeMaxSize" min="16" max="56" value="36">
+              </div>
+              <div class="s-field">
+                <label>Fuente Tipográfica</label>
+                <select id="fontFamily">
+                  <option value="'Barlow Condensed', sans-serif">Barlow Condensed</option>
+                  <option value="'Bebas Neue', sans-serif">Bebas Neue</option>
+                  <option value="'Oswald', sans-serif">Oswald</option>
+                  <option value="'Teko', sans-serif">Teko</option>
+                  <option value="'Rajdhani', sans-serif">Rajdhani</option>
+                  <option value="'Chakra Petch', sans-serif">Chakra Petch</option>
+                  <option value="'Russo One', sans-serif">Russo One</option>
+                  <option value="'Anton', sans-serif">Anton</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="row-4">
+              <div class="s-field">
+                <label>Escala Marcador <span class="v" id="v_boardScale">1.00x</span></label>
+                <input type="range" id="boardScale" min="0.65" max="1.65" step="0.05" value="1.0">
+              </div>
+              <div class="s-field">
+                <label>Tamaño Logo Liga <span class="v" id="v_ligaSize">92px</span></label>
+                <input type="range" id="ligaSize" min="60" max="150" value="92">
+              </div>
+              <div class="s-field">
+                <label>Tamaño Escudos <span class="v" id="v_teamLogoSize">44px</span></label>
+                <input type="range" id="teamLogoSize" min="28" max="62" value="44">
+              </div>
+              <div class="s-field">
+                <label>Texto Equipos <span class="v" id="v_teamFontSize">25px</span></label>
+                <input type="range" id="teamFontSize" min="16" max="36" value="25">
+              </div>
+            </div>
+
+            <div class="row-4">
+              <div class="s-field">
+                <label>Tamaño Puntos <span class="v" id="v_scoreBoxSize">48px</span></label>
+                <input type="range" id="scoreBoxSize" min="34" max="68" value="48">
+              </div>
+              <div class="s-field">
+                <label>Tamaño Reloj <span class="v" id="v_clockFontSize">32px</span></label>
+                <input type="range" id="clockFontSize" min="22" max="44" value="32">
+              </div>
+              <div class="s-field">
+                <label>Posición / Frecuencia RRSS (s)</label>
+                <div class="row-2">
+                  <select id="socialPosition">
+                    <option value="top-left">Arriba Izq</option>
+                    <option value="top-right">Arriba Der</option>
+                  </select>
+                  <input type="number" id="socialIntervalSec" min="20" max="600" value="150">
+                </div>
+              </div>
+              <div class="s-field">
+                <label>Acento / Fondo Pts / Pts</label>
+                <div class="row-3">
+                  <input type="color" id="accentColor" value="#e3b857" title="Acento">
+                  <input type="color" id="scoreBgColor" value="#0c0d10" title="Fondo Puntos">
+                  <input type="color" id="scoreTextColor" value="#e3b857" title="Texto Puntos">
+                </div>
+              </div>
+            </div>
+
+            <div class="row-4">
+              <div class="s-field">
+                <label>Fondo Reloj / Reloj / Cuarto</label>
+                <div class="row-3">
+                  <input type="color" id="clockBgColor" value="#141519" title="Fondo Reloj">
+                  <input type="color" id="clockTextColor" value="#ffffff" title="Texto Reloj">
+                  <input type="color" id="periodTextColor" value="#e3b857" title="Cuarto">
+                </div>
+              </div>
+              <div class="s-field">
+                <label>Falta Normal / Bonus (5ta)</label>
+                <div class="row-2">
+                  <input type="color" id="foulActiveColor" value="#ffe600" title="Falta Normal">
+                  <input type="color" id="foulBonusColor" value="#ff1744" title="Bonus 5ta">
+                </div>
+              </div>
+              <div class="s-field">
+                <label>Reloj 24s + Colores</label>
+                <label class="s-check"><input type="checkbox" id="showShotClock" checked> Mostrar 24s</label>
+                <div class="row-2">
+                  <input type="color" id="shotBgColor" value="#141519" title="Fondo 24s">
+                  <input type="color" id="shotTextColor" value="#ff2a2a" title="Texto 24s">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- RECUADRO: ORIGEN DE DATOS POR CAMPO -->
+          <div class="box-card">
+            <div class="box-title">
+              <span>Origen de Datos por Campo</span>
+              <span style="font-size:0.68rem; color:var(--muted); text-transform:none;">Flexyscore Base: #20152</span>
+            </div>
+            <div class="row-4">
+              <div class="s-field">
+                <label>API Token (liveid) Flexyscore</label>
+                <input type="text" id="flexyLiveId" placeholder="Pega tu liveid aquí">
+              </div>
+              <div class="s-field">
+                <label>Puntos Local (points_1)</label>
+                <select id="src_points_1">
+                  <option value="flexyscore" selected>Flexyscore</option>
+                  <option value="scoresight">ScoreSight</option>
+                  <option value="manual">Manual (Control)</option>
+                </select>
+              </div>
+              <div class="s-field">
+                <label>Puntos Visita (points_2)</label>
+                <select id="src_points_2">
+                  <option value="flexyscore" selected>Flexyscore</option>
+                  <option value="scoresight">ScoreSight</option>
+                  <option value="manual">Manual (Control)</option>
+                </select>
+              </div>
+              <div class="s-field">
+                <label>Reloj Partido (timer)</label>
+                <select id="src_timer">
+                  <option value="scoresight" selected>ScoreSight</option>
+                  <option value="flexyscore">Flexyscore</option>
+                  <option value="manual">Manual (Control)</option>
+                </select>
+              </div>
+            </div>
+            <div class="row-4">
+              <div class="s-field">
+                <label>Cuarto / Período (moment)</label>
+                <select id="src_period">
+                  <option value="scoresight" selected>ScoreSight</option>
+                  <option value="flexyscore">Flexyscore</option>
+                  <option value="manual">Manual (Control)</option>
+                </select>
+              </div>
+              <div class="s-field">
+                <label>Faltas Local (fouls_1)</label>
+                <select id="src_fouls_1">
+                  <option value="scoresight" selected>ScoreSight</option>
+                  <option value="flexyscore">Flexyscore</option>
+                  <option value="manual">Manual (Control)</option>
+                </select>
+              </div>
+              <div class="s-field">
+                <label>Faltas Visita (fouls_2)</label>
+                <select id="src_fouls_2">
+                  <option value="scoresight" selected>ScoreSight</option>
+                  <option value="flexyscore">Flexyscore</option>
+                  <option value="manual">Manual (Control)</option>
+                </select>
+              </div>
+              <div class="s-field">
+                <label>Reloj 24s (shotclock)</label>
+                <select id="src_shotclock">
+                  <option value="scoresight" selected>ScoreSight</option>
+                  <option value="flexyscore">Flexyscore</option>
+                  <option value="manual">Manual (Control)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="pane-especiales" class="tab-section"><div class="tab-head"><h3>Competencias Especiales</h3><label class="enable-check"><input type="checkbox" class="mod-enable" data-mod="especiales"> Habilitar en Control</label></div></div>
+        <div id="pane-tercios" class="tab-section"><div class="tab-head"><h3>Tercios Inferiores</h3><label class="enable-check"><input type="checkbox" class="mod-enable" data-mod="tercios"> Habilitar en Control</label></div></div>
+        <div id="pane-sponsors" class="tab-section"><div class="tab-head"><h3>Logos de Sponsors</h3><label class="enable-check"><input type="checkbox" class="mod-enable" data-mod="sponsors"> Habilitar en Control</label></div></div>
+        <div id="pane-auspiciadores" class="tab-section"><div class="tab-head"><h3>Logos de Auspiciadores</h3><label class="enable-check"><input type="checkbox" class="mod-enable" data-mod="auspiciadores"> Habilitar en Control</label></div></div>
+        <div id="pane-cg" class="tab-section"><div class="tab-head"><h3>Control de CG (Scroll)</h3><label class="enable-check"><input type="checkbox" class="mod-enable" data-mod="cg"> Habilitar en Control</label></div></div>
+        <div id="pane-equipos" class="tab-section"><div class="tab-head"><h3>Presentación de Equipos</h3><label class="enable-check"><input type="checkbox" class="mod-enable" data-mod="equipos"> Habilitar en Control</label></div></div>
+        <div id="pane-estadisticas" class="tab-section"><div class="tab-head"><h3>Estadísticas</h3><label class="enable-check"><input type="checkbox" class="mod-enable" data-mod="estadisticas"> Habilitar en Control</label></div></div>
+      </div>
+    </section>
   </div>
 
   <script type="module">
-    import { db, DB_PATH, ref, onValue } from "./js/firebase.js";
+    import { db, DB_PATH, ref, update, get, requireSession } from "./js/firebase.js";
+    import { mountDragCanvas, syncCanvasPositions } from "./js/canvas.js";
 
-    const FLEXY_ENDPOINT = "https://www.live.flexyscore.net/dirette/in_dispatchers/apidispatcher.php";
+    const SOURCE_FIELDS = ["points_1", "points_2", "timer", "period", "fouls_1", "fouls_2", "shotclock"];
+    const imgs = { logoLiga: "", logo1: "", logo2: "", logoTop: "" };
+    const statusEl = document.getElementById("studio-status");
 
-    let cfg = {
-      flexyBoardId: "20152",
-      flexyLiveId: "",
-      sources: {
-        points_1: "flexyscore",
-        points_2: "flexyscore",
-        timer: "scoresight",
-        period: "scoresight",
-        fouls_1: "scoresight",
-        fouls_2: "scoresight",
-        shotclock: "scoresight"
-      },
-      fontFamily: "'Barlow Condensed', sans-serif",
-      boardScale: 1.0,
-      ligaSize: 92,
-      teamLogoSize: 44,
-      teamFontSize: 25,
-      scoreBoxSize: 48,
-      clockFontSize: 32,
-      accentColor: "#e3b857",
-      foulActiveColor: "#ffe600",
-      foulBonusColor: "#ff1744",
-      name1: "LOCAL",
-      bg1Color: "#1c1e24",
-      text1Color: "#ffffff",
-      name2: "VISITA",
-      bg2Color: "#1c1e24",
-      text2Color: "#ffffff",
-      scoreBgColor: "#0c0d10",
-      scoreTextColor: "#e3b857",
-      shotBgColor: "#141519",
-      shotTextColor: "#ff2a2a",
-      clockBgColor: "#141519",
-      clockTextColor: "#ffffff",
-      periodTextColor: "#e3b857",
-      showShotClock: true,
-      topBadgeEnabled: false,
-      topTextValue: "",
-      logoLiga: "",
-      logo1: "",
-      logo2: "",
-      socialAutoEnabled: true,
-      socialPosition: "top-left",
-      socialScale: 1.35,
-      socialIntervalSec: 150
-    };
+    function syncTopBadgeInputs() {
+      const mode = document.getElementById("topBadgeType").value;
+      document.getElementById("topTextBox").style.display = mode === "text" ? "flex" : "none";
+      document.getElementById("topImageBox").style.display = mode === "image" ? "flex" : "none";
+    }
+    document.getElementById("topBadgeType").addEventListener("change", syncTopBadgeInputs);
 
-    let feeds = {
-      scoresight: {},
-      flexyscore: {},
-      manual: {}
-    };
+    /* --- AJUSTE AUTOMÁTICO DEL CANVAS (FIT) Y ZOOM --- */
+    const canvasArea = document.getElementById("canvas-area");
+    const stageEl = document.getElementById("stage");
+    const zoomLabel = document.getElementById("zoom-label");
+    let zoomMode = "fit";
 
-    let prevPts1 = null;
-    let prevPts2 = null;
-    let lastCmdTs = 0;
+    function applyStageFit() {
+      const pad = 20;
+      const availW = Math.max(240, canvasArea.clientWidth - pad);
+      const availH = Math.max(135, canvasArea.clientHeight - pad);
+      let w = availW;
+      let h = Math.round((w * 9) / 16);
+      if (h > availH) {
+        h = availH;
+        w = Math.round((h * 16) / 9);
+      }
+
+      if (zoomMode !== "fit") {
+        w = Math.round(w * zoomMode);
+        h = Math.round(h * zoomMode);
+        zoomLabel.textContent = `${Math.round(zoomMode * 100)}%`;
+      } else {
+        zoomLabel.textContent = "FIT";
+      }
+
+      stageEl.style.width = `${w}px`;
+      stageEl.style.height = `${h}px`;
+      renderPreview(getSbConfig());
+    }
+
+    document.getElementById("zoom-out").addEventListener("click", () => {
+      const cur = zoomMode === "fit" ? 0.85 : Math.max(0.45, zoomMode - 0.15);
+      zoomMode = Number(cur.toFixed(2));
+      applyStageFit();
+    });
+    document.getElementById("zoom-in").addEventListener("click", () => {
+      const cur = zoomMode === "fit" ? 1.15 : Math.min(1.8, zoomMode + 0.15);
+      zoomMode = Number(cur.toFixed(2));
+      applyStageFit();
+    });
+    document.getElementById("zoom-fit").addEventListener("click", () => {
+      zoomMode = "fit";
+      applyStageFit();
+    });
+    window.addEventListener("resize", applyStageFit);
+
+    /* --- BARRA DIVISORIA ARRASTRABLE ENTRE CANVAS Y MENÚ INFERIOR --- */
+    const resizer = document.getElementById("dock-resizer");
+    const dockPanel = document.getElementById("dock-panel");
+    let isResizing = false;
+
+    resizer.addEventListener("mousedown", (e) => {
+      e.preventDefault();
+      isResizing = true;
+    });
+    window.addEventListener("mousemove", (e) => {
+      if (!isResizing) return;
+      const totalH = window.innerHeight;
+      const newDockH = Math.max(170, Math.min(totalH - 180, totalH - e.clientY));
+      dockPanel.style.height = `${newDockH}px`;
+      applyStageFit();
+    });
+    window.addEventListener("mouseup", () => {
+      isResizing = false;
+    });
+
+    /* --- EXTRACCIÓN DE PALETA DE COLORES FUERTES DESDE EL LOGO DE COMPETENCIA --- */
+    function extractStrongColors(imgEl) {
+      const c = document.createElement("canvas");
+      c.width = 48;
+      c.height = 48;
+      const ctx = c.getContext("2d");
+      ctx.drawImage(imgEl, 0, 0, 48, 48);
+      const { data } = ctx.getImageData(0, 0, 48, 48);
+      const buckets = new Map();
+
+      for (let i = 0; i < data.length; i += 4) {
+        const a = data[i + 3];
+        if (a < 140) continue;
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+        const maxC = Math.max(r, g, b);
+        const minC = Math.min(r, g, b);
+        const sat = maxC === 0 ? 0 : (maxC - minC) / maxC;
+        if (sat < 0.22 && maxC > 220) continue;
+
+        const qr = Math.round(r / 32) * 32;
+        const qg = Math.round(g / 32) * 32;
+        const qb = Math.round(b / 32) * 32;
+        const hex = "#" + [
+          Math.min(255, qr),
+          Math.min(255, qg),
+          Math.min(255, qb)
+        ].map((x) => x.toString(16).padStart(2, "0")).join("");
+
+        buckets.set(hex, (buckets.get(hex) || 0) + (1 + sat * 2.5));
+      }
+
+      return [...buckets.entries()]
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 6)
+        .map(([hex]) => hex);
+    }
+
+    function renderPalette(colors) {
+      const wrap = document.getElementById("league-palette");
+      wrap.innerHTML = "";
+      if (!colors.length) {
+        wrap.innerHTML = `<span style="font-size:0.7rem; color:var(--muted);">Sin colores destacados</span>`;
+        return;
+      }
+      colors.forEach((hex) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "swatch-btn";
+        btn.style.backgroundColor = hex;
+        btn.title = `Aplicar ${hex}`;
+        btn.addEventListener("click", async () => {
+          const targetId = document.getElementById("paletteTarget").value;
+          const targetInput = document.getElementById(targetId);
+          if (targetInput) {
+            targetInput.value = hex;
+            await saveConfig();
+          }
+        });
+        wrap.appendChild(btn);
+      });
+    }
 
     function lum(hex) {
       hex = (hex || "#1c1e24").replace("#", "");
@@ -230,339 +671,284 @@
       return "#" + [r, g, b].map((x) => x.toString(16).padStart(2, "0")).join("");
     }
 
-    function resolveField(fieldName, altKeys = []) {
-      const srcMap = cfg.sources || {};
-      const src = srcMap[fieldName] || "manual";
-      const bucket = feeds[src] || {};
-      for (const k of [fieldName, ...altKeys]) {
-        if (bucket[k] !== undefined && bucket[k] !== null && bucket[k] !== "") {
-          return bucket[k];
-        }
-      }
-      return undefined;
+    function updateRangeLabels() {
+      const n = (id) => parseFloat(document.getElementById(id).value);
+      document.getElementById("v_topBadgeOffsetY").textContent = n("topBadgeOffsetY") + "px";
+      document.getElementById("v_topBadgeFontSize").textContent = n("topBadgeFontSize") + "px";
+      document.getElementById("v_topBadgeMaxSize").textContent = n("topBadgeMaxSize") + "px";
+      document.getElementById("v_boardScale").textContent = n("boardScale").toFixed(2) + "x";
+      document.getElementById("v_ligaSize").textContent = n("ligaSize") + "px";
+      document.getElementById("v_teamLogoSize").textContent = n("teamLogoSize") + "px";
+      document.getElementById("v_teamFontSize").textContent = n("teamFontSize") + "px";
+      document.getElementById("v_scoreBoxSize").textContent = n("scoreBoxSize") + "px";
+      document.getElementById("v_clockFontSize").textContent = n("clockFontSize") + "px";
     }
 
-    function actualizarFaltas(id, cantidad) {
-      const cont = document.getElementById(id);
-      if (!cont) return;
-      const barras = cont.querySelectorAll(".foul-bar");
-      const num = parseInt(cantidad, 10) || 0;
-      barras.forEach((b, idx) => {
-        const n = idx + 1;
-        if (n <= num) {
-          b.style.background = n === 5 ? cfg.foulBonusColor : cfg.foulActiveColor;
-          b.style.border = "1px solid #111111";
-        } else {
-          b.style.background = "rgba(0,0,0,0.35)";
-          b.style.border = "1px solid rgba(255,255,255,0.45)";
-        }
+    function getSources() {
+      const map = {};
+      SOURCE_FIELDS.forEach((f) => {
+        const el = document.getElementById(`src_${f}`);
+        map[f] = el ? el.value : "manual";
       });
+      return map;
     }
 
-    function formatearPeriodo(momentRaw) {
-      const n = parseInt(String(momentRaw ?? "").replace(/[^0-9]/g, ""), 10);
-      if (isNaN(n) || n <= 0) return "Q1";
-      return n <= 4 ? "Q" + n : "OT" + (n - 4);
+    function getSbConfig() {
+      updateRangeLabels();
+      return {
+        flexyBoardId: "20152",
+        flexyLiveId: document.getElementById("flexyLiveId").value.trim(),
+        sources: getSources(),
+        fontFamily: document.getElementById("fontFamily").value,
+        boardScale: parseFloat(document.getElementById("boardScale").value) || 1.0,
+        ligaSize: parseInt(document.getElementById("ligaSize").value, 10) || 92,
+        teamLogoSize: parseInt(document.getElementById("teamLogoSize").value, 10) || 44,
+        teamFontSize: parseInt(document.getElementById("teamFontSize").value, 10) || 25,
+        scoreBoxSize: parseInt(document.getElementById("scoreBoxSize").value, 10) || 48,
+        clockFontSize: parseInt(document.getElementById("clockFontSize").value, 10) || 32,
+        name1: (document.getElementById("name1").value || "LOCAL").trim(),
+        bg1Color: document.getElementById("bg1Color").value,
+        text1Color: document.getElementById("text1Color").value,
+        name2: (document.getElementById("name2").value || "VISITA").trim(),
+        bg2Color: document.getElementById("bg2Color").value,
+        text2Color: document.getElementById("text2Color").value,
+        accentColor: document.getElementById("accentColor").value,
+        scoreBgColor: document.getElementById("scoreBgColor").value,
+        scoreTextColor: document.getElementById("scoreTextColor").value,
+        clockBgColor: document.getElementById("clockBgColor").value,
+        clockTextColor: document.getElementById("clockTextColor").value,
+        periodTextColor: document.getElementById("periodTextColor").value,
+        foulActiveColor: document.getElementById("foulActiveColor").value,
+        foulBonusColor: document.getElementById("foulBonusColor").value,
+        showShotClock: document.getElementById("showShotClock").checked,
+        shotBgColor: document.getElementById("shotBgColor").value,
+        shotTextColor: document.getElementById("shotTextColor").value,
+        topBadgeEnabled: document.getElementById("topBadgeEnabled").checked,
+        topBadgeType: document.getElementById("topBadgeType").value,
+        topTextValue: document.getElementById("topTextValue").value.trim(),
+        topBadgeOffsetY: parseInt(document.getElementById("topBadgeOffsetY").value, 10) || -24,
+        topBadgeFontSize: parseInt(document.getElementById("topBadgeFontSize").value, 10) || 16,
+        topBadgeMaxSize: parseInt(document.getElementById("topBadgeMaxSize").value, 10) || 36,
+        socialAutoEnabled: document.getElementById("socialAutoEnabled").checked,
+        socialPosition: document.getElementById("socialPosition").value,
+        socialIntervalSec: Math.max(20, parseInt(document.getElementById("socialIntervalSec").value, 10) || 150),
+        logoLiga: imgs.logoLiga,
+        logo1: imgs.logo1,
+        logo2: imgs.logo2,
+        logoTop: imgs.logoTop
+      };
     }
 
-    function animarCanasta(slotId, ptsId, val, delta) {
-      const slot = document.getElementById(slotId);
-      const el = document.getElementById(ptsId);
-      if (!slot || !el) return;
-      const badge = document.createElement("div");
-      badge.className = "pts-pop-badge " + (delta === 3 ? "triple" : "doble");
-      badge.textContent = "+" + delta;
-      slot.appendChild(badge);
-      setTimeout(() => { el.textContent = val; }, 340);
-      setTimeout(() => badge.remove(), 1200);
+    function buildTopBadgePreview(cfg) {
+      if (!cfg.topBadgeEnabled) return "";
+      const yOff = cfg.topBadgeOffsetY ?? -24;
+      if (cfg.topBadgeType === "image" && cfg.logoTop) {
+        const maxH = Math.max(12, Math.round((cfg.topBadgeMaxSize || 36) * 0.72));
+        return `<div style="position:absolute;top:${yOff}px;left:50%;transform:translateX(-50%);max-width:130px;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:5;">
+          <img src="${cfg.logoTop}" style="max-height:${maxH}px;max-width:126px;object-fit:contain;display:block;">
+        </div>`;
+      }
+      if (!cfg.topTextValue) return "";
+      const fSize = Math.max(10, Math.round((cfg.topBadgeFontSize || 16) * 0.82));
+      return `<div style="position:absolute;top:${yOff}px;left:50%;transform:translateX(-50%);max-width:135px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:${cfg.scoreBgColor};border:1.5px solid ${cfg.accentColor};border-radius:5px;padding:1px 9px;font-size:${fSize}px;font-weight:800;color:#fff;z-index:5;">${cfg.topTextValue}</div>`;
     }
 
-    function renderEstructura() {
-      document.documentElement.style.setProperty("--sb-accent", cfg.accentColor || "#e3b857");
+    function renderPreview(cfg) {
+      const mount = document.getElementById("studioSbPreview");
+      const stageScale = stageEl.clientWidth / 1920;
+      const s = cfg.boardScale * Math.max(0.32, stageScale * 1.15);
 
       const stripe1 = lum(cfg.bg1Color) > 0.55 ? "rgba(0,0,0,0.085)" : "rgba(255,255,255,0.05)";
       const stripe2 = lum(cfg.bg2Color) > 0.55 ? "rgba(0,0,0,0.085)" : "rgba(255,255,255,0.05)";
-      const foulsBase = Array.from({ length: 5 }, (_, i) => `<span class="foul-bar" data-idx="${i + 1}"></span>`).join("");
 
-      const topHtml = cfg.topBadgeEnabled && cfg.topTextValue
-        ? `<div style="position:absolute;top:-22px;left:50%;transform:translateX(-50%);background:${cfg.scoreBgColor};border:1.5px solid ${cfg.accentColor};border-radius:6px;padding:2px 12px;font-size:16px;font-weight:800;color:#fff;white-space:nowrap;">${cfg.topTextValue}</div>`
-        : "";
+      const foulsHtml = Array.from({ length: 5 }, (_, i) => {
+        const bg = i < 2 ? cfg.foulActiveColor : "rgba(0,0,0,0.35)";
+        const brd = i < 2 ? "1px solid #111" : "1px solid rgba(255,255,255,0.45)";
+        return `<span style="width:16px;height:4px;border-radius:2px;display:inline-block;background:${bg};border:${brd};"></span>`;
+      }).join("");
+
+      const topHtml = buildTopBadgePreview(cfg);
 
       const shotHtml = cfg.showShotClock
-        ? `<div id="shotclock" style="position:absolute;bottom:-17px;left:50%;transform:translateX(-50%);background:${cfg.shotBgColor};color:${cfg.shotTextColor};border:1.5px solid ${cfg.accentColor};border-radius:6px;font-size:19px;font-weight:800;padding:0 7px;min-width:36px;text-align:center;"></div>`
+        ? `<div style="position:absolute;bottom:-14px;left:50%;transform:translateX(-50%);background:${cfg.shotBgColor};color:${cfg.shotTextColor};border:1.5px solid ${cfg.accentColor};border-radius:5px;font-size:15px;font-weight:800;padding:0 6px;">24</div>`
         : "";
 
-      document.getElementById("marcadorMount").innerHTML = `
+      mount.innerHTML = `
         <style>
-          .lm-bar {
-            transform: scale(${cfg.boardScale || 1});
-            transform-origin: top left;
-            display: inline-flex;
-            align-items: center;
-            height: 92px;
-            font-family: ${cfg.fontFamily};
-            user-select: none;
-          }
-          .lm-wing {
-            position: relative;
-            display: flex;
-            align-items: center;
-            height: 60px;
-            min-width: 205px;
-            padding: 0 14px;
-            gap: 10px;
-            overflow: hidden;
-            border-top: 1.5px solid ${cfg.accentColor};
-            border-bottom: 2px solid ${cfg.accentColor};
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.22);
-          }
-          .lm-wing.home {
-            background: linear-gradient(90deg, ${shade(cfg.bg1Color, -0.14)} 0%, ${cfg.bg1Color} 45%, ${shade(cfg.bg1Color, 0.2)} 100%);
-            border-left: 1.5px solid ${cfg.accentColor};
-            border-radius: 10px 0 0 10px;
-          }
-          .lm-wing.home::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background-image: repeating-linear-gradient(-45deg, ${stripe1} 0px, ${stripe1} 2px, transparent 2px, transparent 6px);
-            pointer-events: none;
-          }
-          .lm-wing.away {
-            flex-direction: row-reverse;
-            background: linear-gradient(270deg, ${shade(cfg.bg2Color, -0.14)} 0%, ${cfg.bg2Color} 45%, ${shade(cfg.bg2Color, 0.2)} 100%);
-            border-radius: 0;
-          }
-          .lm-wing.away::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background-image: repeating-linear-gradient(45deg, ${stripe2} 0px, ${stripe2} 2px, transparent 2px, transparent 6px);
-            pointer-events: none;
-          }
-          .lm-name {
-            font-size: ${cfg.teamFontSize || 25}px;
-            font-weight: 800;
-            text-transform: uppercase;
-            line-height: 1;
-            position: relative;
-            z-index: 2;
-          }
-          .lm-fouls {
-            display: flex;
-            gap: 5px;
-            margin-top: 6px;
-            position: relative;
-            z-index: 2;
-          }
-          .foul-bar {
-            width: 19px;
-            height: 5px;
-            border-radius: 2px;
-            display: inline-block;
-          }
-          .lm-scores {
-            position: relative;
-            display: flex;
-            align-items: center;
-            height: 68px;
-            padding: 0 14px;
-            gap: 8px;
-            background: linear-gradient(180deg, ${shade(cfg.scoreBgColor, 0.14)} 0%, ${cfg.scoreBgColor} 55%, ${shade(cfg.scoreBgColor, -0.18)} 100%);
-            border: 2px solid ${cfg.accentColor};
-            border-radius: 9px;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.22);
-            z-index: 3;
-          }
-          .lm-slot {
-            position: relative;
-            min-width: 54px;
-            text-align: center;
-          }
-          .lm-pts {
-            font-size: ${cfg.scoreBoxSize || 48}px;
-            font-weight: 800;
-            color: ${cfg.scoreTextColor};
-            font-variant-numeric: tabular-nums;
-            line-height: 0.92;
-          }
-          .lm-clock {
-            display: flex;
-            align-items: center;
-            height: 60px;
-            padding: 0 14px;
-            gap: 10px;
-            background: linear-gradient(180deg, ${shade(cfg.clockBgColor, 0.14)} 0%, ${cfg.clockBgColor} 55%, ${shade(cfg.clockBgColor, -0.16)} 100%);
-            border: 1.5px solid ${cfg.accentColor};
-            border-radius: 0 10px 10px 0;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.2);
-          }
-          .lm-timer {
-            font-size: ${cfg.clockFontSize || 32}px;
-            font-weight: 700;
-            color: ${cfg.clockTextColor};
-            font-variant-numeric: tabular-nums;
-          }
-          .lm-period {
-            font-size: ${Math.round((cfg.clockFontSize || 32) * 0.72)}px;
-            font-weight: 800;
-            color: ${cfg.periodTextColor};
-            background: rgba(255,255,255,0.08);
-            padding: 4px 8px;
-            border-radius: 6px;
-            border: 1px solid rgba(255,255,255,0.2);
-          }
+          .pv-wrap { transform: scale(${s}); transform-origin: center center; display: inline-flex; align-items: center; font-family: ${cfg.fontFamily}; }
+          .pv-wing { position: relative; display: flex; align-items: center; height: 56px; min-width: 175px; padding: 0 12px; gap: 8px; overflow: hidden; border-top: 1.5px solid ${cfg.accentColor}; border-bottom: 2px solid ${cfg.accentColor}; box-shadow: inset 0 1px 0 rgba(255,255,255,0.22); }
+          .pv-wing.l { background: linear-gradient(90deg, ${shade(cfg.bg1Color, -0.14)} 0%, ${cfg.bg1Color} 45%, ${shade(cfg.bg1Color, 0.2)} 100%); border-left: 1.5px solid ${cfg.accentColor}; border-radius: 9px 0 0 9px; }
+          .pv-wing.l::before { content: ''; position: absolute; inset: 0; background-image: repeating-linear-gradient(-45deg, ${stripe1} 0px, ${stripe1} 2px, transparent 2px, transparent 6px); pointer-events: none; }
+          .pv-wing.r { flex-direction: row-reverse; background: linear-gradient(270deg, ${shade(cfg.bg2Color, -0.14)} 0%, ${cfg.bg2Color} 45%, ${shade(cfg.bg2Color, 0.2)} 100%); border-radius: 0; }
+          .pv-wing.r::before { content: ''; position: absolute; inset: 0; background-image: repeating-linear-gradient(45deg, ${stripe2} 0px, ${stripe2} 2px, transparent 2px, transparent 6px); pointer-events: none; }
+          .pv-scores { position: relative; display: flex; align-items: center; height: 64px; padding: 0 12px; gap: 6px; background: linear-gradient(180deg, ${shade(cfg.scoreBgColor, 0.14)} 0%, ${cfg.scoreBgColor} 55%, ${shade(cfg.scoreBgColor, -0.18)} 100%); border: 2px solid ${cfg.accentColor}; border-radius: 8px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.22); z-index: 2; }
+          .pv-clock { display: flex; align-items: center; height: 56px; padding: 0 12px; gap: 8px; background: linear-gradient(180deg, ${shade(cfg.clockBgColor, 0.14)} 0%, ${cfg.clockBgColor} 55%, ${shade(cfg.clockBgColor, -0.16)} 100%); border: 1.5px solid ${cfg.accentColor}; border-radius: 0 9px 9px 0; box-shadow: inset 0 1px 0 rgba(255,255,255,0.2); }
         </style>
-        <div class="lm-bar">
-          ${cfg.logoLiga ? `<img src="${cfg.logoLiga}" style="height:${cfg.ligaSize || 92}px;margin-right:10px;object-fit:contain;">` : ""}
-          <div class="lm-wing home">
-            ${cfg.logo1 ? `<img src="${cfg.logo1}" style="height:${cfg.teamLogoSize || 44}px;width:${cfg.teamLogoSize || 44}px;object-fit:contain;position:relative;z-index:2;">` : ""}
-            <div style="display:flex;flex-direction:column;align-items:center;flex:1;">
-              <div class="lm-name" style="color:${cfg.text1Color};">${cfg.name1}</div>
-              <div class="lm-fouls" id="fouls1">${foulsBase}</div>
+        <div class="pv-wrap">
+          ${cfg.logoLiga ? `<img src="${cfg.logoLiga}" style="height:${Math.round(cfg.ligaSize * 0.8)}px;margin-right:8px;object-fit:contain;">` : ""}
+          <div class="pv-wing l">
+            ${cfg.logo1 ? `<img src="${cfg.logo1}" style="height:${Math.round(cfg.teamLogoSize * 0.85)}px;width:${Math.round(cfg.teamLogoSize * 0.85)}px;object-fit:contain;position:relative;z-index:2;">` : ""}
+            <div style="display:flex;flex-direction:column;align-items:center;flex:1;position:relative;z-index:2;">
+              <span style="font-size:${cfg.teamFontSize}px;font-weight:800;color:${cfg.text1Color};line-height:1;">${cfg.name1}</span>
+              <div style="display:flex;gap:4px;margin-top:5px;">${foulsHtml}</div>
             </div>
           </div>
-          <div class="lm-scores">
+          <div class="pv-scores">
             ${topHtml}
-            <div class="lm-slot" id="slotPoints1"><div class="lm-pts" id="points1">0</div></div>
-            <span style="color:${cfg.accentColor};font-size:28px;font-weight:800;">-</span>
-            <div class="lm-slot" id="slotPoints2"><div class="lm-pts" id="points2">0</div></div>
+            <span style="font-size:${cfg.scoreBoxSize}px;font-weight:800;color:${cfg.scoreTextColor};line-height:0.95;">64</span>
+            <span style="font-size:${Math.round(cfg.scoreBoxSize * 0.6)}px;font-weight:800;color:${cfg.accentColor};">-</span>
+            <span style="font-size:${cfg.scoreBoxSize}px;font-weight:800;color:${cfg.scoreTextColor};line-height:0.95;">58</span>
             ${shotHtml}
           </div>
-          <div class="lm-wing away">
-            ${cfg.logo2 ? `<img src="${cfg.logo2}" style="height:${cfg.teamLogoSize || 44}px;width:${cfg.teamLogoSize || 44}px;object-fit:contain;position:relative;z-index:2;">` : ""}
-            <div style="display:flex;flex-direction:column;align-items:center;flex:1;">
-              <div class="lm-name" style="color:${cfg.text2Color};">${cfg.name2}</div>
-              <div class="lm-fouls" id="fouls2">${foulsBase}</div>
+          <div class="pv-wing r">
+            ${cfg.logo2 ? `<img src="${cfg.logo2}" style="height:${Math.round(cfg.teamLogoSize * 0.85)}px;width:${Math.round(cfg.teamLogoSize * 0.85)}px;object-fit:contain;position:relative;z-index:2;">` : ""}
+            <div style="display:flex;flex-direction:column;align-items:center;flex:1;position:relative;z-index:2;">
+              <span style="font-size:${cfg.teamFontSize}px;font-weight:800;color:${cfg.text2Color};line-height:1;">${cfg.name2}</span>
+              <div style="display:flex;gap:4px;margin-top:5px;">${foulsHtml}</div>
             </div>
           </div>
-          <div class="lm-clock">
-            <div class="lm-timer" id="timer">10:00</div>
-            <div class="lm-period" id="period">Q1</div>
+          <div class="pv-clock">
+            <span style="font-size:${cfg.clockFontSize}px;font-weight:700;color:${cfg.clockTextColor};">04:32</span>
+            <span style="font-size:${Math.round(cfg.clockFontSize * 0.72)}px;font-weight:800;color:${cfg.periodTextColor};background:rgba(255,255,255,0.08);padding:3px 7px;border-radius:5px;border:1px solid rgba(255,255,255,0.2);">Q4</span>
           </div>
         </div>
       `;
-      aplicarDatos(true);
     }
 
-    function aplicarDatos(esInicial = false) {
-      const p1Raw = String(resolveField("points_1", ["points1", "score_1", "score1"]) ?? "").replace(/[^0-9]/g, "");
-      const p2Raw = String(resolveField("points_2", ["points2", "score_2", "score2"]) ?? "").replace(/[^0-9]/g, "");
-
-      if (p1Raw !== "") {
-        const n1 = parseInt(p1Raw, 10);
-        const el1 = document.getElementById("points1");
-        if (el1) {
-          if (!esInicial && prevPts1 !== null && (n1 - prevPts1 === 2 || n1 - prevPts1 === 3)) {
-            animarCanasta("slotPoints1", "points1", p1Raw, n1 - prevPts1);
-          } else {
-            el1.textContent = p1Raw;
-          }
-        }
-        prevPts1 = n1;
-      }
-
-      if (p2Raw !== "") {
-        const n2 = parseInt(p2Raw, 10);
-        const el2 = document.getElementById("points2");
-        if (el2) {
-          if (!esInicial && prevPts2 !== null && (n2 - prevPts2 === 2 || n2 - prevPts2 === 3)) {
-            animarCanasta("slotPoints2", "points2", p2Raw, n2 - prevPts2);
-          } else {
-            el2.textContent = p2Raw;
-          }
-        }
-        prevPts2 = n2;
-      }
-
-      const tVal = resolveField("timer");
-      if (tVal !== undefined) {
-        const tEl = document.getElementById("timer");
-        if (tEl) tEl.textContent = tVal;
-      }
-
-      const qVal = resolveField("period", ["moment"]);
-      if (qVal !== undefined) {
-        const perEl = document.getElementById("period");
-        if (perEl) perEl.textContent = formatearPeriodo(qVal);
-      }
-
-      const f1Val = resolveField("fouls_1", ["fouls1"]);
-      if (f1Val !== undefined) actualizarFaltas("fouls1", f1Val);
-
-      const f2Val = resolveField("fouls_2", ["fouls2"]);
-      if (f2Val !== undefined) actualizarFaltas("fouls2", f2Val);
-
-      const scVal = resolveField("shotclock", ["shot_clock", "shot"]);
-      if (cfg.showShotClock && scVal !== undefined) {
-        const scEl = document.getElementById("shotclock");
-        if (scEl) scEl.textContent = String(scVal).replace(/[^0-9]/g, "");
-      }
+    async function saveConfig() {
+      const cfg = getSbConfig();
+      renderPreview(cfg);
+      await update(ref(db, `${DB_PATH}/modules/marcadores/config`), cfg);
+      statusEl.textContent = "Sincronizado";
+      setTimeout(() => { statusEl.textContent = "Listo"; }, 1100);
     }
 
-    let turnoSocial = 0;
-    let socialTimer = null;
+    document.querySelectorAll("#pane-marcadores input, #pane-marcadores select").forEach((el) => {
+      if (el.type === "file" || el.id === "paletteTarget") return;
+      el.addEventListener("input", () => renderPreview(getSbConfig()));
+      el.addEventListener("change", saveConfig);
+    });
 
-    function mostrarSocial(net) {
-      if (net === "ig") turnoSocial = 0;
-      if (net === "yt") turnoSocial = 1;
-      const wrap = document.getElementById("socialWrap");
-      const card = document.getElementById("socialCard");
-      wrap.classList.toggle("pos-top-right", cfg.socialPosition === "top-right");
-      wrap.style.setProperty("--social-scale", cfg.socialScale || 1.35);
-
-      card.innerHTML = turnoSocial === 0
-        ? `<div class="social-icon ig"><span style="color:#fff;font-weight:900;">IG</span></div><div class="social-texts"><span class="social-cta">Síguenos en Instagram</span><span class="social-handle">@tiempofuera_cl</span></div>`
-        : `<div class="social-icon yt"><span style="color:#fff;font-weight:900;">YT</span></div><div class="social-texts"><span class="social-cta">¡Suscríbete en YouTube!</span><span class="social-handle">@tiempofuera_cl</span></div>`;
-
-      turnoSocial = (turnoSocial + 1) % 2;
-      wrap.classList.add("active");
-      clearTimeout(socialTimer);
-      socialTimer = setTimeout(() => wrap.classList.remove("active"), 11000);
-    }
-
-    setInterval(() => {
-      if (cfg.socialAutoEnabled) {
-        mostrarSocial();
-      }
-    }, (cfg.socialIntervalSec || 150) * 1000);
-
-    onValue(ref(db, `${DB_PATH}/modules/marcadores`), (snap) => {
-      if (!snap.exists()) return;
-      const mod = snap.val();
-      const layer = document.getElementById("live-marcadores");
-
-      if (mod.pos) {
-        layer.style.left = `${mod.pos.x ?? 14}%`;
-        layer.style.top = `${mod.pos.y ?? 76}%`;
-      }
-
-      if (mod.config) {
-        cfg = {
-          ...cfg,
-          ...mod.config,
-          sources: { ...cfg.sources, ...(mod.config.sources || {}) }
+    document.querySelectorAll("input[type='file'][data-img]").forEach((input) => {
+      input.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        const key = e.target.dataset.img;
+        if (!file || !key) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          const img = new Image();
+          img.onload = async () => {
+            imgs[key] = reader.result;
+            if (key === "logoLiga") {
+              renderPalette(extractStrongColors(img));
+            }
+            await saveConfig();
+          };
+          img.src = reader.result;
         };
-        renderEstructura();
-      }
+        reader.readAsDataURL(file);
+      });
+    });
 
-      feeds = {
-        scoresight: { ...(mod.liveData || {}), ...(mod.feeds?.scoresight || {}) },
-        flexyscore: { ...(mod.feeds?.flexyscore || {}) },
-        manual: { ...(mod.feeds?.manual || {}) }
-      };
-      aplicarDatos(false);
+    document.getElementById("swap-teams-btn").addEventListener("click", async () => {
+      const n1 = document.getElementById("name1").value;
+      const bg1 = document.getElementById("bg1Color").value;
+      const tx1 = document.getElementById("text1Color").value;
+      const l1 = imgs.logo1;
 
-      if (mod.cmd?.action === "social_now" && mod.cmd.ts && mod.cmd.ts !== lastCmdTs) {
-        lastCmdTs = mod.cmd.ts;
-        mostrarSocial(mod.cmd.network);
-      }
+      document.getElementById("name1").value = document.getElementById("name2").value;
+      document.getElementById("bg1Color").value = document.getElementById("bg2Color").value;
+      document.getElementById("text1Color").value = document.getElementById("text2Color").value;
+      imgs.logo1 = imgs.logo2;
 
-      if (mod.enabled && mod.on) {
-        layer.classList.add("is-visible");
-      } else {
-        layer.classList.remove("is-visible");
+      document.getElementById("name2").value = n1;
+      document.getElementById("bg2Color").value = bg1;
+      document.getElementById("text2Color").value = tx1;
+      imgs.logo2 = l1;
+
+      await saveConfig();
+    });
+
+    let snapActive = true;
+    const snapBtn = document.getElementById("snap-toggle");
+    snapBtn.addEventListener("click", () => {
+      snapActive = !snapActive;
+      snapBtn.textContent = snapActive ? "Snap: ON" : "Snap: OFF";
+    });
+
+    document.getElementById("center-x-btn").addEventListener("click", async () => {
+      const box = document.querySelector('.overlay-box[data-module="marcadores"]');
+      const stageRect = stageEl.getBoundingClientRect();
+      if (!box || !stageRect.width) return;
+      const boxRect = box.getBoundingClientRect();
+      const halfWPct = ((boxRect.width / stageRect.width) * 100) / 2;
+      const centeredX = Number((50 - halfWPct).toFixed(2));
+      box.style.left = `${centeredX}%`;
+      box.dataset.x = String(centeredX);
+      const currentY = parseFloat(box.dataset.y ?? parseFloat(box.style.top) ?? 76);
+      await update(ref(db, `${DB_PATH}/modules/marcadores/pos`), { x: centeredX, y: currentY });
+    });
+
+    document.getElementById("save-publish-btn").addEventListener("click", saveConfig);
+
+    requireSession(async () => {
+      mountDragCanvas("stage", { getSnapEnabled: () => snapActive });
+      await syncCanvasPositions();
+
+      const snap = await get(ref(db, `${DB_PATH}/modules`));
+      if (snap.exists()) {
+        const mods = snap.val();
+        document.querySelectorAll(".mod-enable").forEach((chk) => {
+          chk.checked = Boolean(mods[chk.dataset.mod]?.enabled);
+        });
+        const cfg = mods.marcadores?.config;
+        if (cfg) {
+          Object.entries(cfg).forEach(([k, v]) => {
+            if (k in imgs) imgs[k] = v || "";
+            const el = document.getElementById(k);
+            if (!el) return;
+            if (el.type === "checkbox") el.checked = Boolean(v);
+            else el.value = v;
+          });
+          syncTopBadgeInputs();
+          if (cfg.sources) {
+            SOURCE_FIELDS.forEach((f) => {
+              const sel = document.getElementById(`src_${f}`);
+              if (sel && cfg.sources[f]) sel.value = cfg.sources[f];
+            });
+          }
+          if (imgs.logoLiga) {
+            const tempImg = new Image();
+            tempImg.onload = () => renderPalette(extractStrongColors(tempImg));
+            tempImg.src = imgs.logoLiga;
+          }
+        }
       }
+      applyStageFit();
+    }, { requireAdmin: true });
+
+    document.querySelectorAll(".dock-tab").forEach((tab) => {
+      tab.addEventListener("click", () => {
+        document.querySelectorAll(".dock-tab").forEach((t) => t.classList.remove("is-active"));
+        document.querySelectorAll(".tab-section").forEach((s) => s.classList.remove("is-active"));
+        tab.classList.add("is-active");
+        document.getElementById(`pane-${tab.dataset.target}`).classList.add("is-active");
+      });
+    });
+
+    const gridBtn = document.getElementById("grid-toggle");
+    const gridEl = document.getElementById("stage-grid");
+    gridBtn.addEventListener("click", () => {
+      gridEl.classList.toggle("is-off");
+      gridBtn.textContent = gridEl.classList.contains("is-off") ? "Grilla: OFF" : "Grilla: ON";
+    });
+
+    document.querySelectorAll(".mod-enable").forEach((chk) => {
+      chk.addEventListener("change", async (e) => {
+        await update(ref(db, `${DB_PATH}/modules/${e.target.dataset.mod}`), {
+          enabled: e.target.checked
+        });
+      });
     });
   </script>
 </body>
