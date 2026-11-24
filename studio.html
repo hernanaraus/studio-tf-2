@@ -4,74 +4,57 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Estudio — Studio TF 2.0</title>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;1,700;1,800&family=Bebas+Neue&family=Chakra+Petch:wght@600;700&family=Oswald:wght@600;700&family=Rajdhani:wght@600;700&family=Russo+One&family=Teko:wght@600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/studio.css">
   <style>
-    .form-grid-4 {
+    .sb-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
       gap: 12px;
       margin-bottom: 14px;
     }
-    .mini-field label {
-      display: block;
-      font-size: 0.74rem;
-      color: var(--muted);
-      margin-bottom: 4px;
-    }
-    .mini-field input,
-    .mini-field select {
-      width: 100%;
-      padding: 8px 10px;
-      border-radius: 6px;
-      border: 1px solid var(--border);
+    .s-field { display: flex; flex-direction: column; gap: 4px; }
+    .s-field label { font-size: 0.73rem; color: var(--muted); font-weight: 600; }
+    .s-field input[type="text"],
+    .s-field input[type="number"],
+    .s-field select {
       background: var(--bg-app);
+      border: 1px solid var(--border);
       color: var(--text);
-      font-size: 0.85rem;
-    }
-    .mini-field input[type="color"] {
-      padding: 2px;
-      height: 34px;
-      cursor: pointer;
-    }
-    .sb-preview-box {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      background: rgba(14, 14, 18, 0.95);
-      border: 1px solid rgba(255, 255, 255, 0.16);
+      padding: 7px 9px;
       border-radius: 6px;
-      padding: 8px 14px;
-      color: #fff;
-      font-weight: 800;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
+      font-size: 0.82rem;
+      width: 100%;
     }
-    .sb-preview-box.style-compact {
-      padding: 6px 12px;
-      font-size: 0.85rem;
-      border-radius: 4px;
+    .s-field input[type="color"] {
+      width: 100%;
+      height: 32px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--bg-app);
+      cursor: pointer;
+      padding: 2px;
     }
-    .sb-team-tag {
+    .s-check {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      padding: 4px 10px;
-      border-radius: 4px;
-      background: #1d1e26;
-      border-left: 4px solid var(--accent);
+      gap: 7px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
     }
-    .sb-score-num {
-      font-variant-numeric: tabular-nums;
-      font-size: 1.05rem;
-      padding: 0 4px;
+    .mini-file {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      background: var(--bg-app);
+      border: 1px dashed var(--border);
+      padding: 6px;
+      border-radius: 6px;
     }
-    .sb-meta {
-      font-size: 0.75rem;
-      color: #d4d4de;
-      border-left: 1px solid rgba(255, 255, 255, 0.2);
-      padding-left: 10px;
-      font-variant-numeric: tabular-nums;
-    }
+    .mini-file input[type="file"] { font-size: 0.7rem; color: var(--muted); width: 100%; }
+    .status-note { font-size: 0.76rem; color: var(--muted); }
   </style>
 </head>
 <body>
@@ -80,8 +63,10 @@
       <div style="font-weight: 800; letter-spacing: 1px;">
         STUDIO <span style="color: var(--accent);">TF 2.0</span>
       </div>
-      <div style="display: flex; gap: 8px;">
+      <div style="display: flex; gap: 8px; align-items: center;">
+        <span id="studio-status" class="status-note">Listo</span>
         <button id="grid-toggle" class="btn btn-ghost" style="padding: 6px 12px; font-size: 0.74rem;">Grilla: ON</button>
+        <button id="save-publish-btn" class="btn" style="padding: 6px 14px; font-size: 0.74rem;">Guardar y Sincronizar</button>
         <button class="btn btn-ghost" style="padding: 6px 12px; font-size: 0.74rem;" onclick="location.href='control.html'">Control</button>
         <button class="btn btn-ghost" style="padding: 6px 12px; font-size: 0.74rem;" onclick="location.href='index.html'">Inicio</button>
       </div>
@@ -91,20 +76,9 @@
       <div id="stage" class="stage-16x9">
         <div id="stage-grid" class="stage-grid"></div>
 
-        <!-- Marcador arrastrable en el preview -->
-        <div class="overlay-box" data-module="marcadores" style="left: 5%; top: 6%;">
-          <div id="preview-marcador" class="sb-preview-box">
-            <span id="prev-local-tag" class="sb-team-tag" style="border-left-color: #e11d2e;">
-              <span id="prev-local-name">LOC</span>
-              <span id="prev-local-score" class="sb-score-num">0</span>
-            </span>
-            <span style="color: var(--muted); font-size: 0.8rem;">-</span>
-            <span id="prev-visita-tag" class="sb-team-tag" style="border-left-color: #2563eb;">
-              <span id="prev-visita-score" class="sb-score-num">0</span>
-              <span id="prev-visita-name">VIS</span>
-            </span>
-            <span id="prev-meta" class="sb-meta">1° · 10:00</span>
-          </div>
+        <!-- Marcador arrastrable en el preview 16:9 -->
+        <div class="overlay-box" data-module="marcadores" style="left: 16%; top: 76%;">
+          <div id="studioSbPreview"></div>
         </div>
       </div>
     </main>
@@ -122,61 +96,181 @@
       </nav>
 
       <div class="dock-body">
-        <!-- Pestaña 1: Marcadores -->
+        <!-- PESTAÑA 1: MARCADORES -->
         <div id="pane-marcadores" class="tab-section is-active">
           <div class="tab-head">
-            <h3>Marcadores</h3>
-            <label class="enable-check"><input type="checkbox" class="mod-enable" data-mod="marcadores"> Habilitar en Control</label>
+            <h3>Marcadores Broadcast (Tiempo Fuera)</h3>
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+              <button id="test-flexy-btn" type="button" class="btn btn-ghost" style="padding: 5px 10px; font-size: 0.72rem;">Probar Envío Flexyscore</button>
+              <button id="swap-teams-btn" type="button" class="btn btn-ghost" style="padding: 5px 10px; font-size: 0.72rem;">⇄ Intercambiar Local/Visita</button>
+              <label class="enable-check"><input type="checkbox" class="mod-enable" data-mod="marcadores"> Habilitar en Control</label>
+            </div>
           </div>
 
-          <div class="form-grid-4">
-            <div class="mini-field">
-              <label for="sb-local-name">Equipo Local (Sigla/Nombre)</label>
-              <input id="sb-local-name" type="text" maxlength="12" value="LOC">
+          <!-- Integración Flexyscore + Origen de Datos por Campo -->
+          <div class="sb-grid">
+            <div class="s-field">
+              <label>ID Marcador Flexyscore</label>
+              <input type="text" id="flexyBoardId" value="20152" placeholder="20152">
             </div>
-            <div class="mini-field">
-              <label for="sb-local-score">Puntos Local</label>
-              <input id="sb-local-score" type="number" min="0" max="999" value="0">
+            <div class="s-field">
+              <label>API Token (liveid) Flexyscore</label>
+              <input type="text" id="flexyLiveId" placeholder="Pega tu liveid aquí">
             </div>
-            <div class="mini-field">
-              <label for="sb-local-color">Color Local</label>
-              <input id="sb-local-color" type="color" value="#e11d2e">
+            <div class="s-field">
+              <label>Origen Puntos Local</label>
+              <select id="src_points_1">
+                <option value="flexyscore" selected>Flexyscore</option>
+                <option value="scoresight">ScoreSight</option>
+                <option value="manual">Manual (Control)</option>
+              </select>
             </div>
-            <div class="mini-field">
-              <label for="sb-style">Estilo Visual</label>
-              <select id="sb-style">
-                <option value="broadcast">Broadcast TF</option>
-                <option value="compact">Compacto</option>
+            <div class="s-field">
+              <label>Origen Puntos Visita</label>
+              <select id="src_points_2">
+                <option value="flexyscore" selected>Flexyscore</option>
+                <option value="scoresight">ScoreSight</option>
+                <option value="manual">Manual (Control)</option>
               </select>
             </div>
           </div>
 
-          <div class="form-grid-4">
-            <div class="mini-field">
-              <label for="sb-visita-name">Equipo Visita (Sigla/Nombre)</label>
-              <input id="sb-visita-name" type="text" maxlength="12" value="VIS">
+          <div class="sb-grid">
+            <div class="s-field">
+              <label>Origen Reloj Partido</label>
+              <select id="src_timer">
+                <option value="scoresight" selected>ScoreSight</option>
+                <option value="flexyscore">Flexyscore</option>
+                <option value="manual">Manual (Control)</option>
+              </select>
             </div>
-            <div class="mini-field">
-              <label for="sb-visita-score">Puntos Visita</label>
-              <input id="sb-visita-score" type="number" min="0" max="999" value="0">
+            <div class="s-field">
+              <label>Origen Cuarto / Período</label>
+              <select id="src_period">
+                <option value="scoresight" selected>ScoreSight</option>
+                <option value="flexyscore">Flexyscore</option>
+                <option value="manual">Manual (Control)</option>
+              </select>
             </div>
-            <div class="mini-field">
-              <label for="sb-visita-color">Color Visita</label>
-              <input id="sb-visita-color" type="color" value="#2563eb">
+            <div class="s-field">
+              <label>Origen Faltas Local</label>
+              <select id="src_fouls_1">
+                <option value="scoresight" selected>ScoreSight</option>
+                <option value="flexyscore">Flexyscore</option>
+                <option value="manual">Manual (Control)</option>
+              </select>
             </div>
-            <div class="mini-field">
-              <label for="sb-period">Período / Cuarto</label>
-              <input id="sb-period" type="text" maxlength="10" value="1°">
+            <div class="s-field">
+              <label>Origen Faltas Visita</label>
+              <select id="src_fouls_2">
+                <option value="scoresight" selected>ScoreSight</option>
+                <option value="flexyscore">Flexyscore</option>
+                <option value="manual">Manual (Control)</option>
+              </select>
             </div>
           </div>
 
-          <div class="form-grid-4" style="align-items: end;">
-            <div class="mini-field">
-              <label for="sb-clock">Reloj / Estado</label>
-              <input id="sb-clock" type="text" maxlength="12" value="10:00">
+          <div class="sb-grid">
+            <div class="s-field">
+              <label>Origen Reloj 24s (Shotclock)</label>
+              <select id="src_shotclock">
+                <option value="scoresight" selected>ScoreSight</option>
+                <option value="flexyscore">Flexyscore</option>
+                <option value="manual">Manual (Control)</option>
+              </select>
             </div>
-            <div>
-              <button id="sb-save-btn" class="btn" style="padding: 9px 16px; font-size: 0.78rem;">Guardar Marcador</button>
+            <div class="s-field">
+              <label>Fuente Tipográfica</label>
+              <select id="fontFamily">
+                <option value="'Barlow Condensed', sans-serif">Barlow Condensed</option>
+                <option value="'Bebas Neue', sans-serif">Bebas Neue</option>
+                <option value="'Oswald', sans-serif">Oswald</option>
+                <option value="'Teko', sans-serif">Teko</option>
+                <option value="'Rajdhani', sans-serif">Rajdhani</option>
+                <option value="'Chakra Petch', sans-serif">Chakra Petch</option>
+                <option value="'Russo One', sans-serif">Russo One</option>
+                <option value="'Anton', sans-serif">Anton</option>
+              </select>
+            </div>
+            <div class="s-field">
+              <label>Equipo Local</label>
+              <input type="text" id="name1" value="LOCAL">
+            </div>
+            <div class="s-field">
+              <label>Equipo Visita</label>
+              <input type="text" id="name2" value="VISITA">
+            </div>
+          </div>
+
+          <!-- Colores -->
+          <div class="sb-grid">
+            <div class="s-field">
+              <label>Fondo / Texto Local</label>
+              <div style="display:flex; gap:6px;">
+                <input type="color" id="bg1Color" value="#1c1e24">
+                <input type="color" id="text1Color" value="#ffffff">
+              </div>
+            </div>
+            <div class="s-field">
+              <label>Fondo / Texto Visita</label>
+              <div style="display:flex; gap:6px;">
+                <input type="color" id="bg2Color" value="#1c1e24">
+                <input type="color" id="text2Color" value="#ffffff">
+              </div>
+            </div>
+            <div class="s-field">
+              <label>Acento / Fondo Pts / Pts</label>
+              <div style="display:flex; gap:6px;">
+                <input type="color" id="accentColor" value="#e3b857">
+                <input type="color" id="scoreBgColor" value="#0c0d10">
+                <input type="color" id="scoreTextColor" value="#e3b857">
+              </div>
+            </div>
+            <div class="s-field">
+              <label>Fondo Reloj / Reloj / Cuarto</label>
+              <div style="display:flex; gap:6px;">
+                <input type="color" id="clockBgColor" value="#141519">
+                <input type="color" id="clockTextColor" value="#ffffff">
+                <input type="color" id="periodTextColor" value="#e3b857">
+              </div>
+            </div>
+          </div>
+
+          <!-- Faltas, Posesión, Logos y RRSS -->
+          <div class="sb-grid">
+            <div class="s-field">
+              <label>Falta Normal / Bonus (5ta)</label>
+              <div style="display:flex; gap:6px;">
+                <input type="color" id="foulActiveColor" value="#ffe600">
+                <input type="color" id="foulBonusColor" value="#ff1744">
+              </div>
+            </div>
+            <div class="s-field">
+              <label>Reloj 24s + Colores</label>
+              <label class="s-check"><input type="checkbox" id="showShotClock" checked> Activar 24s</label>
+              <div style="display:flex; gap:6px; margin-top:4px;">
+                <input type="color" id="shotBgColor" value="#141519">
+                <input type="color" id="shotTextColor" value="#ff2a2a">
+              </div>
+            </div>
+            <div class="s-field">
+              <label>Logos (Liga / Local / Visita)</label>
+              <div class="mini-file">
+                <input type="file" accept="image/*" data-img="logoLiga" title="Logo Liga">
+                <input type="file" accept="image/*" data-img="logo1" title="Logo Local">
+                <input type="file" accept="image/*" data-img="logo2" title="Logo Visita">
+              </div>
+            </div>
+            <div class="s-field">
+              <label>RRSS (@tiempofuera_cl)</label>
+              <label class="s-check"><input type="checkbox" id="socialAutoEnabled" checked> Rotación IG / YT</label>
+              <div style="display:flex; gap:6px; margin-top:4px;">
+                <select id="socialPosition">
+                  <option value="top-left">Arriba Izq</option>
+                  <option value="top-right">Arriba Der</option>
+                </select>
+                <input type="number" id="socialIntervalSec" min="20" max="600" value="150">
+              </div>
             </div>
           </div>
         </div>
@@ -186,145 +280,212 @@
             <h3>Competencias Especiales</h3>
             <label class="enable-check"><input type="checkbox" class="mod-enable" data-mod="especiales"> Habilitar en Control</label>
           </div>
-          <p style="color: var(--muted); font-size: 0.85rem;">Estructura base lista para formatos especiales.</p>
+          <p style="color: var(--muted); font-size: 0.85rem;">Listo para el siguiente paso.</p>
         </div>
-
         <div id="pane-tercios" class="tab-section">
           <div class="tab-head">
             <h3>Tercios Inferiores</h3>
             <label class="enable-check"><input type="checkbox" class="mod-enable" data-mod="tercios"> Habilitar en Control</label>
           </div>
-          <p style="color: var(--muted); font-size: 0.85rem;">Estructura base lista para lower thirds y rótulos.</p>
+          <p style="color: var(--muted); font-size: 0.85rem;">Listo para el siguiente paso.</p>
         </div>
-
         <div id="pane-sponsors" class="tab-section">
           <div class="tab-head">
             <h3>Logos de Sponsors</h3>
             <label class="enable-check"><input type="checkbox" class="mod-enable" data-mod="sponsors"> Habilitar en Control</label>
           </div>
-          <p style="color: var(--muted); font-size: 0.85rem;">Estructura base lista para logos de sponsors.</p>
+          <p style="color: var(--muted); font-size: 0.85rem;">Listo para el siguiente paso.</p>
         </div>
-
         <div id="pane-auspiciadores" class="tab-section">
           <div class="tab-head">
             <h3>Logos de Auspiciadores</h3>
             <label class="enable-check"><input type="checkbox" class="mod-enable" data-mod="auspiciadores"> Habilitar en Control</label>
           </div>
-          <p style="color: var(--muted); font-size: 0.85rem;">Estructura base lista para logos de auspiciadores.</p>
+          <p style="color: var(--muted); font-size: 0.85rem;">Listo para el siguiente paso.</p>
         </div>
-
         <div id="pane-cg" class="tab-section">
           <div class="tab-head">
-            <h3>Control de CG (Banda Inferior / Scroll)</h3>
+            <h3>Control de CG (Scroll)</h3>
             <label class="enable-check"><input type="checkbox" class="mod-enable" data-mod="cg"> Habilitar en Control</label>
           </div>
-          <p style="color: var(--muted); font-size: 0.85rem;">Estructura base lista para mensajes en banda inferior con scroll.</p>
+          <p style="color: var(--muted); font-size: 0.85rem;">Listo para el siguiente paso.</p>
         </div>
-
         <div id="pane-equipos" class="tab-section">
           <div class="tab-head">
             <h3>Presentación de Equipos</h3>
             <label class="enable-check"><input type="checkbox" class="mod-enable" data-mod="equipos"> Habilitar en Control</label>
           </div>
-          <p style="color: var(--muted); font-size: 0.85rem;">Estructura base lista para planteles y alineaciones.</p>
+          <p style="color: var(--muted); font-size: 0.85rem;">Listo para el siguiente paso.</p>
         </div>
-
         <div id="pane-estadisticas" class="tab-section">
           <div class="tab-head">
             <h3>Estadísticas</h3>
             <label class="enable-check"><input type="checkbox" class="mod-enable" data-mod="estadisticas"> Habilitar en Control</label>
           </div>
-          <p style="color: var(--muted); font-size: 0.85rem;">Estructura base lista para estadísticas en pantalla.</p>
+          <p style="color: var(--muted); font-size: 0.85rem;">Listo para el siguiente paso.</p>
         </div>
       </div>
     </section>
   </div>
 
   <script type="module">
-    import { db, DB_PATH, ref, update, get, onValue, requireSession } from "./js/firebase.js";
+    import { db, DB_PATH, ref, update, get, requireSession } from "./js/firebase.js";
     import { mountDragCanvas, syncCanvasPositions } from "./js/canvas.js";
+    import { pushToFlexyscore } from "./js/flexyscore-api.js";
 
-    const DEFAULT_SB = {
-      localName: "LOC",
-      localScore: 0,
-      localColor: "#e11d2e",
-      visitaName: "VIS",
-      visitaScore: 0,
-      visitaColor: "#2563eb",
-      period: "1°",
-      clock: "10:00",
-      style: "broadcast"
-    };
+    const SOURCE_FIELDS = ["points_1", "points_2", "timer", "period", "fouls_1", "fouls_2", "shotclock"];
+    const imgs = { logoLiga: "", logo1: "", logo2: "" };
+    const statusEl = document.getElementById("studio-status");
 
-    const inputs = {
-      localName: document.getElementById("sb-local-name"),
-      localScore: document.getElementById("sb-local-score"),
-      localColor: document.getElementById("sb-local-color"),
-      visitaName: document.getElementById("sb-visita-name"),
-      visitaScore: document.getElementById("sb-visita-score"),
-      visitaColor: document.getElementById("sb-visita-color"),
-      period: document.getElementById("sb-period"),
-      clock: document.getElementById("sb-clock"),
-      style: document.getElementById("sb-style")
-    };
+    function getSources() {
+      const map = {};
+      SOURCE_FIELDS.forEach((f) => {
+        const el = document.getElementById(`src_${f}`);
+        map[f] = el ? el.value : "manual";
+      });
+      return map;
+    }
 
-    function getFormData() {
+    function getSbConfig() {
       return {
-        localName: (inputs.localName.value || "LOC").trim().toUpperCase(),
-        localScore: Math.max(0, parseInt(inputs.localScore.value, 10) || 0),
-        localColor: inputs.localColor.value || "#e11d2e",
-        visitaName: (inputs.visitaName.value || "VIS").trim().toUpperCase(),
-        visitaScore: Math.max(0, parseInt(inputs.visitaScore.value, 10) || 0),
-        visitaColor: inputs.visitaColor.value || "#2563eb",
-        period: (inputs.period.value || "1°").trim(),
-        clock: (inputs.clock.value || "00:00").trim(),
-        style: inputs.style.value || "broadcast"
+        flexyBoardId: document.getElementById("flexyBoardId").value.trim() || "20152",
+        flexyLiveId: document.getElementById("flexyLiveId").value.trim(),
+        sources: getSources(),
+        fontFamily: document.getElementById("fontFamily").value,
+        name1: (document.getElementById("name1").value || "LOCAL").trim(),
+        bg1Color: document.getElementById("bg1Color").value,
+        text1Color: document.getElementById("text1Color").value,
+        name2: (document.getElementById("name2").value || "VISITA").trim(),
+        bg2Color: document.getElementById("bg2Color").value,
+        text2Color: document.getElementById("text2Color").value,
+        accentColor: document.getElementById("accentColor").value,
+        scoreBgColor: document.getElementById("scoreBgColor").value,
+        scoreTextColor: document.getElementById("scoreTextColor").value,
+        clockBgColor: document.getElementById("clockBgColor").value,
+        clockTextColor: document.getElementById("clockTextColor").value,
+        periodTextColor: document.getElementById("periodTextColor").value,
+        foulActiveColor: document.getElementById("foulActiveColor").value,
+        foulBonusColor: document.getElementById("foulBonusColor").value,
+        showShotClock: document.getElementById("showShotClock").checked,
+        shotBgColor: document.getElementById("shotBgColor").value,
+        shotTextColor: document.getElementById("shotTextColor").value,
+        socialAutoEnabled: document.getElementById("socialAutoEnabled").checked,
+        socialPosition: document.getElementById("socialPosition").value,
+        socialIntervalSec: Math.max(20, parseInt(document.getElementById("socialIntervalSec").value, 10) || 150),
+        logoLiga: imgs.logoLiga,
+        logo1: imgs.logo1,
+        logo2: imgs.logo2
       };
     }
 
-    function applyPreview(data) {
-      const d = { ...DEFAULT_SB, ...data };
-      const box = document.getElementById("preview-marcador");
-      box.classList.toggle("style-compact", d.style === "compact");
+    function renderPreview(cfg) {
+      const mount = document.getElementById("studioSbPreview");
+      const foulsHtml = Array.from({ length: 5 }, (_, i) => {
+        const bg = i < 2 ? cfg.foulActiveColor : "rgba(0,0,0,0.35)";
+        const brd = i < 2 ? "1px solid #111" : "1px solid rgba(255,255,255,0.4)";
+        return `<span style="width:14px;height:4px;border-radius:2px;display:inline-block;background:${bg};border:${brd};"></span>`;
+      }).join("");
 
-      const localTag = document.getElementById("prev-local-tag");
-      const visitaTag = document.getElementById("prev-visita-tag");
-      localTag.style.borderLeftColor = d.localColor;
-      visitaTag.style.borderLeftColor = d.visitaColor;
+      const shotHtml = cfg.showShotClock
+        ? `<div style="position:absolute;bottom:-12px;left:50%;transform:translateX(-50%);background:${cfg.shotBgColor};color:${cfg.shotTextColor};border:1px solid ${cfg.accentColor};border-radius:4px;font-size:12px;font-weight:800;padding:0 5px;">24</div>`
+        : "";
 
-      document.getElementById("prev-local-name").textContent = d.localName;
-      document.getElementById("prev-local-score").textContent = d.localScore;
-      document.getElementById("prev-visita-name").textContent = d.visitaName;
-      document.getElementById("prev-visita-score").textContent = d.visitaScore;
-      document.getElementById("prev-meta").textContent = `${d.period} · ${d.clock}`;
+      mount.innerHTML = `
+        <div style="display:inline-flex;align-items:center;font-family:${cfg.fontFamily};gap:6px;">
+          ${cfg.logoLiga ? `<img src="${cfg.logoLiga}" style="height:44px;object-fit:contain;">` : ""}
+          <div style="display:flex;align-items:center;height:38px;background:${cfg.bg1Color};color:${cfg.text1Color};border-top:1.5px solid ${cfg.accentColor};border-bottom:2px solid ${cfg.accentColor};border-left:1.5px solid ${cfg.accentColor};border-radius:7px 0 0 7px;padding:0 10px;gap:6px;">
+            ${cfg.logo1 ? `<img src="${cfg.logo1}" style="height:24px;width:24px;object-fit:contain;">` : ""}
+            <div style="display:flex;flex-direction:column;align-items:center;">
+              <span style="font-size:15px;font-weight:800;line-height:1;">${cfg.name1}</span>
+              <div style="display:flex;gap:3px;margin-top:3px;">${foulsHtml}</div>
+            </div>
+          </div>
+          <div style="position:relative;display:flex;align-items:center;gap:5px;height:44px;padding:0 10px;background:${cfg.scoreBgColor};color:${cfg.scoreTextColor};border:2px solid ${cfg.accentColor};border-radius:7px;font-size:24px;font-weight:800;">
+            <span>64</span>
+            <span style="color:${cfg.accentColor};font-size:16px;">-</span>
+            <span>58</span>
+            ${shotHtml}
+          </div>
+          <div style="display:flex;align-items:center;height:38px;background:${cfg.bg2Color};color:${cfg.text2Color};border-top:1.5px solid ${cfg.accentColor};border-bottom:2px solid ${cfg.accentColor};border-radius:0;padding:0 10px;gap:6px;">
+            ${cfg.logo2 ? `<img src="${cfg.logo2}" style="height:24px;width:24px;object-fit:contain;">` : ""}
+            <div style="display:flex;flex-direction:column;align-items:center;">
+              <span style="font-size:15px;font-weight:800;line-height:1;">${cfg.name2}</span>
+              <div style="display:flex;gap:3px;margin-top:3px;">${foulsHtml}</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;height:38px;padding:0 10px;background:${cfg.clockBgColor};color:${cfg.clockTextColor};border:1.5px solid ${cfg.accentColor};border-radius:0 7px 7px 0;font-weight:800;">
+            <span style="font-size:18px;">04:32</span>
+            <span style="font-size:13px;color:${cfg.periodTextColor};border:1px solid rgba(255,255,255,0.2);padding:2px 5px;border-radius:4px;">Q4</span>
+          </div>
+        </div>
+      `;
     }
 
-    function fillInputs(data) {
-      const d = { ...DEFAULT_SB, ...data };
-      inputs.localName.value = d.localName;
-      inputs.localScore.value = d.localScore;
-      inputs.localColor.value = d.localColor;
-      inputs.visitaName.value = d.visitaName;
-      inputs.visitaScore.value = d.visitaScore;
-      inputs.visitaColor.value = d.visitaColor;
-      inputs.period.value = d.period;
-      inputs.clock.value = d.clock;
-      inputs.style.value = d.style;
-      applyPreview(d);
+    async function saveConfig() {
+      const cfg = getSbConfig();
+      renderPreview(cfg);
+      await update(ref(db, `${DB_PATH}/modules/marcadores/config`), cfg);
+      statusEl.textContent = "Sincronizado";
+      setTimeout(() => { statusEl.textContent = "Listo"; }, 1200);
     }
 
-    Object.values(inputs).forEach((el) => {
-      el.addEventListener("input", () => applyPreview(getFormData()));
-      el.addEventListener("change", () => applyPreview(getFormData()));
+    document.querySelectorAll("#pane-marcadores input, #pane-marcadores select").forEach((el) => {
+      if (el.type === "file") return;
+      el.addEventListener("input", () => renderPreview(getSbConfig()));
+      el.addEventListener("change", saveConfig);
     });
 
-    document.getElementById("sb-save-btn").addEventListener("click", async (e) => {
-      const btn = e.currentTarget;
-      await update(ref(db, `${DB_PATH}/modules/marcadores/data`), getFormData());
-      const prev = btn.textContent;
-      btn.textContent = "Guardado";
-      setTimeout(() => { btn.textContent = prev; }, 1000);
+    document.querySelectorAll("input[type='file'][data-img]").forEach((input) => {
+      input.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        const key = e.target.dataset.img;
+        if (!file || !key) return;
+        const reader = new FileReader();
+        reader.onload = async () => {
+          imgs[key] = reader.result;
+          await saveConfig();
+        };
+        reader.readAsDataURL(file);
+      });
     });
+
+    document.getElementById("swap-teams-btn").addEventListener("click", async () => {
+      const n1 = document.getElementById("name1").value;
+      const bg1 = document.getElementById("bg1Color").value;
+      const tx1 = document.getElementById("text1Color").value;
+      const l1 = imgs.logo1;
+
+      document.getElementById("name1").value = document.getElementById("name2").value;
+      document.getElementById("bg1Color").value = document.getElementById("bg2Color").value;
+      document.getElementById("text1Color").value = document.getElementById("text2Color").value;
+      imgs.logo1 = imgs.logo2;
+
+      document.getElementById("name2").value = n1;
+      document.getElementById("bg2Color").value = bg1;
+      document.getElementById("text2Color").value = tx1;
+      imgs.logo2 = l1;
+
+      await saveConfig();
+    });
+
+    document.getElementById("test-flexy-btn").addEventListener("click", async () => {
+      const cfg = getSbConfig();
+      statusEl.textContent = "Enviando a Flexyscore...";
+      try {
+        await pushToFlexyscore(cfg.flexyLiveId, {
+          team_1: cfg.name1,
+          team_2: cfg.name2,
+          generictoggle: 1,
+          moment: 1,
+          timer: 600
+        }, true);
+        statusEl.textContent = "Flexyscore OK";
+      } catch (err) {
+        statusEl.textContent = err.message;
+      }
+    });
+
+    document.getElementById("save-publish-btn").addEventListener("click", saveConfig);
 
     requireSession(async () => {
       mountDragCanvas("stage");
@@ -334,19 +495,27 @@
       if (snap.exists()) {
         const mods = snap.val();
         document.querySelectorAll(".mod-enable").forEach((chk) => {
-          const m = chk.dataset.mod;
-          chk.checked = Boolean(mods[m]?.enabled);
+          chk.checked = Boolean(mods[chk.dataset.mod]?.enabled);
         });
-        if (mods.marcadores?.data) {
-          fillInputs(mods.marcadores.data);
+        const cfg = mods.marcadores?.config;
+        if (cfg) {
+          Object.entries(cfg).forEach(([k, v]) => {
+            if (k in imgs) imgs[k] = v || "";
+            const el = document.getElementById(k);
+            if (!el) return;
+            if (el.type === "checkbox") el.checked = Boolean(v);
+            else el.value = v;
+          });
+          if (cfg.sources) {
+            SOURCE_FIELDS.forEach((f) => {
+              const sel = document.getElementById(`src_${f}`);
+              if (sel && cfg.sources[f]) sel.value = cfg.sources[f];
+            });
+          }
         }
       }
-
-      // Escucha cambios en tiempo real (por ejemplo, si sumas puntos desde control.html)
-      onValue(ref(db, `${DB_PATH}/modules/marcadores/data`), (s) => {
-        if (s.exists()) fillInputs(s.val());
-      });
-    });
+      renderPreview(getSbConfig());
+    }, { requireAdmin: true });
 
     document.querySelectorAll(".dock-tab").forEach((tab) => {
       tab.addEventListener("click", () => {
@@ -366,8 +535,7 @@
 
     document.querySelectorAll(".mod-enable").forEach((chk) => {
       chk.addEventListener("change", async (e) => {
-        const mod = e.target.dataset.mod;
-        await update(ref(db, `${DB_PATH}/modules/${mod}`), {
+        await update(ref(db, `${DB_PATH}/modules/${e.target.dataset.mod}`), {
           enabled: e.target.checked
         });
       });
