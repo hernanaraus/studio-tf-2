@@ -6,6 +6,73 @@
   <title>Estudio — Studio TF 2.0</title>
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/studio.css">
+  <style>
+    .form-grid-4 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .mini-field label {
+      display: block;
+      font-size: 0.74rem;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+    .mini-field input,
+    .mini-field select {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--bg-app);
+      color: var(--text);
+      font-size: 0.85rem;
+    }
+    .mini-field input[type="color"] {
+      padding: 2px;
+      height: 34px;
+      cursor: pointer;
+    }
+    .sb-preview-box {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(14, 14, 18, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 6px;
+      padding: 8px 14px;
+      color: #fff;
+      font-weight: 800;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
+    }
+    .sb-preview-box.style-compact {
+      padding: 6px 12px;
+      font-size: 0.85rem;
+      border-radius: 4px;
+    }
+    .sb-team-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 10px;
+      border-radius: 4px;
+      background: #1d1e26;
+      border-left: 4px solid var(--accent);
+    }
+    .sb-score-num {
+      font-variant-numeric: tabular-nums;
+      font-size: 1.05rem;
+      padding: 0 4px;
+    }
+    .sb-meta {
+      font-size: 0.75rem;
+      color: #d4d4de;
+      border-left: 1px solid rgba(255, 255, 255, 0.2);
+      padding-left: 10px;
+      font-variant-numeric: tabular-nums;
+    }
+  </style>
 </head>
 <body>
   <div class="studio-shell">
@@ -24,8 +91,20 @@
       <div id="stage" class="stage-16x9">
         <div id="stage-grid" class="stage-grid"></div>
 
-        <div class="overlay-box" data-module="marcadores" style="left: 5%; top: 6%; background: rgba(18,18,22,0.92); border-left: 4px solid #e11d2e; padding: 10px 16px; border-radius: 4px; font-weight: 700;">
-          MARCADOR BASE
+        <!-- Marcador arrastrable en el preview -->
+        <div class="overlay-box" data-module="marcadores" style="left: 5%; top: 6%;">
+          <div id="preview-marcador" class="sb-preview-box">
+            <span id="prev-local-tag" class="sb-team-tag" style="border-left-color: #e11d2e;">
+              <span id="prev-local-name">LOC</span>
+              <span id="prev-local-score" class="sb-score-num">0</span>
+            </span>
+            <span style="color: var(--muted); font-size: 0.8rem;">-</span>
+            <span id="prev-visita-tag" class="sb-team-tag" style="border-left-color: #2563eb;">
+              <span id="prev-visita-score" class="sb-score-num">0</span>
+              <span id="prev-visita-name">VIS</span>
+            </span>
+            <span id="prev-meta" class="sb-meta">1° · 10:00</span>
+          </div>
         </div>
       </div>
     </main>
@@ -43,12 +122,63 @@
       </nav>
 
       <div class="dock-body">
+        <!-- Pestaña 1: Marcadores -->
         <div id="pane-marcadores" class="tab-section is-active">
           <div class="tab-head">
             <h3>Marcadores</h3>
             <label class="enable-check"><input type="checkbox" class="mod-enable" data-mod="marcadores"> Habilitar en Control</label>
           </div>
-          <p style="color: var(--muted); font-size: 0.85rem;">Estructura base lista para configurar estilos, deportes y marcador en el siguiente paso.</p>
+
+          <div class="form-grid-4">
+            <div class="mini-field">
+              <label for="sb-local-name">Equipo Local (Sigla/Nombre)</label>
+              <input id="sb-local-name" type="text" maxlength="12" value="LOC">
+            </div>
+            <div class="mini-field">
+              <label for="sb-local-score">Puntos Local</label>
+              <input id="sb-local-score" type="number" min="0" max="999" value="0">
+            </div>
+            <div class="mini-field">
+              <label for="sb-local-color">Color Local</label>
+              <input id="sb-local-color" type="color" value="#e11d2e">
+            </div>
+            <div class="mini-field">
+              <label for="sb-style">Estilo Visual</label>
+              <select id="sb-style">
+                <option value="broadcast">Broadcast TF</option>
+                <option value="compact">Compacto</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-grid-4">
+            <div class="mini-field">
+              <label for="sb-visita-name">Equipo Visita (Sigla/Nombre)</label>
+              <input id="sb-visita-name" type="text" maxlength="12" value="VIS">
+            </div>
+            <div class="mini-field">
+              <label for="sb-visita-score">Puntos Visita</label>
+              <input id="sb-visita-score" type="number" min="0" max="999" value="0">
+            </div>
+            <div class="mini-field">
+              <label for="sb-visita-color">Color Visita</label>
+              <input id="sb-visita-color" type="color" value="#2563eb">
+            </div>
+            <div class="mini-field">
+              <label for="sb-period">Período / Cuarto</label>
+              <input id="sb-period" type="text" maxlength="10" value="1°">
+            </div>
+          </div>
+
+          <div class="form-grid-4" style="align-items: end;">
+            <div class="mini-field">
+              <label for="sb-clock">Reloj / Estado</label>
+              <input id="sb-clock" type="text" maxlength="12" value="10:00">
+            </div>
+            <div>
+              <button id="sb-save-btn" class="btn" style="padding: 9px 16px; font-size: 0.78rem;">Guardar Marcador</button>
+            </div>
+          </div>
         </div>
 
         <div id="pane-especiales" class="tab-section">
@@ -111,8 +241,90 @@
   </div>
 
   <script type="module">
-    import { db, DB_PATH, ref, update, get, requireSession } from "./js/firebase.js";
+    import { db, DB_PATH, ref, update, get, onValue, requireSession } from "./js/firebase.js";
     import { mountDragCanvas, syncCanvasPositions } from "./js/canvas.js";
+
+    const DEFAULT_SB = {
+      localName: "LOC",
+      localScore: 0,
+      localColor: "#e11d2e",
+      visitaName: "VIS",
+      visitaScore: 0,
+      visitaColor: "#2563eb",
+      period: "1°",
+      clock: "10:00",
+      style: "broadcast"
+    };
+
+    const inputs = {
+      localName: document.getElementById("sb-local-name"),
+      localScore: document.getElementById("sb-local-score"),
+      localColor: document.getElementById("sb-local-color"),
+      visitaName: document.getElementById("sb-visita-name"),
+      visitaScore: document.getElementById("sb-visita-score"),
+      visitaColor: document.getElementById("sb-visita-color"),
+      period: document.getElementById("sb-period"),
+      clock: document.getElementById("sb-clock"),
+      style: document.getElementById("sb-style")
+    };
+
+    function getFormData() {
+      return {
+        localName: (inputs.localName.value || "LOC").trim().toUpperCase(),
+        localScore: Math.max(0, parseInt(inputs.localScore.value, 10) || 0),
+        localColor: inputs.localColor.value || "#e11d2e",
+        visitaName: (inputs.visitaName.value || "VIS").trim().toUpperCase(),
+        visitaScore: Math.max(0, parseInt(inputs.visitaScore.value, 10) || 0),
+        visitaColor: inputs.visitaColor.value || "#2563eb",
+        period: (inputs.period.value || "1°").trim(),
+        clock: (inputs.clock.value || "00:00").trim(),
+        style: inputs.style.value || "broadcast"
+      };
+    }
+
+    function applyPreview(data) {
+      const d = { ...DEFAULT_SB, ...data };
+      const box = document.getElementById("preview-marcador");
+      box.classList.toggle("style-compact", d.style === "compact");
+
+      const localTag = document.getElementById("prev-local-tag");
+      const visitaTag = document.getElementById("prev-visita-tag");
+      localTag.style.borderLeftColor = d.localColor;
+      visitaTag.style.borderLeftColor = d.visitaColor;
+
+      document.getElementById("prev-local-name").textContent = d.localName;
+      document.getElementById("prev-local-score").textContent = d.localScore;
+      document.getElementById("prev-visita-name").textContent = d.visitaName;
+      document.getElementById("prev-visita-score").textContent = d.visitaScore;
+      document.getElementById("prev-meta").textContent = `${d.period} · ${d.clock}`;
+    }
+
+    function fillInputs(data) {
+      const d = { ...DEFAULT_SB, ...data };
+      inputs.localName.value = d.localName;
+      inputs.localScore.value = d.localScore;
+      inputs.localColor.value = d.localColor;
+      inputs.visitaName.value = d.visitaName;
+      inputs.visitaScore.value = d.visitaScore;
+      inputs.visitaColor.value = d.visitaColor;
+      inputs.period.value = d.period;
+      inputs.clock.value = d.clock;
+      inputs.style.value = d.style;
+      applyPreview(d);
+    }
+
+    Object.values(inputs).forEach((el) => {
+      el.addEventListener("input", () => applyPreview(getFormData()));
+      el.addEventListener("change", () => applyPreview(getFormData()));
+    });
+
+    document.getElementById("sb-save-btn").addEventListener("click", async (e) => {
+      const btn = e.currentTarget;
+      await update(ref(db, `${DB_PATH}/modules/marcadores/data`), getFormData());
+      const prev = btn.textContent;
+      btn.textContent = "Guardado";
+      setTimeout(() => { btn.textContent = prev; }, 1000);
+    });
 
     requireSession(async () => {
       mountDragCanvas("stage");
@@ -125,7 +337,15 @@
           const m = chk.dataset.mod;
           chk.checked = Boolean(mods[m]?.enabled);
         });
+        if (mods.marcadores?.data) {
+          fillInputs(mods.marcadores.data);
+        }
       }
+
+      // Escucha cambios en tiempo real (por ejemplo, si sumas puntos desde control.html)
+      onValue(ref(db, `${DB_PATH}/modules/marcadores/data`), (s) => {
+        if (s.exists()) fillInputs(s.val());
+      });
     });
 
     document.querySelectorAll(".dock-tab").forEach((tab) => {
