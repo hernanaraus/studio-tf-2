@@ -1,1 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Live — Studio TF 2.0</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 1920px;
+      height: 1080px;
+      background: transparent;
+      overflow: hidden;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    }
+    .live-item {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+    .live-item.is-visible {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div id="live-marcadores" class="live-item" style="background: rgba(18,18,22,0.95); border-left: 5px solid #e11d2e; color: #fff; padding: 14px 24px; border-radius: 6px; font-size: 26px; font-weight: 700;">
+    MARCADOR EN VIVO
+  </div>
 
+  <script type="module">
+    import { db, DB_PATH, ref, onValue } from "./js/firebase.js";
+
+    onValue(ref(db, `${DB_PATH}/modules`), (snap) => {
+      const mods = snap.val() || {};
+      Object.entries(mods).forEach(([key, cfg]) => {
+        const el = document.getElementById(`live-${key}`);
+        if (!el) return;
+
+        if (cfg.pos) {
+          el.style.left = `${cfg.pos.x ?? 5}%`;
+          el.style.top = `${cfg.pos.y ?? 6}%`;
+        }
+
+        if (cfg.enabled && cfg.on) {
+          el.classList.add("is-visible");
+        } else {
+          el.classList.remove("is-visible");
+        }
+      });
+    });
+  </script>
+</body>
+</html>
