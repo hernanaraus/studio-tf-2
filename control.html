@@ -1,1 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Control — Studio TF 2.0</title>
+  <link rel="stylesheet" href="css/base.css">
+  <style>
+    .ctrl-bar {
+      height: 52px;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+    }
+    .ctrl-grid {
+      max-width: 1080px;
+      margin: 24px auto;
+      padding: 0 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      gap: 16px;
+    }
+    .ctrl-card {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .ctrl-card.is-on {
+      border-color: var(--accent);
+    }
+    .pill {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: var(--bg-elevated);
+      color: var(--muted);
+    }
+    .ctrl-card.is-on .pill {
+      background: var(--accent);
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <header class="ctrl-bar">
+    <div style="font-weight: 800;">CONTROL <span style="color: var(--accent);">TF 2.0</span></div>
+    <div style="display: flex; gap: 8px;">
+      <button id="sync-btn" class="btn" style="background: #2563eb; padding: 7px 14px; font-size: 0.75rem;">SYNC</button>
+      <button class="btn btn-ghost" style="padding: 7px 14px; font-size: 0.75rem;" onclick="location.href='studio.html'">Estudio</button>
+      <button class="btn btn-ghost" style="padding: 7px 14px; font-size: 0.75rem;" onclick="location.href='index.html'">Inicio</button>
+    </div>
+  </header>
 
+  <main id="ctrl-grid" class="ctrl-grid">
+    <p style="color: var(--muted);">Conectando con el estudio...</p>
+  </main>
+
+  <script type="module">
+    import { db, DB_PATH, ref, update, get, onValue, requireSession } from "./js/firebase.js";
+
+    const LABELS = {
+      marcadores: "Marcadores",
+      especiales: "Competencias Especiales",
+      tercios: "Tercios Inferiores",
+      sponsors: "Logos de Sponsors",
+      auspiciadores: "Logos de Auspiciadores",
+      cg: "Control de CG (Scroll)",
+      equipos: "Presentación de Equipos",
+      estadisticas: "Estadísticas"
+    };
+
+    const grid = document.getElementById("ctrl-grid");
+
+    function paintModules(data) {
+      grid.innerHTML = "";
+      if (!data) {
+        grid.innerHTML = "<p style='color: var(--muted);'>No hay módulos habilitados en el Estudio.</p>";
+        return;
+      }
+
+      let activeCount = 0;
+      Object.entries(LABELS).forEach(([key, title]) => {
+        const item = data[key];
+        if (!item?.enabled) return;
+        activeCount++;
+
+        const isOn = Boolean(item.on);
+        const card = document.createElement("article");
+        card.className = `card ctrl-card ${isOn ? "is-on" : ""}`;
+        card.innerHTML = `
+          <div>
+            <span class="pill">${isOn ? "ACTIVO EN LIVE" : "APAGADO"}</span>
+            <h3 style="margin-top: 10px; font-size: 1.05rem;">${title}</h3>
+          </div>
+          <button class="btn ${isOn ? "" : "btn-ghost"}" data-mod="${key}" data-on="${isOn}">
+            ${isOn ? "APAGAR (OFF)" : "ENCENDER (ON)"}
+          </button>
+        `;
+        grid.appendChild(card);
+      });
+
+      if (activeCount === 0) {
+        grid.innerHTML = "<p style='color: var(--muted);'>Habilita módulos desde las pestañas del Estudio.</p>";
+      }
+
+      grid.querySelectorAll("button[data-mod]").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const mod = btn.dataset.mod;
+          const nextState = btn.dataset.on !== "true";
+          await update(ref(db, `${DB_PATH}/modules/${mod}`), { on: nextState });
+        });
+      });
+    }
+
+    requireSession(() => {
+      const modulesRef = ref(db, `${DB_PATH}/modules`);
+      onValue(modulesRef, (snap) => paintModules(snap.val()));
+
+      document.getElementById("sync-btn").addEventListener("click", async (e) => {
+        const btn = e.currentTarget;
+        btn.textContent = "SINCRONIZANDO...";
+        const snap = await get(modulesRef);
+        paintModules(snap.val());
+        await update(ref(db, DB_PATH), { syncedAt: Date.now() });
+        setTimeout(() => { btn.textContent = "SYNC"; }, 700);
+      });
+    });
+  </script>
+</body>
+</html>
