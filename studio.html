@@ -153,17 +153,19 @@
         STUDIO <span>TF 2.0</span>
       </div>
 
-      <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-        <span id="studio-status" style="font-size: 0.73rem; color: var(--muted);">Listo</span>
+      <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+        <span id="studio-status" style="font-size: 0.73rem; color: var(--muted); margin-right: 4px;">Listo</span>
 
         <div class="zoom-bar">
           <button type="button" class="zoom-btn" id="zoom-out" title="Alejar">−</button>
-          <span id="zoom-label" style="min-width: 42px; text-align: center;">FIT</span>
+          <span id="zoom-label" style="min-width: 40px; text-align: center;">FIT</span>
           <button type="button" class="zoom-btn" id="zoom-in" title="Acercar">+</button>
           <button type="button" class="zoom-btn" id="zoom-fit" title="Ajustar al recuadro">Ajustar</button>
         </div>
 
         <button id="grid-toggle" type="button" class="btn btn-ghost" style="padding: 5px 10px; font-size: 0.72rem;">Grilla: ON</button>
+        <button id="snap-toggle" type="button" class="btn btn-ghost" style="padding: 5px 10px; font-size: 0.72rem;">Snap: ON</button>
+        <button id="center-x-btn" type="button" class="btn btn-ghost" style="padding: 5px 10px; font-size: 0.72rem;">Centrar X</button>
         <button id="save-publish-btn" type="button" class="btn" style="padding: 5px 12px; font-size: 0.72rem;">Guardar y Sincronizar</button>
         <button type="button" class="btn btn-ghost" style="padding: 5px 10px; font-size: 0.72rem;" onclick="location.href='control.html'">Control</button>
       </div>
@@ -484,7 +486,7 @@
     const canvasArea = document.getElementById("canvas-area");
     const stageEl = document.getElementById("stage");
     const zoomLabel = document.getElementById("zoom-label");
-    let zoomMode = "fit"; // "fit" o número (ej. 0.75, 1.0, 1.25)
+    let zoomMode = "fit";
 
     function applyStageFit() {
       const pad = 20;
@@ -565,7 +567,7 @@
         const maxC = Math.max(r, g, b);
         const minC = Math.min(r, g, b);
         const sat = maxC === 0 ? 0 : (maxC - minC) / maxC;
-        if (sat < 0.22 && maxC > 220) continue; // ignora blancos puros
+        if (sat < 0.22 && maxC > 220) continue;
 
         const qr = Math.round(r / 32) * 32;
         const qg = Math.round(g / 32) * 32;
@@ -576,8 +578,7 @@
           Math.min(255, qb)
         ].map((x) => x.toString(16).padStart(2, "0")).join("");
 
-        const score = (1 + sat * 2.5);
-        buckets.set(hex, (buckets.get(hex) || 0) + score);
+        buckets.set(hex, (buckets.get(hex) || 0) + (1 + sat * 2.5));
       }
 
       return [...buckets.entries()]
@@ -817,10 +818,30 @@
       await saveConfig();
     });
 
+    let snapActive = true;
+    const snapBtn = document.getElementById("snap-toggle");
+    snapBtn.addEventListener("click", () => {
+      snapActive = !snapActive;
+      snapBtn.textContent = snapActive ? "Snap: ON" : "Snap: OFF";
+    });
+
+    document.getElementById("center-x-btn").addEventListener("click", async () => {
+      const box = document.querySelector('.overlay-box[data-module="marcadores"]');
+      const stageRect = stageEl.getBoundingClientRect();
+      if (!box || !stageRect.width) return;
+      const boxRect = box.getBoundingClientRect();
+      const halfWPct = ((boxRect.width / stageRect.width) * 100) / 2;
+      const centeredX = Number((50 - halfWPct).toFixed(2));
+      box.style.left = `${centeredX}%`;
+      box.dataset.x = String(centeredX);
+      const currentY = parseFloat(box.dataset.y ?? parseFloat(box.style.top) ?? 76);
+      await update(ref(db, `${DB_PATH}/modules/marcadores/pos`), { x: centeredX, y: currentY });
+    });
+
     document.getElementById("save-publish-btn").addEventListener("click", saveConfig);
 
     requireSession(async () => {
-      mountDragCanvas("stage");
+      mountDragCanvas("stage", { getSnapEnabled: () => snapActive });
       await syncCanvasPositions();
 
       const snap = await get(ref(db, `${DB_PATH}/modules`));
