@@ -1,1 +1,157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Estudio — Studio TF 2.0</title>
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/studio.css">
+</head>
+<body>
+  <div class="studio-shell">
+    <header class="studio-topbar">
+      <div style="font-weight: 800; letter-spacing: 1px;">
+        STUDIO <span style="color: var(--accent);">TF 2.0</span>
+      </div>
+      <div style="display: flex; gap: 8px;">
+        <button id="grid-toggle" class="btn btn-ghost" style="padding: 6px 12px; font-size: 0.74rem;">Grilla: ON</button>
+        <button class="btn btn-ghost" style="padding: 6px 12px; font-size: 0.74rem;" onclick="location.href='control.html'">Control</button>
+        <button class="btn btn-ghost" style="padding: 6px 12px; font-size: 0.74rem;" onclick="location.href='index.html'">Inicio</button>
+      </div>
+    </header>
 
+    <main class="canvas-area">
+      <div id="stage" class="stage-16x9">
+        <div id="stage-grid" class="stage-grid"></div>
+
+        <div class="overlay-box" data-module="marcadores" style="left: 5%; top: 6%; background: rgba(18,18,22,0.92); border-left: 4px solid #e11d2e; padding: 10px 16px; border-radius: 4px; font-weight: 700;">
+          MARCADOR BASE
+        </div>
+      </div>
+    </main>
+
+    <section class="dock-panel">
+      <nav class="dock-tabs">
+        <button class="dock-tab is-active" data-target="marcadores">Marcadores</button>
+        <button class="dock-tab" data-target="especiales">Competencias Especiales</button>
+        <button class="dock-tab" data-target="tercios">Tercios Inferiores</button>
+        <button class="dock-tab" data-target="sponsors">Logos de Sponsors</button>
+        <button class="dock-tab" data-target="auspiciadores">Logos de Auspiciadores</button>
+        <button class="dock-tab" data-target="cg">Control de CG (Scroll)</button>
+        <button class="dock-tab" data-target="equipos">Presentación de Equipos</button>
+        <button class="dock-tab" data-target="estadisticas">Estadísticas</button>
+      </nav>
+
+      <div class="dock-body">
+        <div id="pane-marcadores" class="tab-section is-active">
+          <div class="tab-head">
+            <h3>Marcadores</h3>
+            <label class="enable-check"><input type="checkbox" class="mod-enable" data-mod="marcadores"> Habilitar en Control</label>
+          </div>
+          <p style="color: var(--muted); font-size: 0.85rem;">Estructura base lista para configurar estilos, deportes y marcador en el siguiente paso.</p>
+        </div>
+
+        <div id="pane-especiales" class="tab-section">
+          <div class="tab-head">
+            <h3>Competencias Especiales</h3>
+            <label class="enable-check"><input type="checkbox" class="mod-enable" data-mod="especiales"> Habilitar en Control</label>
+          </div>
+          <p style="color: var(--muted); font-size: 0.85rem;">Estructura base lista para formatos especiales.</p>
+        </div>
+
+        <div id="pane-tercios" class="tab-section">
+          <div class="tab-head">
+            <h3>Tercios Inferiores</h3>
+            <label class="enable-check"><input type="checkbox" class="mod-enable" data-mod="tercios"> Habilitar en Control</label>
+          </div>
+          <p style="color: var(--muted); font-size: 0.85rem;">Estructura base lista para lower thirds y rótulos.</p>
+        </div>
+
+        <div id="pane-sponsors" class="tab-section">
+          <div class="tab-head">
+            <h3>Logos de Sponsors</h3>
+            <label class="enable-check"><input type="checkbox" class="mod-enable" data-mod="sponsors"> Habilitar en Control</label>
+          </div>
+          <p style="color: var(--muted); font-size: 0.85rem;">Estructura base lista para logos de sponsors.</p>
+        </div>
+
+        <div id="pane-auspiciadores" class="tab-section">
+          <div class="tab-head">
+            <h3>Logos de Auspiciadores</h3>
+            <label class="enable-check"><input type="checkbox" class="mod-enable" data-mod="auspiciadores"> Habilitar en Control</label>
+          </div>
+          <p style="color: var(--muted); font-size: 0.85rem;">Estructura base lista para logos de auspiciadores.</p>
+        </div>
+
+        <div id="pane-cg" class="tab-section">
+          <div class="tab-head">
+            <h3>Control de CG (Banda Inferior / Scroll)</h3>
+            <label class="enable-check"><input type="checkbox" class="mod-enable" data-mod="cg"> Habilitar en Control</label>
+          </div>
+          <p style="color: var(--muted); font-size: 0.85rem;">Estructura base lista para mensajes en banda inferior con scroll.</p>
+        </div>
+
+        <div id="pane-equipos" class="tab-section">
+          <div class="tab-head">
+            <h3>Presentación de Equipos</h3>
+            <label class="enable-check"><input type="checkbox" class="mod-enable" data-mod="equipos"> Habilitar en Control</label>
+          </div>
+          <p style="color: var(--muted); font-size: 0.85rem;">Estructura base lista para planteles y alineaciones.</p>
+        </div>
+
+        <div id="pane-estadisticas" class="tab-section">
+          <div class="tab-head">
+            <h3>Estadísticas</h3>
+            <label class="enable-check"><input type="checkbox" class="mod-enable" data-mod="estadisticas"> Habilitar en Control</label>
+          </div>
+          <p style="color: var(--muted); font-size: 0.85rem;">Estructura base lista para estadísticas en pantalla.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script type="module">
+    import { db, DB_PATH, ref, update, get, requireSession } from "./js/firebase.js";
+    import { mountDragCanvas, syncCanvasPositions } from "./js/canvas.js";
+
+    requireSession(async () => {
+      mountDragCanvas("stage");
+      await syncCanvasPositions();
+
+      const snap = await get(ref(db, `${DB_PATH}/modules`));
+      if (snap.exists()) {
+        const mods = snap.val();
+        document.querySelectorAll(".mod-enable").forEach((chk) => {
+          const m = chk.dataset.mod;
+          chk.checked = Boolean(mods[m]?.enabled);
+        });
+      }
+    });
+
+    document.querySelectorAll(".dock-tab").forEach((tab) => {
+      tab.addEventListener("click", () => {
+        document.querySelectorAll(".dock-tab").forEach((t) => t.classList.remove("is-active"));
+        document.querySelectorAll(".tab-section").forEach((s) => s.classList.remove("is-active"));
+        tab.classList.add("is-active");
+        document.getElementById(`pane-${tab.dataset.target}`).classList.add("is-active");
+      });
+    });
+
+    const gridBtn = document.getElementById("grid-toggle");
+    const gridEl = document.getElementById("stage-grid");
+    gridBtn.addEventListener("click", () => {
+      gridEl.classList.toggle("is-off");
+      gridBtn.textContent = gridEl.classList.contains("is-off") ? "Grilla: OFF" : "Grilla: ON";
+    });
+
+    document.querySelectorAll(".mod-enable").forEach((chk) => {
+      chk.addEventListener("change", async (e) => {
+        const mod = e.target.dataset.mod;
+        await update(ref(db, `${DB_PATH}/modules/${mod}`), {
+          enabled: e.target.checked
+        });
+      });
+    });
+  </script>
+</body>
+</html>
