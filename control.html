@@ -3,34 +3,140 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Control en Vivo — Studio TF 2.0</title>
+  <title>Modo Control — Studio TF 2.0</title>
   <link rel="stylesheet" href="css/base.css">
   <style>
+    .brand-link {
+      font-weight: 800;
+      letter-spacing: 1px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .brand-link span { color: var(--accent); }
+
     .ctrl-wrap {
-      max-width: 1180px;
+      max-width: 1120px;
       margin: 0 auto;
       padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
     }
-    .ctrl-topbar {
+
+    /* Slidebar seguro arriba del todo para encender/apagar marcador */
+    .master-slidebar-card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 14px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 10px;
-      padding: 12px 16px;
-      background: var(--bg-surface);
-      border-bottom: 1px solid var(--border);
+      gap: 14px;
       flex-wrap: wrap;
     }
-    .ctrl-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 14px;
+    .master-slidebar-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
     }
-    .ctrl-card {
-      background: var(--bg-surface);
+    .master-slidebar-title {
+      font-size: 0.85rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+    .master-slidebar-sub {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+    .slide-switch {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .slide-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+      position: absolute;
+    }
+    .slide-track {
+      position: relative;
+      width: 64px;
+      height: 32px;
+      background: #2b2e38;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      transition: background 0.2s ease, border-color 0.2s ease;
+    }
+    .slide-track::after {
+      content: "";
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #fff;
+      transition: transform 0.2s ease;
+    }
+    .slide-switch input:checked + .slide-track {
+      background: var(--ok, #16a34a);
+      border-color: var(--ok, #16a34a);
+    }
+    .slide-switch input:checked + .slide-track::after {
+      transform: translateX(32px);
+    }
+    .slide-state-label {
+      font-size: 0.8rem;
+      font-weight: 800;
+      min-width: 58px;
+    }
+
+    .ctrl-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+    .ctrl-tab {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 8px 16px;
+      border-radius: 7px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .ctrl-tab.is-active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+    .ctrl-tab:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    .ctrl-pane { display: none; }
+    .ctrl-pane.is-active { display: block; }
+
+    /* Columnas en paralelo Local | Visita */
+    .teams-parallel-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(280px, 1fr));
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+    @media (max-width: 720px) {
+      .teams-parallel-grid { grid-template-columns: 1fr; }
+    }
+
+    .team-panel {
+      background: var(--bg-panel);
       border: 1px solid var(--border);
       border-radius: 10px;
       padding: 16px;
@@ -38,453 +144,761 @@
       flex-direction: column;
       gap: 12px;
     }
-    .ctrl-head {
+    .team-header {
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      gap: 8px;
+      align-items: center;
       border-bottom: 1px solid var(--border);
       padding-bottom: 8px;
     }
-    .ctrl-head h2 {
-      font-size: 0.92rem;
-      text-transform: uppercase;
+    .team-title {
+      font-size: 1rem;
+      font-weight: 800;
       letter-spacing: 0.5px;
     }
-    .team-score-box {
-      background: var(--bg-elevated);
+    .score-big {
+      font-size: 2.6rem;
+      font-weight: 900;
+      text-align: center;
+      line-height: 1;
+      padding: 8px 0;
+      font-variant-numeric: tabular-nums;
+    }
+    .pts-btn-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    .pts-btn {
+      padding: 11px 6px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg-app);
+      color: var(--text);
+      font-weight: 800;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+    .pts-btn:hover { border-color: var(--accent); }
+    .pts-btn.plus { background: rgba(225, 29, 46, 0.16); border-color: rgba(225, 29, 46, 0.45); }
+
+    .fouls-box {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background: var(--bg-app);
       border: 1px solid var(--border);
       border-radius: 8px;
-      padding: 12px;
+      padding: 10px 12px;
+    }
+    .fouls-count {
+      font-size: 1.2rem;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+    .bonus-pill {
+      font-size: 0.7rem;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: rgba(255, 23, 68, 0.2);
+      color: #ff6b81;
+      border: 1px solid rgba(255, 23, 68, 0.45);
+      display: none;
+    }
+    .bonus-pill.is-bonus { display: inline-block; }
+
+    /* Panel inferior Tiempo y Cuartos */
+    .clock-card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .clock-top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .clock-inputs {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .clock-inputs input {
+      width: 64px;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--bg-app);
+      color: var(--text);
+      font-size: 1rem;
+      font-weight: 800;
+      text-align: center;
+    }
+    .periods-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .period-btn {
+      padding: 7px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--bg-app);
+      color: var(--text);
+      font-size: 0.78rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .period-btn.is-active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    /* Competencias Especiales en Control */
+    .sp-ctrl-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+    .sp-ctrl-card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
       display: flex;
       flex-direction: column;
       gap: 10px;
     }
-    .score-big {
-      font-size: 2.3rem;
+    .sp-score-big {
+      font-size: 2.4rem;
       font-weight: 900;
       text-align: center;
       font-variant-numeric: tabular-nums;
-      line-height: 1;
     }
-    .btn-row {
+    .sp-timer-big {
+      font-size: 2rem;
+      font-weight: 900;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+      color: var(--accent);
+    }
+    .sp-actions-row {
       display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
-    .btn-sm {
-      padding: 8px 11px;
-      font-size: 0.78rem;
-    }
-    .btn-on {
-      background: var(--ok);
-      color: #fff;
-    }
-    .btn-on:hover {
-      background: #15803d;
-    }
-    .clock-row {
-      display: flex;
-      align-items: center;
       gap: 8px;
       flex-wrap: wrap;
     }
-    .clock-row input,
-    .clock-row select {
-      background: var(--bg-app);
-      color: var(--text);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 8px 10px;
-      font-size: 0.88rem;
-      font-weight: 700;
+    .sp-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
     }
-    .sp-list {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
+    .sp-table th, .sp-table td {
+      padding: 7px 8px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
     }
-    .sp-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      padding: 8px 10px;
-      border-radius: 7px;
-      background: var(--bg-elevated);
-      border: 1px solid var(--border);
-      font-size: 0.84rem;
-    }
-    .sp-item.is-active {
-      border-color: var(--accent);
-    }
-    .hidden { display: none !important; }
+    .sp-table th { color: var(--accent); font-size: 0.72rem; text-transform: uppercase; }
   </style>
 </head>
 <body>
-  <header class="ctrl-topbar">
-    <div style="display:flex; align-items:center; gap:12px;">
-      <div style="font-weight:900; letter-spacing:1px; cursor:pointer;" onclick="location.href='index.html'">
-        STUDIO <span style="color:var(--accent);">TF 2.0</span> · CONTROL
+  <div class="studio-shell">
+    <header class="studio-topbar">
+      <div class="brand-link" onclick="location.href='index.html'">
+        STUDIO <span>TF 2.0</span> · CONTROL
       </div>
-      <span id="roleBadge" style="font-size:0.75rem; color:var(--muted); font-weight:700;"></span>
-    </div>
-    <div style="display:flex; gap:8px; flex-wrap:wrap;">
-      <button type="button" id="toggleMarcadorBtn" class="btn btn-sm">Marcador: OFF</button>
-      <button type="button" id="studioLinkBtn" class="btn btn-ghost btn-sm hidden" onclick="location.href='studio.html'">Estudio</button>
-      <button type="button" class="btn btn-ghost btn-sm" onclick="location.href='index.html'">Portal</button>
-    </div>
-  </header>
-
-  <main class="ctrl-wrap">
-    <!-- MARCADOR PRINCIPAL -->
-    <section class="ctrl-card" id="cardMarcador">
-      <div class="ctrl-head">
-        <h2>Marcador de Partido</h2>
-        <span id="matchTitle" style="font-size:0.82rem; color:var(--muted); font-weight:700;">LOCAL vs VISITA</span>
+      <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+        <span id="ctrl-status" style="font-size: 0.75rem; color: var(--muted);">Conectando...</span>
+        <button id="ctrl-logout-btn" type="button" class="btn btn-ghost" style="padding: 5px 10px; font-size: 0.72rem;">Salir</button>
       </div>
+    </header>
 
-      <div class="ctrl-grid">
-        <!-- LOCAL -->
-        <div class="team-score-box">
-          <div style="display:flex; justify-content:space-between; align-items:center;">
-            <strong id="labelTeam1" style="font-size:0.95rem; text-transform:uppercase;">LOCAL</strong>
-            <span id="labelFouls1" style="font-size:0.8rem; color:var(--muted); font-weight:700;">Faltas: 0</span>
-          </div>
-          <div class="score-big" id="valPts1">0</div>
-          <div class="btn-row">
-            <button type="button" class="btn btn-sm" data-pts="1:1">+1</button>
-            <button type="button" class="btn btn-sm" data-pts="1:2">+2</button>
-            <button type="button" class="btn btn-sm" data-pts="1:3">+3</button>
-            <button type="button" class="btn btn-ghost btn-sm" data-pts="1:-1">-1</button>
-          </div>
-          <div class="btn-row">
-            <button type="button" class="btn btn-ghost btn-sm" data-foul="1:+1">+ Falta</button>
-            <button type="button" class="btn btn-ghost btn-sm" data-foul="1:-1">- Falta</button>
-          </div>
+    <main class="ctrl-wrap">
+      <!-- Slidebar superior seguro para encender/apagar marcador en vivo -->
+      <section class="master-slidebar-card" id="masterSlidebarSection">
+        <div class="master-slidebar-info">
+          <span class="master-slidebar-title">Salida del Marcador en Vivo (Live)</span>
+          <span class="master-slidebar-sub">Desliza para mostrar u ocultar el marcador sin riesgo de apagarlo operando puntos</span>
         </div>
-
-        <!-- VISITA -->
-        <div class="team-score-box">
-          <div style="display:flex; justify-content:space-between; align-items:center;">
-            <strong id="labelTeam2" style="font-size:0.95rem; text-transform:uppercase;">VISITA</strong>
-            <span id="labelFouls2" style="font-size:0.8rem; color:var(--muted); font-weight:700;">Faltas: 0</span>
-          </div>
-          <div class="score-big" id="valPts2">0</div>
-          <div class="btn-row">
-            <button type="button" class="btn btn-sm" data-pts="2:1">+1</button>
-            <button type="button" class="btn btn-sm" data-pts="2:2">+2</button>
-            <button type="button" class="btn btn-sm" data-pts="2:3">+3</button>
-            <button type="button" class="btn btn-ghost btn-sm" data-pts="2:-1">-1</button>
-          </div>
-          <div class="btn-row">
-            <button type="button" class="btn btn-ghost btn-sm" data-foul="2:+1">+ Falta</button>
-            <button type="button" class="btn btn-ghost btn-sm" data-foul="2:-1">- Falta</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- RELOJ Y CUARTO -->
-      <div class="clock-row">
-        <input type="text" id="inTimer" value="10:00" style="width:90px; text-align:center;">
-        <button type="button" id="applyTimerBtn" class="btn btn-ghost btn-sm">Set Reloj</button>
-        <select id="selPeriod">
-          <option value="1">Q1</option>
-          <option value="2">Q2</option>
-          <option value="3">Q3</option>
-          <option value="4">Q4</option>
-          <option value="5">OT1</option>
-          <option value="6">OT2</option>
-        </select>
-        <button type="button" id="resetFoulsBtn" class="btn btn-ghost btn-sm">Limpiar Faltas</button>
-      </div>
-    </section>
-
-    <!-- RRSS Y COMPETENCIAS ESPECIALES -->
-    <div class="ctrl-grid">
-      <section class="ctrl-card">
-        <div class="ctrl-head">
-          <h2>Redes Sociales</h2>
-        </div>
-        <div class="btn-row">
-          <button type="button" id="sendIgBtn" class="btn btn-ghost btn-sm">Lanzar Instagram</button>
-          <button type="button" id="sendYtBtn" class="btn btn-ghost btn-sm">Lanzar YouTube</button>
-        </div>
+        <label class="slide-switch" for="liveScoreboardSlide">
+          <input type="checkbox" id="liveScoreboardSlide">
+          <span class="slide-track"></span>
+          <span class="slide-state-label" id="liveScoreboardStateLabel">APAGADO</span>
+        </label>
       </section>
 
-      <section class="ctrl-card hidden" id="cardEspeciales">
-        <div class="ctrl-head">
-          <h2>Competencia Especial</h2>
-          <button type="button" id="toggleEspecialBtn" class="btn btn-sm">Lanzar en Live</button>
+      <nav class="ctrl-tabs" id="ctrlTabsNav">
+        <button type="button" class="ctrl-tab is-active" data-ctrl-tab="marcadores" id="tabBtnMarcadores">Marcador de Partido</button>
+        <button type="button" class="ctrl-tab" data-ctrl-tab="especiales" id="tabBtnEspeciales" disabled>Competencias Especiales</button>
+      </nav>
+
+      <!-- ==================== PESTAÑA MARCADOR DE PARTIDO ==================== -->
+      <section id="pane-marcadores" class="ctrl-pane is-active">
+        <div class="teams-parallel-grid">
+          <!-- Columna Local -->
+          <article class="team-panel">
+            <div class="team-header">
+              <span class="team-title" id="ctrlName1">LOCAL</span>
+              <span class="bonus-pill" id="bonusPill1">BONUS (5+)</span>
+            </div>
+            <div class="score-big" id="ctrlScore1">0</div>
+            <div class="pts-btn-row">
+              <button type="button" class="pts-btn plus" data-team="1" data-delta="1">+1</button>
+              <button type="button" class="pts-btn plus" data-team="1" data-delta="2">+2</button>
+              <button type="button" class="pts-btn plus" data-team="1" data-delta="3">+3</button>
+              <button type="button" class="pts-btn" data-team="1" data-delta="-1">-1</button>
+            </div>
+            <div class="fouls-box">
+              <div>
+                <div style="font-size: 0.72rem; color: var(--muted); font-weight: 700;">FALTAS EQUIPO</div>
+                <div class="fouls-count" id="ctrlFouls1">0</div>
+              </div>
+              <div style="display: flex; gap: 6px;">
+                <button type="button" class="pts-btn" data-foul="1" data-delta="-1">- Falta</button>
+                <button type="button" class="pts-btn plus" data-foul="1" data-delta="1">+ Falta</button>
+              </div>
+            </div>
+          </article>
+
+          <!-- Columna Visita -->
+          <article class="team-panel">
+            <div class="team-header">
+              <span class="team-title" id="ctrlName2">VISITA</span>
+              <span class="bonus-pill" id="bonusPill2">BONUS (5+)</span>
+            </div>
+            <div class="score-big" id="ctrlScore2">0</div>
+            <div class="pts-btn-row">
+              <button type="button" class="pts-btn plus" data-team="2" data-delta="1">+1</button>
+              <button type="button" class="pts-btn plus" data-team="2" data-delta="2">+2</button>
+              <button type="button" class="pts-btn plus" data-team="2" data-delta="3">+3</button>
+              <button type="button" class="pts-btn" data-team="2" data-delta="-1">-1</button>
+            </div>
+            <div class="fouls-box">
+              <div>
+                <div style="font-size: 0.72rem; color: var(--muted); font-weight: 700;">FALTAS EQUIPO</div>
+                <div class="fouls-count" id="ctrlFouls2">0</div>
+              </div>
+              <div style="display: flex; gap: 6px;">
+                <button type="button" class="pts-btn" data-foul="2" data-delta="-1">- Falta</button>
+                <button type="button" class="pts-btn plus" data-foul="2" data-delta="1">+ Falta</button>
+              </div>
+            </div>
+          </article>
         </div>
 
-        <div class="clock-row">
-          <select id="spCompType">
-            <option value="triples">Concurso de Triples</option>
-            <option value="tiros_libres">Concurso de Tiros Libres</option>
-          </select>
-          <input type="text" id="spShooterName" placeholder="Nombre tirador" style="flex:1; min-width:130px;">
-          <button type="button" id="addShooterBtn" class="btn btn-ghost btn-sm">+ Tirador</button>
-        </div>
+        <!-- Panel inferior: Tiempo y Cuartos -->
+        <section class="clock-card">
+          <div class="clock-top-row">
+            <div>
+              <div style="font-size: 0.72rem; color: var(--muted); font-weight: 700; margin-bottom: 4px;">RELOJ DE PARTIDO (MM:SS)</div>
+              <div class="clock-inputs">
+                <input type="number" id="clockMinInput" min="0" max="99" value="10">
+                <span style="font-weight: 900; font-size: 1.2rem;">:</span>
+                <input type="number" id="clockSecInput" min="0" max="59" value="00">
+                <button type="button" id="clockToggleBtn" class="btn">Iniciar / Pausar</button>
+                <button type="button" id="clockSetBtn" class="btn btn-ghost">Aplicar Tiempo</button>
+              </div>
+            </div>
 
-        <div class="btn-row">
-          <button type="button" class="btn btn-sm" data-shot="hit">🏀 Encesta</button>
-          <button type="button" class="btn btn-ghost btn-sm" data-shot="miss">✕ Falla</button>
-          <button type="button" class="btn btn-ghost btn-sm" id="finishTurnBtn">Guardar Turno</button>
-          <button type="button" class="btn btn-ghost btn-sm" id="closeRoundBtn">Cerrar Ronda</button>
-        </div>
+            <div>
+              <div style="font-size: 0.72rem; color: var(--muted); font-weight: 700; margin-bottom: 4px;">POSESIÓN / 24s</div>
+              <div class="clock-inputs">
+                <input type="number" id="shotClockInput" min="0" max="24" value="24">
+                <button type="button" id="shot24Btn" class="btn btn-ghost">24s</button>
+                <button type="button" id="shot14Btn" class="btn btn-ghost">14s</button>
+              </div>
+            </div>
+          </div>
 
-        <div class="sp-list" id="spShootersList"></div>
+          <div>
+            <div style="font-size: 0.72rem; color: var(--muted); font-weight: 700; margin-bottom: 6px;">CUARTO / PERÍODO</div>
+            <div class="periods-row" id="periodsRow">
+              <button type="button" class="period-btn is-active" data-period="Q1">Q1</button>
+              <button type="button" class="period-btn" data-period="Q2">Q2</button>
+              <button type="button" class="period-btn" data-period="Q3">Q3</button>
+              <button type="button" class="period-btn" data-period="Q4">Q4</button>
+              <button type="button" class="period-btn" data-period="OT">OT</button>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; border-top: 1px solid var(--border); padding-top: 10px;">
+            <button type="button" id="resetFoulsBtn" class="btn btn-ghost">Reiniciar Faltas</button>
+            <button type="button" id="resetMatchBtn" class="btn btn-ghost">Reiniciar Marcador (0-0)</button>
+          </div>
+        </section>
       </section>
-    </div>
-  </main>
+
+      <!-- ==================== PESTAÑA COMPETENCIAS ESPECIALES ==================== -->
+      <section id="pane-especiales" class="ctrl-pane">
+        <div class="sp-ctrl-grid">
+          <article class="sp-ctrl-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap;">
+              <strong style="font-size: 0.9rem;">Competencia Activa en Live</strong>
+              <select id="spActiveKindSelect" style="padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-app); color: var(--text); font-weight: 700;">
+                <option value="triples">Concurso de Triples</option>
+                <option value="libres">Concurso de Tiros Libres</option>
+              </select>
+            </div>
+
+            <div style="font-size: 0.8rem; color: var(--muted);" id="spModeSummary">Modalidad: —</div>
+            <div class="sp-timer-big" id="spLiveTimer">01:00</div>
+            <div class="sp-score-big" id="spLiveScore">0 pts</div>
+
+            <div class="sp-actions-row">
+              <button type="button" id="spShowLiveBtn" class="btn">Mostrar en Live</button>
+              <button type="button" id="spHideLiveBtn" class="btn btn-ghost">Ocultar en Live</button>
+              <button type="button" id="spStartTimerBtn" class="btn btn-ghost">Iniciar/Pausar Reloj</button>
+              <button type="button" id="spTiebreakBtn" class="btn btn-ghost">Desempate (0:30)</button>
+            </div>
+
+            <div class="sp-actions-row" id="spScoringButtons">
+              <button type="button" class="pts-btn plus" id="spAddNormalBtn">+1 Acierto</button>
+              <button type="button" class="pts-btn plus" id="spAddSpecialBtn">+3 Balón Esp.</button>
+              <button type="button" class="pts-btn" id="spUndoBtn">-1</button>
+              <button type="button" class="pts-btn" id="spResetTurnBtn">Limpiar Turno</button>
+            </div>
+          </article>
+
+          <article class="sp-ctrl-card">
+            <strong style="font-size: 0.9rem;">Participante en Turno y Tabla</strong>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <select id="spPlayerSelect" style="flex: 1; min-width: 180px; padding: 7px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-app); color: var(--text);"></select>
+              <button type="button" id="spSaveBestBtn" class="btn">Guardar Mejor Marca</button>
+            </div>
+
+            <div style="max-height: 240px; overflow: auto;">
+              <table class="sp-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Jugador</th>
+                    <th>Equipo</th>
+                    <th>Mejor</th>
+                  </tr>
+                </thead>
+                <tbody id="spStandingsBody"></tbody>
+              </table>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
 
   <script type="module">
-    import { db, DB_PATH, ref, update, onValue, requireSession } from "./js/firebase.js";
+    import {
+      auth,
+      db,
+      DB_PATH,
+      ref,
+      set,
+      update,
+      onValue,
+      signOut,
+      getUserRole,
+      requireSession
+    } from "./js/firebase.js";
 
-    let marcMod = {
-      on: false,
-      config: { name1: "LOCAL", name2: "VISITA" },
-      feeds: { manual: { points_1: 0, points_2: 0, fouls_1: 0, fouls_2: 0, timer: "10:00", period: 1 } }
+    const statusEl = document.getElementById("ctrl-status");
+    const liveSlideInput = document.getElementById("liveScoreboardSlide");
+    const liveSlideLabel = document.getElementById("liveScoreboardStateLabel");
+
+    let userScope = "all";
+    let matchState = {
+      points_1: 0,
+      points_2: 0,
+      fouls_1: 0,
+      fouls_2: 0,
+      period: "Q1",
+      timerSec: 600,
+      timerRunning: false,
+      shotclock: 24
     };
 
-    let espMod = {
+    let especialesModule = {
       enabled: false,
       config: {
-        modules: ["triples", "tiros_libres"],
-        rules: {
-          triples: "5 racks de triples + balón dinero en cada rack. Máximo puntaje define el avance de ronda.",
-          tiros_libres: "Turnos de tiros libres desde la línea. Mayor efectividad o desempate súbito define al ganador."
-        }
-      },
-      live: {
-        active: false,
-        compType: "triples",
-        shooters: [],
-        activeId: null,
-        turnShots: [],
-        closed: false,
-        winnerId: null,
-        rulesText: "",
-        bannerTitle: "",
-        bannerTs: 0
+        enabledTriples: true,
+        enabledLibres: false,
+        triples: { title: "TORNEO TRIPLES", officialSec: 60, tiebreakSec: 30, ptsNormal: 1, moneyEnabled: true, ptsMoney: 3, players: [] },
+        libres: { title: "TIROS LIBRES", officialSec: 60, tiebreakSec: 30, ptsNormal: 1, bonusLastEnabled: false, ptsBonus: 2, players: [] }
       }
     };
 
-    function getManual() {
-      return {
-        points_1: 0,
-        points_2: 0,
-        fouls_1: 0,
-        fouls_2: 0,
-        timer: "10:00",
-        period: 1,
-        ...(marcMod.feeds?.manual || {})
-      };
+    let spLive = {
+      visible: false,
+      kind: "triples",
+      score: 0,
+      shots: 0,
+      seconds: 60,
+      running: false,
+      isTiebreak: false,
+      playerName: ""
+    };
+
+    function formatClock(sec) {
+      const s = Math.max(0, parseInt(sec, 10) || 0);
+      const m = Math.floor(s / 60);
+      const r = s % 60;
+      return `${String(m).padStart(2, "0")}:${String(r).padStart(2, "0")}`;
     }
 
-    function renderMarcadorUI() {
-      const m = getManual();
-      const n1 = marcMod.config?.name1 || "LOCAL";
-      const n2 = marcMod.config?.name2 || "VISITA";
-
-      document.getElementById("labelTeam1").textContent = n1;
-      document.getElementById("labelTeam2").textContent = n2;
-      document.getElementById("matchTitle").textContent = `${n1} vs ${n2}`;
-      document.getElementById("valPts1").textContent = m.points_1;
-      document.getElementById("valPts2").textContent = m.points_2;
-      document.getElementById("labelFouls1").textContent = `Faltas: ${m.fouls_1}`;
-      document.getElementById("labelFouls2").textContent = `Faltas: ${m.fouls_2}`;
-      document.getElementById("inTimer").value = m.timer || "10:00";
-      document.getElementById("selPeriod").value = String(m.period || 1);
-
-      const btn = document.getElementById("toggleMarcadorBtn");
-      btn.textContent = marcMod.on ? "Marcador: ON AIR" : "Marcador: OFF";
-      btn.classList.toggle("btn-on", Boolean(marcMod.on));
+    function updateSlideLabel(isOn) {
+      liveSlideLabel.textContent = isOn ? "ENCENDIDO" : "APAGADO";
+      liveSlideLabel.style.color = isOn ? "#4ade80" : "var(--muted)";
     }
 
-    function renderEspecialesUI() {
-      document.getElementById("cardEspeciales").classList.toggle("hidden", !espMod.enabled);
-      const live = espMod.live || {};
-      const tBtn = document.getElementById("toggleEspecialBtn");
-      tBtn.textContent = live.active ? "Ocultar en Live" : "Lanzar en Live";
-      tBtn.classList.toggle("btn-on", Boolean(live.active));
+    function renderMatchUI() {
+      document.getElementById("ctrlScore1").textContent = matchState.points_1 ?? 0;
+      document.getElementById("ctrlScore2").textContent = matchState.points_2 ?? 0;
+      document.getElementById("ctrlFouls1").textContent = matchState.fouls_1 ?? 0;
+      document.getElementById("ctrlFouls2").textContent = matchState.fouls_2 ?? 0;
 
-      const shooters = live.shooters || [];
-      const activeId = live.activeId;
-      const listEl = document.getElementById("spShootersList");
+      document.getElementById("bonusPill1").classList.toggle("is-bonus", (matchState.fouls_1 ?? 0) >= 5);
+      document.getElementById("bonusPill2").classList.toggle("is-bonus", (matchState.fouls_2 ?? 0) >= 5);
 
-      if (!shooters.length) {
-        listEl.innerHTML = `<div style="color:var(--muted); font-size:0.8rem;">Agrega tiradores para iniciar la ronda.</div>`;
-        return;
+      const sec = Math.max(0, parseInt(matchState.timerSec, 10) || 0);
+      if (document.activeElement !== document.getElementById("clockMinInput")) {
+        document.getElementById("clockMinInput").value = Math.floor(sec / 60);
+      }
+      if (document.activeElement !== document.getElementById("clockSecInput")) {
+        document.getElementById("clockSecInput").value = String(sec % 60).padStart(2, "0");
+      }
+      if (document.activeElement !== document.getElementById("shotClockInput")) {
+        document.getElementById("shotClockInput").value = matchState.shotclock ?? 24;
       }
 
-      listEl.innerHTML = shooters.map((s) => `
-        <div class="sp-item ${s.id === activeId ? "is-active" : ""}">
-          <div>
-            <strong>${s.name}</strong>
-            <span style="color:var(--accent); font-weight:800; margin-left:8px;">${s.score ?? 0} pts</span>
-            ${live.winnerId === s.id ? `<span style="color:#4ade80; font-weight:800; margin-left:6px;">GANADOR</span>` : ""}
-          </div>
-          <button type="button" class="btn btn-ghost btn-sm" data-pick="${s.id}">Turno</button>
-        </div>
-      `).join("");
-
-      listEl.querySelectorAll("[data-pick]").forEach((b) => {
-        b.addEventListener("click", async () => {
-          await update(ref(db, `${DB_PATH}/modules/especiales/live`), {
-            activeId: b.dataset.pick,
-            turnShots: []
-          });
-        });
+      document.querySelectorAll(".period-btn").forEach((btn) => {
+        btn.classList.toggle("is-active", btn.dataset.period === matchState.period);
       });
     }
 
-    document.getElementById("toggleMarcadorBtn").addEventListener("click", async () => {
-      await update(ref(db, `${DB_PATH}/modules/marcadores`), { on: !marcMod.on });
+    async function pushMatchState() {
+      await update(ref(db, `${DB_PATH}/modules/marcadores/live`), matchState);
+    }
+
+    // Cambio en el slidebar superior
+    liveSlideInput.addEventListener("change", async () => {
+      const checked = liveSlideInput.checked;
+      updateSlideLabel(checked);
+      await update(ref(db, `${DB_PATH}/modules/marcadores`), { enabled: checked });
     });
 
-    document.querySelectorAll("[data-pts]").forEach((btn) => {
+    // Puntos y faltas en paralelo
+    document.querySelectorAll("button[data-team]").forEach((btn) => {
       btn.addEventListener("click", async () => {
-        const [team, deltaStr] = btn.dataset.pts.split(":");
-        const delta = parseInt(deltaStr, 10);
-        const m = getManual();
+        const team = btn.dataset.team;
+        const delta = parseInt(btn.dataset.delta, 10) || 0;
         const key = team === "1" ? "points_1" : "points_2";
-        const nextVal = Math.max(0, (parseInt(m[key], 10) || 0) + delta);
-        await update(ref(db, `${DB_PATH}/modules/marcadores/feeds/manual`), { [key]: nextVal });
+        matchState[key] = Math.max(0, (parseInt(matchState[key], 10) || 0) + delta);
+        renderMatchUI();
+        await pushMatchState();
       });
     });
 
-    document.querySelectorAll("[data-foul]").forEach((btn) => {
+    document.querySelectorAll("button[data-foul]").forEach((btn) => {
       btn.addEventListener("click", async () => {
-        const [team, deltaStr] = btn.dataset.foul.split(":");
-        const delta = parseInt(deltaStr, 10);
-        const m = getManual();
+        const team = btn.dataset.foul;
+        const delta = parseInt(btn.dataset.delta, 10) || 0;
         const key = team === "1" ? "fouls_1" : "fouls_2";
-        const nextVal = Math.max(0, Math.min(5, (parseInt(m[key], 10) || 0) + delta));
-        await update(ref(db, `${DB_PATH}/modules/marcadores/feeds/manual`), { [key]: nextVal });
+        matchState[key] = Math.max(0, (parseInt(matchState[key], 10) || 0) + delta);
+        renderMatchUI();
+        await pushMatchState();
+      });
+    });
+
+    document.getElementById("clockSetBtn").addEventListener("click", async () => {
+      const m = Math.max(0, parseInt(document.getElementById("clockMinInput").value, 10) || 0);
+      const s = Math.max(0, Math.min(59, parseInt(document.getElementById("clockSecInput").value, 10) || 0));
+      matchState.timerSec = m * 60 + s;
+      renderMatchUI();
+      await pushMatchState();
+    });
+
+    document.getElementById("clockToggleBtn").addEventListener("click", async () => {
+      matchState.timerRunning = !matchState.timerRunning;
+      await pushMatchState();
+    });
+
+    document.getElementById("shot24Btn").addEventListener("click", async () => {
+      matchState.shotclock = 24;
+      renderMatchUI();
+      await pushMatchState();
+    });
+
+    document.getElementById("shot14Btn").addEventListener("click", async () => {
+      matchState.shotclock = 14;
+      renderMatchUI();
+      await pushMatchState();
+    });
+
+    document.getElementById("shotClockInput").addEventListener("change", async (e) => {
+      matchState.shotclock = Math.max(0, Math.min(24, parseInt(e.target.value, 10) || 0));
+      await pushMatchState();
+    });
+
+    document.querySelectorAll(".period-btn").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        matchState.period = btn.dataset.period;
+        renderMatchUI();
+        await pushMatchState();
       });
     });
 
     document.getElementById("resetFoulsBtn").addEventListener("click", async () => {
-      await update(ref(db, `${DB_PATH}/modules/marcadores/feeds/manual`), { fouls_1: 0, fouls_2: 0 });
+      matchState.fouls_1 = 0;
+      matchState.fouls_2 = 0;
+      renderMatchUI();
+      await pushMatchState();
     });
 
-    document.getElementById("applyTimerBtn").addEventListener("click", async () => {
-      const val = document.getElementById("inTimer").value.trim() || "10:00";
-      await update(ref(db, `${DB_PATH}/modules/marcadores/feeds/manual`), { timer: val });
+    document.getElementById("resetMatchBtn").addEventListener("click", async () => {
+      matchState.points_1 = 0;
+      matchState.points_2 = 0;
+      matchState.fouls_1 = 0;
+      matchState.fouls_2 = 0;
+      matchState.timerRunning = false;
+      renderMatchUI();
+      await pushMatchState();
     });
 
-    document.getElementById("selPeriod").addEventListener("change", async (e) => {
-      await update(ref(db, `${DB_PATH}/modules/marcadores/feeds/manual`), { period: parseInt(e.target.value, 10) || 1 });
-    });
+    // Reloj de partido en control
+    setInterval(async () => {
+      if (matchState.timerRunning && matchState.timerSec > 0) {
+        matchState.timerSec -= 1;
+        if (matchState.timerSec <= 0) {
+          matchState.timerSec = 0;
+          matchState.timerRunning = false;
+        }
+        renderMatchUI();
+        await pushMatchState();
+      }
+    }, 1000);
 
-    async function sendSocial(network) {
-      await update(ref(db, `${DB_PATH}/modules/marcadores/cmd`), {
-        action: "social_now",
-        network,
-        ts: Date.now()
-      });
+    /* ==================== COMPETENCIAS ESPECIALES EN CONTROL ==================== */
+    function getActiveSpConfig() {
+      const kind = spLive.kind === "libres" ? "libres" : "triples";
+      return especialesModule.config?.[kind] || {};
     }
-    document.getElementById("sendIgBtn").addEventListener("click", () => sendSocial("ig"));
-    document.getElementById("sendYtBtn").addEventListener("click", () => sendSocial("yt"));
 
-    // Competencias Especiales — Operación rápida en vivo
-    document.getElementById("toggleEspecialBtn").addEventListener("click", async () => {
-      const live = espMod.live || {};
-      const nextActive = !live.active;
-      const compType = document.getElementById("spCompType").value || live.compType || "triples";
-      const rulesMap = espMod.config?.rules || {};
-      const bannerTitle = compType === "tiros_libres" ? "CONCURSO DE TIROS LIBRES" : "CONCURSO DE TRIPLES";
-      const rulesText = rulesMap[compType] || "";
+    function renderEspecialesControlUI() {
+      const cfg = especialesModule.config || {};
+      const sel = document.getElementById("spActiveKindSelect");
+      const trOpt = sel.querySelector('option[value="triples"]');
+      const ftOpt = sel.querySelector('option[value="libres"]');
+      trOpt.disabled = cfg.enabledTriples === false;
+      ftOpt.disabled = !cfg.enabledLibres;
 
-      await update(ref(db, `${DB_PATH}/modules/especiales/live`), {
-        active: nextActive,
-        compType,
-        rulesText,
-        ...(nextActive ? { bannerTitle, bannerTs: Date.now() } : {})
-      });
-    });
-
-    document.getElementById("addShooterBtn").addEventListener("click", async () => {
-      const inp = document.getElementById("spShooterName");
-      const name = inp.value.trim();
-      if (!name) return;
-      const live = espMod.live || {};
-      const shooters = [...(live.shooters || [])];
-      const newId = `sh_${Date.now()}`;
-      shooters.push({ id: newId, name, score: 0 });
-      await update(ref(db, `${DB_PATH}/modules/especiales/live`), {
-        shooters,
-        activeId: live.activeId || newId,
-        turnShots: live.activeId ? (live.turnShots || []) : []
-      });
-      inp.value = "";
-    });
-
-    document.querySelectorAll("[data-shot]").forEach((btn) => {
-      btn.addEventListener("click", async () => {
-        const isHit = btn.dataset.shot === "hit";
-        const live = espMod.live || {};
-        const turnShots = [...(live.turnShots || [])];
-        const compType = live.compType || "triples";
-        const shotPts = isHit ? (compType === "triples" ? 3 : 1) : 0;
-        turnShots.push({ hit: isHit, pts: shotPts });
-        await update(ref(db, `${DB_PATH}/modules/especiales/live`), { turnShots });
-      });
-    });
-
-    document.getElementById("finishTurnBtn").addEventListener("click", async () => {
-      const live = espMod.live || {};
-      const shooters = [...(live.shooters || [])];
-      const activeId = live.activeId;
-      const turnPts = (live.turnShots || []).reduce((acc, s) => acc + (s.hit ? (s.pts || 1) : 0), 0);
-
-      const idx = shooters.findIndex((s) => s.id === activeId);
-      if (idx >= 0) {
-        shooters[idx] = { ...shooters[idx], score: (shooters[idx].score || 0) + turnPts };
+      if (spLive.kind === "libres" && !cfg.enabledLibres && cfg.enabledTriples !== false) {
+        spLive.kind = "triples";
+      } else if (spLive.kind === "triples" && cfg.enabledTriples === false && cfg.enabledLibres) {
+        spLive.kind = "libres";
       }
-      const nextShooter = shooters[(idx + 1) % shooters.length] || null;
+      sel.value = spLive.kind;
 
-      await update(ref(db, `${DB_PATH}/modules/especiales/live`), {
-        shooters,
-        activeId: nextShooter ? nextShooter.id : null,
-        turnShots: []
+      const cur = getActiveSpConfig();
+      const modeLabel = cur.modePreset === "femicentro"
+        ? `Femicentro (${cur.maxShots || (spLive.kind === "libres" ? 10 : 6)} tiros)`
+        : cur.modePreset === "personalizada"
+          ? "Personalizada"
+          : `Time Attack (${cur.officialSec || 60}s / Desempate ${cur.tiebreakSec || 30}s)`;
+
+      document.getElementById("spModeSummary").textContent =
+        `${cur.title || "Competencia"} · ${modeLabel} · ${cur.stage || ""}`;
+      document.getElementById("spLiveTimer").textContent = formatClock(spLive.seconds);
+      document.getElementById("spLiveScore").textContent = `${spLive.score || 0} pts (${spLive.shots || 0} tiros)`;
+
+      const normalPts = cur.ptsNormal || 1;
+      const bonusPts = spLive.kind === "libres" ? (cur.ptsBonus || 2) : (cur.ptsMoney || 3);
+      document.getElementById("spAddNormalBtn").textContent = `+${normalPts} Acierto`;
+      document.getElementById("spAddSpecialBtn").textContent = `+${bonusPts} Balón Esp.`;
+
+      const players = cur.players || [];
+      const playerSelect = document.getElementById("spPlayerSelect");
+      playerSelect.innerHTML = players.length
+        ? players.map((p) => `<option value="${p.id}">${p.name} (${p.team})</option>`).join("")
+        : `<option value="">Sin participantes cargados</option>`;
+      if (spLive.playerId) playerSelect.value = String(spLive.playerId);
+
+      const sorted = [...players].sort((a, b) => (b.bestScore ?? -1) - (a.bestScore ?? -1));
+      const tbody = document.getElementById("spStandingsBody");
+      tbody.innerHTML = sorted.length
+        ? sorted.map((p, idx) => `
+            <tr>
+              <td>${idx + 1}</td>
+              <td><strong>${p.name}</strong></td>
+              <td>${p.team}</td>
+              <td><strong>${p.bestScore !== null && p.bestScore !== undefined ? p.bestScore : "-"}</strong></td>
+            </tr>
+          `).join("")
+        : `<tr><td colspan="4" style="color:var(--muted);">Sin marcas registradas</td></tr>`;
+    }
+
+    async function pushEspecialesLive() {
+      await update(ref(db, `${DB_PATH}/modules/especiales/live`), spLive);
+    }
+
+    document.getElementById("spActiveKindSelect").addEventListener("change", async (e) => {
+      spLive.kind = e.target.value;
+      const cur = getActiveSpConfig();
+      spLive.seconds = cur.officialSec || 60;
+      spLive.score = 0;
+      spLive.shots = 0;
+      spLive.running = false;
+      spLive.isTiebreak = false;
+      renderEspecialesControlUI();
+      await pushEspecialesLive();
+    });
+
+    document.getElementById("spShowLiveBtn").addEventListener("click", async () => {
+      spLive.visible = true;
+      await pushEspecialesLive();
+    });
+
+    document.getElementById("spHideLiveBtn").addEventListener("click", async () => {
+      spLive.visible = false;
+      spLive.running = false;
+      await pushEspecialesLive();
+    });
+
+    document.getElementById("spStartTimerBtn").addEventListener("click", async () => {
+      spLive.running = !spLive.running;
+      await pushEspecialesLive();
+    });
+
+    document.getElementById("spTiebreakBtn").addEventListener("click", async () => {
+      const cur = getActiveSpConfig();
+      spLive.isTiebreak = true;
+      spLive.seconds = cur.tiebreakSec || 30;
+      spLive.score = 0;
+      spLive.shots = 0;
+      spLive.running = false;
+      renderEspecialesControlUI();
+      await pushEspecialesLive();
+    });
+
+    document.getElementById("spAddNormalBtn").addEventListener("click", async () => {
+      const cur = getActiveSpConfig();
+      spLive.score = (spLive.score || 0) + (parseInt(cur.ptsNormal, 10) || 1);
+      spLive.shots = (spLive.shots || 0) + 1;
+      renderEspecialesControlUI();
+      await pushEspecialesLive();
+    });
+
+    document.getElementById("spAddSpecialBtn").addEventListener("click", async () => {
+      const cur = getActiveSpConfig();
+      const extra = spLive.kind === "libres"
+        ? (parseInt(cur.ptsBonus, 10) || 2)
+        : (parseInt(cur.ptsMoney, 10) || 3);
+      spLive.score = (spLive.score || 0) + extra;
+      spLive.shots = (spLive.shots || 0) + 1;
+      renderEspecialesControlUI();
+      await pushEspecialesLive();
+    });
+
+    document.getElementById("spUndoBtn").addEventListener("click", async () => {
+      spLive.score = Math.max(0, (spLive.score || 0) - 1);
+      spLive.shots = Math.max(0, (spLive.shots || 0) - 1);
+      renderEspecialesControlUI();
+      await pushEspecialesLive();
+    });
+
+    document.getElementById("spResetTurnBtn").addEventListener("click", async () => {
+      const cur = getActiveSpConfig();
+      spLive.score = 0;
+      spLive.shots = 0;
+      spLive.running = false;
+      spLive.isTiebreak = false;
+      spLive.seconds = cur.officialSec || 60;
+      renderEspecialesControlUI();
+      await pushEspecialesLive();
+    });
+
+    document.getElementById("spSaveBestBtn").addEventListener("click", async () => {
+      const selId = document.getElementById("spPlayerSelect").value;
+      if (!selId) return;
+      const cur = getActiveSpConfig();
+      const players = cur.players || [];
+      const updated = players.map((p) => {
+        if (String(p.id) !== String(selId)) return p;
+        const prevBest = p.bestScore ?? 0;
+        return { ...p, bestScore: Math.max(prevBest, spLive.score || 0) };
+      });
+      await set(ref(db, `${DB_PATH}/modules/especiales/config/${spLive.kind}/players`), updated);
+    });
+
+    setInterval(async () => {
+      if (spLive.running && spLive.seconds > 0) {
+        spLive.seconds -= 1;
+        if (spLive.seconds <= 0) {
+          spLive.seconds = 0;
+          spLive.running = false;
+        }
+        renderEspecialesControlUI();
+        await pushEspecialesLive();
+      }
+    }, 1000);
+
+    // Cambio de pestañas
+    document.querySelectorAll(".ctrl-tab").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        if (btn.disabled) return;
+        document.querySelectorAll(".ctrl-tab").forEach((b) => b.classList.remove("is-active"));
+        document.querySelectorAll(".ctrl-pane").forEach((p) => p.classList.remove("is-active"));
+        btn.classList.add("is-active");
+        document.getElementById(`pane-${btn.dataset.ctrlTab}`).classList.add("is-active");
       });
     });
 
-    document.getElementById("closeRoundBtn").addEventListener("click", async () => {
-      const live = espMod.live || {};
-      const shooters = [...(live.shooters || [])];
-      let winner = null;
-      if (shooters.length) {
-        winner = [...shooters].sort((a, b) => (b.score || 0) - (a.score || 0))[0];
-      }
-      await update(ref(db, `${DB_PATH}/modules/especiales/live`), {
-        closed: true,
-        winnerId: winner ? winner.id : null
-      });
-    });
+    document.getElementById("ctrl-logout-btn").addEventListener("click", () => signOut(auth));
 
-    requireSession((user, role) => {
-      document.getElementById("roleBadge").textContent = `${user.email} · ${role.toUpperCase()}`;
-      if (role === "admin") {
-        document.getElementById("studioLinkBtn").classList.remove("hidden");
+    requireSession(async (user) => {
+      const role = await getUserRole(user);
+      if (role === "operator_marcadores") {
+        userScope = "marcadores";
       }
+      statusEl.textContent = "En línea";
 
       onValue(ref(db, `${DB_PATH}/modules/marcadores`), (snap) => {
         if (!snap.exists()) return;
-        marcMod = { ...marcMod, ...snap.val() };
-        renderMarcadorUI();
+        const data = snap.val();
+        const isOn = Boolean(data.enabled);
+        liveSlideInput.checked = isOn;
+        updateSlideLabel(isOn);
+
+        if (data.config) {
+          document.getElementById("ctrlName1").textContent = data.config.name1 || "LOCAL";
+          document.getElementById("ctrlName2").textContent = data.config.name2 || "VISITA";
+        }
+        if (data.live) {
+          matchState = { ...matchState, ...data.live };
+          renderMatchUI();
+        }
       });
 
       onValue(ref(db, `${DB_PATH}/modules/especiales`), (snap) => {
         if (!snap.exists()) return;
-        espMod = { ...espMod, ...snap.val() };
-        if (espMod.live?.compType) {
-          document.getElementById("spCompType").value = espMod.live.compType;
+        const data = snap.val();
+        especialesModule = {
+          enabled: Boolean(data.enabled),
+          config: data.config || especialesModule.config
+        };
+        if (data.live) {
+          spLive = { ...spLive, ...data.live };
         }
-        renderEspecialesUI();
+        const tabEsp = document.getElementById("tabBtnEspeciales");
+        tabEsp.disabled = !(especialesModule.enabled && userScope !== "marcadores");
+        renderEspecialesControlUI();
       });
     });
   </script>
