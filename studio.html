@@ -8,613 +8,1187 @@
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/studio.css">
   <style>
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(195px, 1fr));
-      gap: 10px;
-      margin-bottom: 12px;
-    }
-    .form-grid .field {
-      margin-bottom: 0;
-    }
-    .form-grid select,
-    .form-grid input[type="text"],
-    .form-grid textarea {
-      width: 100%;
-      padding: 8px 10px;
-      border-radius: 6px;
-      border: 1px solid var(--border);
-      background: var(--bg-app);
-      color: var(--text);
-      font-size: 0.85rem;
-    }
-    .form-grid textarea {
-      min-height: 58px;
-      resize: vertical;
-    }
-    .form-grid input[type="color"] {
-      width: 100%;
-      height: 36px;
-      padding: 2px 4px;
-      border-radius: 6px;
-      border: 1px solid var(--border);
-      background: var(--bg-app);
+    .brand-link {
+      font-weight: 800;
+      letter-spacing: 1px;
       cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
     }
-    .slider-field {
+    .brand-link span { color: var(--accent); }
+
+    .zoom-bar {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--bg-app);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 2px 6px;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+    .zoom-btn {
+      background: transparent;
+      color: var(--text);
+      border: none;
+      padding: 3px 7px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 800;
+    }
+    .zoom-btn:hover { background: var(--bg-elevated); color: var(--accent); }
+
+    .base-three-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .box-card {
+      background: var(--bg-app);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
       display: flex;
       flex-direction: column;
-      gap: 4px;
-      font-size: 0.8rem;
-      color: var(--muted);
+      gap: 9px;
     }
-    .slider-top {
+    .box-title {
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      color: var(--accent);
+      font-weight: 800;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      padding-bottom: 5px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 8px;
+      flex-wrap: wrap;
     }
-    .slider-val {
+    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .row-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .row-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(175px, 1fr)); gap: 10px; }
+
+    .s-field { display: flex; flex-direction: column; gap: 3px; }
+    .s-field label {
+      font-size: 0.7rem;
+      color: var(--muted);
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+    }
+    .s-field label span.v { color: var(--text); font-variant-numeric: tabular-nums; }
+    .s-field input[type="text"],
+    .s-field input[type="number"],
+    .s-field select,
+    .s-field textarea {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
       color: var(--text);
-      font-weight: 700;
-      font-variant-numeric: tabular-nums;
+      padding: 6px 8px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      width: 100%;
     }
-    .slider-field input[type="range"] {
+    .s-field textarea {
+      min-height: 54px;
+      resize: vertical;
+      font-family: inherit;
+    }
+    .s-field input[type="color"] {
+      width: 100%;
+      height: 28px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--bg-surface);
+      cursor: pointer;
+      padding: 2px;
+    }
+    .s-field input[type="range"] {
       width: 100%;
       accent-color: var(--accent);
       cursor: pointer;
     }
-    .sub-block {
-      background: var(--bg-elevated);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 12px;
-      margin-bottom: 12px;
-    }
-    .sub-block-title {
-      font-size: 0.78rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: var(--accent);
-      margin-bottom: 10px;
-      display: flex;
-      justify-content: space-between;
+    .s-check {
+      display: inline-flex;
       align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
+      gap: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
     }
-    .palette-box {
+    .mini-file {
       display: flex;
       gap: 6px;
+      align-items: center;
+      background: var(--bg-surface);
+      border: 1px dashed var(--border);
+      padding: 5px;
+      border-radius: 6px;
+    }
+    .mini-file input[type="file"] { font-size: 0.68rem; color: var(--muted); width: 100%; }
+
+    .palette-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 7px 9px;
+    }
+    .palette-swatches {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 6px;
+      flex-wrap: wrap;
+    }
+    .swatch-btn {
+      width: 24px;
+      height: 24px;
+      border-radius: 5px;
+      border: 1.5px solid rgba(255,255,255,0.6);
+      cursor: pointer;
+    }
+    .swatch-btn:hover { transform: scale(1.1); border-color: #fff; }
+
+    /* Sub-navegación independiente dentro de Competencias Especiales */
+    .sp-subtabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
       flex-wrap: wrap;
       align-items: center;
     }
-    .swatch-chip {
-      width: 20px;
-      height: 20px;
-      border-radius: 4px;
-      border: 1px solid rgba(255, 255, 255, 0.55);
+    .sp-subtab {
+      background: var(--bg-app);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 7px 14px;
+      border-radius: 7px;
+      font-size: 0.76rem;
+      font-weight: 800;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
-    .btn-new-match {
-      background: #1d4ed8;
+    .sp-subtab.is-active {
+      background: var(--accent);
+      border-color: var(--accent);
       color: #fff;
     }
-    .btn-new-match:hover {
-      background: #2563eb;
-    }
-    .toast-bar {
-      position: fixed;
-      top: 56px;
-      right: 16px;
-      background: var(--ok);
-      color: #fff;
-      padding: 8px 14px;
-      border-radius: 6px;
-      font-size: 0.8rem;
-      font-weight: 700;
-      opacity: 0;
+    .sp-pane { display: none; }
+    .sp-pane.is-active { display: block; }
+    .sp-disabled-overlay {
+      opacity: 0.45;
       pointer-events: none;
-      transition: opacity 0.2s ease;
-      z-index: 90;
     }
-    .toast-bar.is-shown { opacity: 1; }
+
+    .sp-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.76rem;
+    }
+    .sp-table th {
+      text-align: left;
+      color: var(--accent);
+      border-bottom: 1px solid var(--border);
+      padding: 6px 6px;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+    }
+    .sp-table td {
+      padding: 6px 6px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      vertical-align: middle;
+    }
+    .sp-tbl-logo {
+      width: 26px;
+      height: 26px;
+      object-fit: contain;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2px;
+      display: block;
+    }
+
+    #stage {
+      position: relative;
+      overflow: hidden;
+    }
+    .sb-drag-box {
+      position: absolute;
+      cursor: grab;
+      user-select: none;
+      touch-action: none;
+      z-index: 10;
+    }
+    .sb-drag-box:active { cursor: grabbing; }
   </style>
 </head>
 <body>
   <div class="studio-shell">
-    <!-- TOPBAR -->
     <header class="studio-topbar">
-      <div style="display:flex; align-items:center; gap:12px;">
-        <div style="font-weight:900; letter-spacing:1px; cursor:pointer;" onclick="location.href='index.html'">
-          STUDIO <span style="color:var(--accent);">TF 2.0</span>
-        </div>
-        <span id="liveBadge" style="font-size:0.75rem; font-weight:700; color:var(--muted);">OFF AIR</span>
+      <div class="brand-link" onclick="location.href='index.html'" title="Ir al menú principal">
+        STUDIO <span>TF 2.0</span>
       </div>
 
-      <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-        <label class="enable-check" style="font-size:0.75rem;">
-          <input type="checkbox" id="toggleGridCheck" checked>
-          <span>Guías / Imán</span>
-        </label>
-        <button type="button" id="newMatchBtn" class="btn btn-new-match" style="padding:7px 12px; font-size:0.76rem;">Nuevo Partido</button>
-        <button type="button" id="saveStudioBtn" class="btn" style="padding:7px 14px; font-size:0.76rem;">Guardar</button>
-        <button type="button" class="btn btn-ghost" style="padding:7px 12px; font-size:0.76rem;" onclick="location.href='control.html'">Control</button>
-        <button type="button" class="btn btn-ghost" style="padding:7px 12px; font-size:0.76rem;" onclick="location.href='index.html'">Portal</button>
+      <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+        <span id="studio-status" style="font-size: 0.73rem; color: var(--muted); margin-right: 4px;">Listo</span>
+
+        <div class="zoom-bar">
+          <button type="button" class="zoom-btn" id="zoom-out" title="Alejar">−</button>
+          <span id="zoom-label" style="min-width: 40px; text-align: center;">FIT</span>
+          <button type="button" class="zoom-btn" id="zoom-in" title="Acercar">+</button>
+          <button type="button" class="zoom-btn" id="zoom-fit" title="Ajustar al recuadro">Ajustar</button>
+        </div>
+
+        <button id="grid-toggle" type="button" class="btn btn-ghost" style="padding: 5px 10px; font-size: 0.72rem;">Grilla: ON</button>
+        <button id="snap-toggle" type="button" class="btn btn-ghost" style="padding: 5px 10px; font-size: 0.72rem;">Snap: ON</button>
+        <button id="center-x-btn" type="button" class="btn btn-ghost" style="padding: 5px 10px; font-size: 0.72rem;">Centrar X</button>
+        <button id="save-publish-btn" type="button" class="btn" style="padding: 5px 12px; font-size: 0.72rem;">Guardar y Sincronizar</button>
+        <button type="button" class="btn btn-ghost" style="padding: 5px 10px; font-size: 0.72rem;" onclick="location.href='control.html'">Control</button>
       </div>
     </header>
 
-    <!-- ÁREA DE LIENZO 16:9 -->
-    <div class="canvas-area" id="canvasArea">
-      <div class="stage-16x9" id="stage">
-        <div class="stage-grid" id="stageGrid"></div>
-
-        <div class="overlay-box is-selected" id="box-marcadores" data-module="marcadores" style="left:50%; top:84%; transform:translateX(-50%);">
-          <div id="stagePreviewMount" style="transform:scale(0.3333); transform-origin:top center;"></div>
+    <main id="canvas-area" class="canvas-area">
+      <div id="stage" class="stage-16x9">
+        <div id="stage-grid" class="stage-grid"></div>
+        <div id="sbDragBox" class="sb-drag-box" style="left: 14%; top: 76%;">
+          <div id="studioSbPreview"></div>
         </div>
       </div>
-    </div>
+    </main>
 
-    <!-- DIVISOR REDIMENSIONABLE -->
-    <div class="dock-resizer" id="dockResizer" title="Arrastra para ajustar altura del panel"></div>
+    <div id="dock-resizer" class="dock-resizer" title="Arrastra para ajustar el alto del panel"></div>
 
-    <!-- PANEL INFERIOR CON PESTAÑAS -->
-    <section class="dock-panel" id="dockPanel">
+    <section id="dock-panel" class="dock-panel">
       <nav class="dock-tabs">
-        <button type="button" class="dock-tab is-active" data-tab="sec-equipos">Equipos y Competencia</button>
-        <button type="button" class="dock-tab" data-tab="sec-estilo">Estilo y Sliders</button>
-        <button type="button" class="dock-tab" data-tab="sec-fuentes">Fuentes y Flexyscore</button>
-        <button type="button" class="dock-tab" data-tab="sec-rrss">Redes Sociales</button>
-        <button type="button" class="dock-tab" data-tab="sec-especiales">Competencias Especiales</button>
+        <button class="dock-tab is-active" data-target="marcadores">Marcadores</button>
+        <button class="dock-tab" data-target="especiales">Competencias Especiales</button>
+        <button class="dock-tab" data-target="tercios">Tercios Inferiores</button>
+        <button class="dock-tab" data-target="sponsors">Logos de Sponsors</button>
+        <button class="dock-tab" data-target="auspiciadores">Logos de Auspiciadores</button>
+        <button class="dock-tab" data-target="cg">Control de CG (Scroll)</button>
+        <button class="dock-tab" data-target="equipos">Presentación de Equipos</button>
+        <button class="dock-tab" data-target="estadisticas">Estadísticas</button>
       </nav>
 
       <div class="dock-body">
-        <!-- SECCIÓN 1: EQUIPOS Y COMPETENCIA -->
-        <div class="tab-section is-active" id="sec-equipos">
+        <!-- ==================== PESTAÑA MARCADORES (INTACTA) ==================== -->
+        <div id="pane-marcadores" class="tab-section is-active">
           <div class="tab-head">
-            <label class="enable-check">
-              <input type="checkbox" id="modMarcadoresEnabled" checked>
-              <span>Habilitar Módulo de Marcadores</span>
-            </label>
-            <div style="display:flex; gap:8px; flex-wrap:wrap;">
-              <button type="button" id="grayscaleModeBtn" class="btn btn-ghost" style="padding:6px 10px; font-size:0.74rem;">Escala de Grises Sobria</button>
-              <button type="button" id="clearLogosBtn" class="btn btn-ghost" style="padding:6px 10px; font-size:0.74rem;">Limpiar Logos Equipos</button>
+            <h3>Marcadores Broadcast (Tiempo Fuera)</h3>
+            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+              <button id="swap-teams-btn" type="button" class="btn btn-ghost" style="padding: 5px 10px; font-size: 0.72rem;">⇄ Intercambiar Local/Visita</button>
+              <label class="enable-check"><input type="checkbox" class="mod-enable" data-mod="marcadores"> Habilitar en Control</label>
             </div>
           </div>
 
-          <div class="sub-block">
-            <div class="sub-block-title">
-              <span>Logo de Competencia / Liga</span>
-              <div class="palette-box">
-                <div id="ligaSwatches" class="palette-box"></div>
-                <button type="button" id="applyLigaPaletteBtn" class="btn btn-ghost" style="padding:4px 9px; font-size:0.72rem; display:none;">Aplicar paleta</button>
+          <div class="base-three-grid">
+            <div class="box-card">
+              <div class="box-title">1. Equipo Local</div>
+              <div class="s-field">
+                <label>Nombre / Sigla Local</label>
+                <input type="text" id="name1" value="LOCAL">
               </div>
-            </div>
-            <div class="form-grid">
-              <div class="field">
-                <label>Subir Logo Competencia</label>
-                <input type="file" id="inLogoLiga" accept="image/*">
+              <div class="row-2">
+                <div class="s-field">
+                  <label>Color Fondo</label>
+                  <input type="color" id="bg1Color" value="#1c1e24">
+                </div>
+                <div class="s-field">
+                  <label>Color Texto</label>
+                  <input type="color" id="text1Color" value="#ffffff">
+                </div>
               </div>
-              <div class="slider-field">
-                <div class="slider-top"><span>Alto Logo Liga</span><span class="slider-val" id="valLigaSize">92px</span></div>
-                <input type="range" id="cfgLigaSize" min="36" max="150" value="92">
-              </div>
-            </div>
-          </div>
-
-          <div class="sub-block">
-            <div class="sub-block-title"><span>Equipo 1 (Local)</span></div>
-            <div class="form-grid">
-              <div class="field">
-                <label>Nombre Local</label>
-                <input type="text" id="cfgName1" value="LOCAL">
-              </div>
-              <div class="field">
+              <div class="s-field">
                 <label>Logo Local</label>
-                <input type="file" id="inLogo1" accept="image/*">
-              </div>
-              <div class="field">
-                <label>Fondo Local</label>
-                <input type="color" id="cfgBg1Color" value="#2b2d33">
-              </div>
-              <div class="field">
-                <label>Texto Local</label>
-                <input type="color" id="cfgText1Color" value="#f3f4f6">
+                <div class="mini-file">
+                  <input type="file" accept="image/*" data-img="logo1">
+                </div>
               </div>
             </div>
-          </div>
 
-          <div class="sub-block">
-            <div class="sub-block-title"><span>Equipo 2 (Visita)</span></div>
-            <div class="form-grid">
-              <div class="field">
-                <label>Nombre Visita</label>
-                <input type="text" id="cfgName2" value="VISITA">
+            <div class="box-card">
+              <div class="box-title">2. Equipo Visita</div>
+              <div class="s-field">
+                <label>Nombre / Sigla Visita</label>
+                <input type="text" id="name2" value="VISITA">
               </div>
-              <div class="field">
+              <div class="row-2">
+                <div class="s-field">
+                  <label>Color Fondo</label>
+                  <input type="color" id="bg2Color" value="#1c1e24">
+                </div>
+                <div class="s-field">
+                  <label>Color Texto</label>
+                  <input type="color" id="text2Color" value="#ffffff">
+                </div>
+              </div>
+              <div class="s-field">
                 <label>Logo Visita</label>
-                <input type="file" id="inLogo2" accept="image/*">
+                <div class="mini-file">
+                  <input type="file" accept="image/*" data-img="logo2">
+                </div>
               </div>
-              <div class="field">
-                <label>Fondo Visita</label>
-                <input type="color" id="cfgBg2Color" value="#2b2d33">
+            </div>
+
+            <div class="box-card">
+              <div class="box-title">3. Competencia / Etiqueta Superior</div>
+              <div class="s-field">
+                <label>Logo Competencia</label>
+                <div class="mini-file">
+                  <input type="file" accept="image/*" id="leagueLogoInput" data-img="logoLiga">
+                </div>
               </div>
-              <div class="field">
-                <label>Texto Visita</label>
-                <input type="color" id="cfgText2Color" value="#f3f4f6">
+
+              <div class="palette-box">
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; flex-wrap:wrap;">
+                  <span style="font-size:0.68rem; color:var(--muted); font-weight:700;">Colores sugeridos del logo:</span>
+                  <select id="paletteTarget" style="width:auto; padding:2px 6px; font-size:0.7rem;">
+                    <option value="accentColor">Aplicar a: Acento/Borde</option>
+                    <option value="scoreTextColor">Aplicar a: Puntos</option>
+                    <option value="scoreBgColor">Aplicar a: Fondo Puntos</option>
+                    <option value="bg1Color">Aplicar a: Fondo Local</option>
+                    <option value="bg2Color">Aplicar a: Fondo Visita</option>
+                  </select>
+                </div>
+                <div id="league-palette" class="palette-swatches">
+                  <span style="font-size:0.7rem; color:var(--muted);">Sube un logo para detectar colores</span>
+                </div>
+              </div>
+
+              <div class="row-2">
+                <div class="s-field">
+                  <label class="s-check" style="margin-top:0;"><input type="checkbox" id="topBadgeEnabled"> Etiqueta Superior</label>
+                  <select id="topBadgeType">
+                    <option value="text">Modo: Texto</option>
+                    <option value="image">Modo: Imagen</option>
+                  </select>
+                </div>
+                <div class="s-field" id="topTextBox">
+                  <label>Texto Etiqueta</label>
+                  <input type="text" id="topTextValue" placeholder="GRAN FINAL">
+                </div>
+                <div class="s-field" id="topImageBox" style="display:none;">
+                  <label>Imagen Etiqueta</label>
+                  <div class="mini-file">
+                    <input type="file" accept="image/*" data-img="logoTop">
+                  </div>
+                </div>
+              </div>
+
+              <div class="s-field">
+                <label class="s-check" style="margin-top:0;"><input type="checkbox" id="socialAutoEnabled" checked> Auto-rotación RRSS (@tiempofuera_cl)</label>
               </div>
             </div>
           </div>
 
-          <div class="sub-block">
-            <div class="sub-block-title">
-              <span>Badge Superior Central</span>
-              <label class="enable-check" style="font-size:0.75rem;">
-                <input type="checkbox" id="cfgTopBadgeEnabled">
-                <span>Mostrar Badge Superior</span>
-              </label>
-            </div>
-            <div class="form-grid">
-              <div class="field">
-                <label>Tipo</label>
-                <select id="cfgTopBadgeType">
-                  <option value="text">Texto</option>
-                  <option value="image">Imagen</option>
-                </select>
-              </div>
-              <div class="field">
-                <label>Texto Superior</label>
-                <input type="text" id="cfgTopTextValue" placeholder="Ej. FINAL / COPA">
-              </div>
-              <div class="field">
-                <label>Imagen Superior</label>
-                <input type="file" id="inLogoTop" accept="image/*">
-              </div>
-              <div class="slider-field">
-                <div class="slider-top"><span>Posición Y Badge</span><span class="slider-val" id="valTopOffset">-24px</span></div>
-                <input type="range" id="cfgTopBadgeOffsetY" min="-55" max="8" value="-24">
-              </div>
-              <div class="slider-field">
-                <div class="slider-top"><span>Tamaño Texto</span><span class="slider-val" id="valTopFont">16px</span></div>
-                <input type="range" id="cfgTopBadgeFontSize" min="11" max="28" value="16">
-              </div>
-              <div class="slider-field">
-                <div class="slider-top"><span>Alto Máx. Imagen</span><span class="slider-val" id="valTopImg">36px</span></div>
-                <input type="range" id="cfgTopBadgeMaxSize" min="18" max="64" value="36">
-              </div>
-            </div>
-          </div>
-        </div>
+          <div class="box-card" style="margin-bottom: 14px;">
+            <div class="box-title">Personalización Avanzada (Posición X/Y, Tamaños, Fuente y Colores)</div>
 
-        <!-- SECCIÓN 2: ESTILO Y SLIDERS -->
-        <div class="tab-section" id="sec-estilo">
-          <div class="sub-block">
-            <div class="sub-block-title"><span>Posición, Escala y Tamaños</span></div>
-            <div class="form-grid">
-              <div class="field">
-                <label>Tipografía</label>
-                <select id="cfgFontFamily">
+            <div class="row-4">
+              <div class="s-field">
+                <label>Posición Horizontal X <span class="v" id="v_posX">14.0%</span></label>
+                <input type="range" id="posX" min="0" max="80" step="0.5" value="14">
+              </div>
+              <div class="s-field">
+                <label>Posición Vertical Y <span class="v" id="v_posY">76.0%</span></label>
+                <input type="range" id="posY" min="0" max="90" step="0.5" value="76">
+              </div>
+              <div class="s-field">
+                <label>Escala Marcador <span class="v" id="v_boardScale">1.00x</span></label>
+                <input type="range" id="boardScale" min="0.65" max="1.65" step="0.05" value="1.0">
+              </div>
+              <div class="s-field">
+                <label>Fuente Tipográfica</label>
+                <select id="fontFamily">
                   <option value="'Barlow Condensed', sans-serif">Barlow Condensed</option>
                   <option value="'Bebas Neue', sans-serif">Bebas Neue</option>
-                  <option value="'Anton', sans-serif">Anton</option>
                   <option value="'Oswald', sans-serif">Oswald</option>
-                  <option value="'Chakra Petch', sans-serif">Chakra Petch</option>
-                  <option value="'Rajdhani', sans-serif">Rajdhani</option>
-                  <option value="'Russo One', sans-serif">Russo One</option>
                   <option value="'Teko', sans-serif">Teko</option>
+                  <option value="'Rajdhani', sans-serif">Rajdhani</option>
+                  <option value="'Chakra Petch', sans-serif">Chakra Petch</option>
+                  <option value="'Russo One', sans-serif">Russo One</option>
+                  <option value="'Anton', sans-serif">Anton</option>
                 </select>
               </div>
-              <div class="slider-field">
-                <div class="slider-top"><span>Posición X (%)</span><span class="slider-val" id="valPosX">50%</span></div>
-                <input type="range" id="cfgPosX" min="5" max="95" step="0.5" value="50">
+            </div>
+
+            <div class="row-4">
+              <div class="s-field">
+                <label>Altura Etiqueta Sup. <span class="v" id="v_topBadgeOffsetY">-24px</span></label>
+                <input type="range" id="topBadgeOffsetY" min="-55" max="10" value="-24">
               </div>
-              <div class="slider-field">
-                <div class="slider-top"><span>Posición Y (%)</span><span class="slider-val" id="valPosY">84%</span></div>
-                <input type="range" id="cfgPosY" min="5" max="92" step="0.5" value="84">
+              <div class="s-field">
+                <label>Tamaño Texto Etiqueta <span class="v" id="v_topBadgeFontSize">16px</span></label>
+                <input type="range" id="topBadgeFontSize" min="11" max="26" value="16">
               </div>
-              <div class="slider-field">
-                <div class="slider-top"><span>Escala Marcador</span><span class="slider-val" id="valBoardScale">1.00x</span></div>
-                <input type="range" id="cfgBoardScale" min="0.6" max="1.45" step="0.05" value="1.0">
+              <div class="s-field">
+                <label>Tamaño Imagen Etiqueta <span class="v" id="v_topBadgeMaxSize">36px</span></label>
+                <input type="range" id="topBadgeMaxSize" min="16" max="56" value="36">
               </div>
-              <div class="slider-field">
-                <div class="slider-top"><span>Logos Equipos</span><span class="slider-val" id="valTeamLogo">44px</span></div>
-                <input type="range" id="cfgTeamLogoSize" min="24" max="72" value="44">
+              <div class="s-field">
+                <label>Tamaño Logo Liga <span class="v" id="v_ligaSize">92px</span></label>
+                <input type="range" id="ligaSize" min="60" max="150" value="92">
               </div>
-              <div class="slider-field">
-                <div class="slider-top"><span>Fuente Nombres</span><span class="slider-val" id="valTeamFont">25px</span></div>
-                <input type="range" id="cfgTeamFontSize" min="16" max="38" value="25">
+            </div>
+
+            <div class="row-4">
+              <div class="s-field">
+                <label>Tamaño Escudos <span class="v" id="v_teamLogoSize">44px</span></label>
+                <input type="range" id="teamLogoSize" min="28" max="62" value="44">
               </div>
-              <div class="slider-field">
-                <div class="slider-top"><span>Fuente Puntos</span><span class="slider-val" id="valScoreFont">48px</span></div>
-                <input type="range" id="cfgScoreBoxSize" min="30" max="68" value="48">
+              <div class="s-field">
+                <label>Texto Equipos <span class="v" id="v_teamFontSize">25px</span></label>
+                <input type="range" id="teamFontSize" min="16" max="36" value="25">
               </div>
-              <div class="slider-field">
-                <div class="slider-top"><span>Fuente Reloj</span><span class="slider-val" id="valClockFont">32px</span></div>
-                <input type="range" id="cfgClockFontSize" min="20" max="48" value="32">
+              <div class="s-field">
+                <label>Tamaño Puntos <span class="v" id="v_scoreBoxSize">48px</span></label>
+                <input type="range" id="scoreBoxSize" min="34" max="68" value="48">
+              </div>
+              <div class="s-field">
+                <label>Tamaño Reloj <span class="v" id="v_clockFontSize">32px</span></label>
+                <input type="range" id="clockFontSize" min="22" max="44" value="32">
+              </div>
+            </div>
+
+            <div class="row-4">
+              <div class="s-field">
+                <label>Posición / Frecuencia RRSS (s)</label>
+                <div class="row-2">
+                  <select id="socialPosition">
+                    <option value="top-left">Arriba Izq</option>
+                    <option value="top-right">Arriba Der</option>
+                  </select>
+                  <input type="number" id="socialIntervalSec" min="20" max="600" value="150">
+                </div>
+              </div>
+              <div class="s-field">
+                <label>Acento / Fondo Pts / Pts</label>
+                <div class="row-3">
+                  <input type="color" id="accentColor" value="#e3b857" title="Acento">
+                  <input type="color" id="scoreBgColor" value="#0c0d10" title="Fondo Puntos">
+                  <input type="color" id="scoreTextColor" value="#e3b857" title="Texto Puntos">
+                </div>
+              </div>
+              <div class="s-field">
+                <label>Fondo Reloj / Reloj / Cuarto</label>
+                <div class="row-3">
+                  <input type="color" id="clockBgColor" value="#141519" title="Fondo Reloj">
+                  <input type="color" id="clockTextColor" value="#ffffff" title="Texto Reloj">
+                  <input type="color" id="periodTextColor" value="#e3b857" title="Cuarto">
+                </div>
+              </div>
+              <div class="s-field">
+                <label>Falta Normal / Bonus (5ta)</label>
+                <div class="row-2">
+                  <input type="color" id="foulActiveColor" value="#ffe600" title="Falta Normal">
+                  <input type="color" id="foulBonusColor" value="#ff1744" title="Bonus 5ta">
+                </div>
+              </div>
+            </div>
+
+            <div class="row-4">
+              <div class="s-field">
+                <label>Reloj 24s + Colores</label>
+                <label class="s-check"><input type="checkbox" id="showShotClock" checked> Mostrar 24s</label>
+                <div class="row-2">
+                  <input type="color" id="shotBgColor" value="#141519" title="Fondo 24s">
+                  <input type="color" id="shotTextColor" value="#ff2a2a" title="Texto 24s">
+                </div>
               </div>
             </div>
           </div>
 
-          <div class="sub-block">
-            <div class="sub-block-title"><span>Colores y Reloj 24s</span></div>
-            <div class="form-grid">
-              <div class="field">
-                <label>Borde / Acento</label>
-                <input type="color" id="cfgAccentColor" value="#9ca3af">
-              </div>
-              <div class="field">
-                <label>Fondo Puntos</label>
-                <input type="color" id="cfgScoreBgColor" value="#14161a">
-              </div>
-              <div class="field">
-                <label>Texto Puntos</label>
-                <input type="color" id="cfgScoreTextColor" value="#f3f4f6">
-              </div>
-              <div class="field">
-                <label>Fondo Reloj</label>
-                <input type="color" id="cfgClockBgColor" value="#1b1e24">
-              </div>
-              <div class="field">
-                <label>Texto Reloj</label>
-                <input type="color" id="cfgClockTextColor" value="#ffffff">
-              </div>
-              <div class="field">
-                <label>Texto Cuarto</label>
-                <input type="color" id="cfgPeriodTextColor" value="#d1d5db">
-              </div>
-              <div class="field">
-                <label>Falta Activa (1–4)</label>
-                <input type="color" id="cfgFoulActiveColor" value="#e5e7eb">
-              </div>
-              <div class="field">
-                <label>Falta Bonus (5)</label>
-                <input type="color" id="cfgFoulBonusColor" value="#dc2626">
-              </div>
-              <div class="field">
-                <label>Fondo 24s</label>
-                <input type="color" id="cfgShotBgColor" value="#181a20">
-              </div>
-              <div class="field">
-                <label>Texto 24s</label>
-                <input type="color" id="cfgShotTextColor" value="#f87171">
-              </div>
+          <div class="box-card">
+            <div class="box-title">
+              <span>Origen de Datos por Campo</span>
+              <span style="font-size:0.68rem; color:var(--muted); text-transform:none;">Recomendado: Manual en Puntos</span>
             </div>
-            <label class="enable-check">
-              <input type="checkbox" id="cfgShowShotClock" checked>
-              <span>Mostrar Reloj de Posesión (24s)</span>
-            </label>
-          </div>
-        </div>
-
-        <!-- SECCIÓN 3: FUENTES DE DATOS Y FLEXYSCORE -->
-        <div class="tab-section" id="sec-fuentes">
-          <div class="sub-block">
-            <div class="sub-block-title"><span>Origen por Campo</span></div>
-            <div class="form-grid">
-              <div class="field">
-                <label>Puntos Local</label>
+            <div class="row-4">
+              <div class="s-field">
+                <label>API Token (liveid) Flexyscore</label>
+                <input type="text" id="flexyLiveId" placeholder="Opcional si envías a Flexyscore">
+              </div>
+              <div class="s-field">
+                <label>Puntos Local (points_1)</label>
                 <select id="src_points_1">
-                  <option value="manual">Manual</option>
+                  <option value="manual" selected>Manual (Control)</option>
                   <option value="scoresight">ScoreSight</option>
                   <option value="flexyscore">Flexyscore</option>
                 </select>
               </div>
-              <div class="field">
-                <label>Puntos Visita</label>
+              <div class="s-field">
+                <label>Puntos Visita (points_2)</label>
                 <select id="src_points_2">
-                  <option value="manual">Manual</option>
+                  <option value="manual" selected>Manual (Control)</option>
                   <option value="scoresight">ScoreSight</option>
                   <option value="flexyscore">Flexyscore</option>
                 </select>
               </div>
-              <div class="field">
-                <label>Reloj Partido</label>
+              <div class="s-field">
+                <label>Reloj Partido (timer)</label>
                 <select id="src_timer">
-                  <option value="manual">Manual</option>
-                  <option value="scoresight">ScoreSight</option>
+                  <option value="scoresight" selected>ScoreSight</option>
+                  <option value="manual">Manual (Control)</option>
                   <option value="flexyscore">Flexyscore</option>
                 </select>
               </div>
-              <div class="field">
-                <label>Cuarto / Periodo</label>
+            </div>
+            <div class="row-4">
+              <div class="s-field">
+                <label>Cuarto / Período (moment)</label>
                 <select id="src_period">
-                  <option value="manual">Manual</option>
-                  <option value="scoresight">ScoreSight</option>
+                  <option value="scoresight" selected>ScoreSight</option>
+                  <option value="manual">Manual (Control)</option>
                   <option value="flexyscore">Flexyscore</option>
                 </select>
               </div>
-              <div class="field">
-                <label>Faltas Local</label>
+              <div class="s-field">
+                <label>Faltas Local (fouls_1)</label>
                 <select id="src_fouls_1">
-                  <option value="manual">Manual</option>
-                  <option value="scoresight">ScoreSight</option>
+                  <option value="scoresight" selected>ScoreSight</option>
+                  <option value="manual">Manual (Control)</option>
                   <option value="flexyscore">Flexyscore</option>
                 </select>
               </div>
-              <div class="field">
-                <label>Faltas Visita</label>
+              <div class="s-field">
+                <label>Faltas Visita (fouls_2)</label>
                 <select id="src_fouls_2">
-                  <option value="manual">Manual</option>
-                  <option value="scoresight">ScoreSight</option>
+                  <option value="scoresight" selected>ScoreSight</option>
+                  <option value="manual">Manual (Control)</option>
                   <option value="flexyscore">Flexyscore</option>
                 </select>
               </div>
-              <div class="field">
-                <label>Reloj 24s</label>
+              <div class="s-field">
+                <label>Reloj 24s (shotclock)</label>
                 <select id="src_shotclock">
-                  <option value="scoresight">ScoreSight</option>
-                  <option value="manual">Manual</option>
+                  <option value="scoresight" selected>ScoreSight</option>
+                  <option value="manual">Manual (Control)</option>
                   <option value="flexyscore">Flexyscore</option>
                 </select>
               </div>
             </div>
           </div>
-
-          <div class="sub-block">
-            <div class="sub-block-title"><span>Flexyscore</span></div>
-            <div class="form-grid">
-              <div class="field">
-                <label>Board ID</label>
-                <input type="text" id="cfgFlexyBoardId" value="20152">
-              </div>
-              <div class="field">
-                <label>Token Live ID</label>
-                <input type="text" id="cfgFlexyLiveId" placeholder="Token liveid">
-              </div>
-            </div>
-            <button type="button" id="testFlexyBtn" class="btn btn-ghost" style="padding:6px 12px; font-size:0.75rem;">Probar Flexyscore</button>
-          </div>
         </div>
 
-        <!-- SECCIÓN 4: REDES SOCIALES -->
-        <div class="tab-section" id="sec-rrss">
-          <div class="sub-block">
-            <div class="sub-block-title">
-              <span>Rotación Automática (@tiempofuera_cl)</span>
-              <label class="enable-check" style="font-size:0.75rem;">
-                <input type="checkbox" id="cfgSocialAutoEnabled" checked>
-                <span>Activar Rotación</span>
-              </label>
-            </div>
-            <div class="form-grid">
-              <div class="field">
-                <label>Posición</label>
-                <select id="cfgSocialPosition">
-                  <option value="top-left">Superior Izquierda</option>
-                  <option value="top-right">Superior Derecha</option>
-                </select>
-              </div>
-              <div class="slider-field">
-                <div class="slider-top"><span>Escala Banner</span><span class="slider-val" id="valSocialScale">1.35x</span></div>
-                <input type="range" id="cfgSocialScale" min="0.8" max="2.0" step="0.05" value="1.35">
-              </div>
-              <div class="slider-field">
-                <div class="slider-top"><span>Intervalo (seg)</span><span class="slider-val" id="valSocialInterval">150s</span></div>
-                <input type="range" id="cfgSocialIntervalSec" min="30" max="600" step="10" value="150">
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- SECCIÓN 5: COMPETENCIAS ESPECIALES (CONFIGURACIÓN Y REGLAS) -->
-        <div class="tab-section" id="sec-especiales">
+        <!-- ==================== PESTAÑA COMPETENCIAS ESPECIALES (4 PASOS INDEPENDIENTES) ==================== -->
+        <div id="pane-especiales" class="tab-section">
+          <!-- Paso 1: Habilitar Competencias Especiales -->
           <div class="tab-head">
+            <h3>Competencias Especiales</h3>
             <label class="enable-check">
-              <input type="checkbox" id="modEspecialesEnabled">
-              <span>Habilitar Competencias Especiales</span>
+              <input type="checkbox" class="mod-enable" id="modEspecialesCheck" data-mod="especiales">
+              <span>1. Habilitar Competencias Especiales en Control</span>
             </label>
           </div>
 
-          <div class="sub-block">
-            <div class="sub-block-title"><span>Modalidades y Reglas en Pantalla Inferior</span></div>
-            <div style="display:flex; gap:18px; flex-wrap:wrap; margin-bottom:10px;">
-              <label class="enable-check">
-                <input type="checkbox" id="spModTriples" checked>
-                <span>Concurso de Triples</span>
-              </label>
-              <label class="enable-check">
-                <input type="checkbox" id="spModTirosLibres" checked>
-                <span>Concurso de Tiros Libres</span>
-              </label>
-            </div>
-            <div class="form-grid">
-              <div class="field">
-                <label>Reglas Concurso de Triples (Zócalo Inferior)</label>
-                <textarea id="cfgRulesTriples">5 racks de triples + balón dinero en cada rack. Máximo puntaje define el avance de ronda.</textarea>
+          <div id="especialesConfigBody">
+            <!-- Paso 2: Seleccionar qué competencia especial habilitar y abrir su pestaña de configuración -->
+            <div class="box-card" style="margin-bottom: 12px;">
+              <div class="box-title">
+                <span>2. Seleccionar Competencia Especial Activa y Pestaña de Configuración</span>
               </div>
-              <div class="field">
-                <label>Reglas Concurso de Tiros Libres (Zócalo Inferior)</label>
-                <textarea id="cfgRulesTirosLibres">Turnos de tiros libres desde la línea. Mayor efectividad o desempate súbito define al ganador.</textarea>
+              <div style="display:flex; gap:18px; align-items:center; flex-wrap:wrap; margin-bottom:8px;">
+                <label class="s-check">
+                  <input type="checkbox" id="spEnableTriples" checked>
+                  <span>Habilitar Concurso de Triples</span>
+                </label>
+                <label class="s-check">
+                  <input type="checkbox" id="spEnableLibres">
+                  <span>Habilitar Concurso de Tiros Libres</span>
+                </label>
+              </div>
+              <div class="sp-subtabs">
+                <button type="button" class="sp-subtab is-active" data-sp-tab="sp-pane-triples">Configurar Concurso de Triples</button>
+                <button type="button" class="sp-subtab" data-sp-tab="sp-pane-libres">Configurar Concurso de Tiros Libres</button>
+              </div>
+            </div>
+
+            <!-- Paso 3: Pestaña de Configuración Independiente — TRIPLES -->
+            <div id="sp-pane-triples" class="sp-pane is-active">
+              <div class="box-card" style="margin-bottom: 12px;">
+                <div class="box-title">
+                  <span>3. Categoría / Modalidad — Concurso de Triples</span>
+                  <button type="button" id="saveTriplesBtn" class="btn" style="padding: 4px 10px; font-size: 0.7rem;">Guardar Config. Triples</button>
+                </div>
+
+                <div class="row-4">
+                  <div class="s-field">
+                    <label>Categoría / Modalidad de Triples</label>
+                    <select id="tr_modePreset">
+                      <option value="time_attack">Time Attack (1:00 Oficial + 0:30 Desempate)</option>
+                      <option value="femicentro">Femicentro (6 Triples)</option>
+                      <option value="personalizada">Personalizada</option>
+                    </select>
+                  </div>
+                  <div class="s-field">
+                    <label>Título del Torneo</label>
+                    <input type="text" id="tr_title" value="TORNEO TRIPLES — TIEMPO FUERA">
+                  </div>
+                  <div class="s-field">
+                    <label>Instancia / Fase</label>
+                    <select id="tr_stage">
+                      <option value="GRUPO A">GRUPO A (Clasificatoria)</option>
+                      <option value="GRUPO B">GRUPO B (Clasificatoria)</option>
+                      <option value="GRUPO C">GRUPO C (Clasificatoria)</option>
+                      <option value="GRUPO D">GRUPO D (Clasificatoria)</option>
+                      <option value="SEMIFINAL 1">SEMIFINAL 1 (1° vs 4°)</option>
+                      <option value="SEMIFINAL 2">SEMIFINAL 2 (2° vs 3°)</option>
+                      <option value="GRAN FINAL">GRAN FINAL</option>
+                      <option value="DESEMPATE">DESEMPATE</option>
+                    </select>
+                  </div>
+                  <div class="s-field">
+                    <label>Categoría Jugadores</label>
+                    <input type="text" id="tr_categoryLabel" value="TODO COMPETIDOR">
+                  </div>
+                </div>
+
+                <div class="row-4">
+                  <div class="s-field">
+                    <label>Tiempo Ronda Oficial (seg)</label>
+                    <input type="number" id="tr_officialSec" min="0" max="300" value="60">
+                  </div>
+                  <div class="s-field">
+                    <label>Tiempo Desempate (seg)</label>
+                    <input type="number" id="tr_tiebreakSec" min="0" max="180" value="30">
+                  </div>
+                  <div class="s-field">
+                    <label>Límite de Tiros (0 = por tiempo)</label>
+                    <input type="number" id="tr_maxShots" min="0" max="50" value="0">
+                  </div>
+                  <div class="s-field">
+                    <label>Puntos Triple Normal</label>
+                    <input type="number" id="tr_ptsNormal" min="1" max="10" value="1">
+                  </div>
+                </div>
+
+                <div class="row-4">
+                  <div class="s-field">
+                    <label class="s-check"><input type="checkbox" id="tr_moneyEnabled" checked> Balón Especial (+Pts)</label>
+                    <input type="number" id="tr_ptsMoney" min="1" max="10" value="3">
+                  </div>
+                  <div class="s-field">
+                    <label class="s-check"><input type="checkbox" id="tr_halfEnabled" checked> Tiro Media Cancha (+Pts)</label>
+                    <input type="number" id="tr_ptsHalf" min="1" max="10" value="3">
+                  </div>
+                  <div class="s-field">
+                    <label>Puntaje a Superar (0 = Auto)</label>
+                    <input type="number" id="tr_targetOverride" min="0" value="0">
+                  </div>
+                  <div class="s-field">
+                    <label>Logo Competencia Triples</label>
+                    <div class="mini-file">
+                      <input type="file" id="tr_compLogoIn" accept="image/*">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row-4">
+                  <div class="s-field">
+                    <label>Tamaño Logo Comp. <span class="v" id="v_tr_compLogoSize">66px</span></label>
+                    <input type="range" id="tr_compLogoSize" min="35" max="115" value="66">
+                  </div>
+                  <div class="s-field">
+                    <label>Tamaño Logo Equipo <span class="v" id="v_tr_teamLogoSize">60px</span></label>
+                    <input type="range" id="tr_teamLogoSize" min="36" max="82" value="60">
+                  </div>
+                  <div class="s-field">
+                    <label>Opacidad Fondo <span class="v" id="v_tr_bgAlpha">85%</span></label>
+                    <input type="range" id="tr_bgAlpha" min="40" max="100" value="85">
+                  </div>
+                  <div class="s-field">
+                    <label>Escala Overlay <span class="v" id="v_tr_scale">100%</span></label>
+                    <input type="range" id="tr_scale" min="75" max="125" value="100">
+                  </div>
+                </div>
+
+                <div class="row-2">
+                  <div class="s-field">
+                    <label>Colores Overlay (Fondo / Acento)</label>
+                    <div class="row-2">
+                      <input type="color" id="tr_colorBg" value="#2b2f38">
+                      <input type="color" id="tr_colorAccent" value="#e11d2e">
+                    </div>
+                  </div>
+                  <div class="s-field">
+                    <label>Reglas en Pantalla (Zócalo Inferior al Lanzar)</label>
+                    <textarea id="tr_rulesText">Time Attack: 1 minuto oficial para convertir la mayor cantidad de triples. Empates se definen en rondas de 30 segundos.</textarea>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Lista de Participantes Triples -->
+              <div class="box-card">
+                <div class="box-title">
+                  <span>Participantes — Concurso de Triples (<span id="tr_count">0</span>)</span>
+                  <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                    <button type="button" id="tr_clearScoresBtn" class="btn btn-ghost" style="padding:4px 8px; font-size:0.68rem;">Limpiar Puntajes</button>
+                    <button type="button" id="tr_clearAllBtn" class="btn btn-ghost" style="padding:4px 8px; font-size:0.68rem;">Vaciar Lista</button>
+                  </div>
+                </div>
+                <div class="row-4" style="margin-bottom:6px;">
+                  <div class="s-field">
+                    <label>Nombre Jugador</label>
+                    <input type="text" id="tr_newName" placeholder="Ej. Andrés Tapia">
+                  </div>
+                  <div class="s-field">
+                    <label>Equipo</label>
+                    <input type="text" id="tr_newTeam" placeholder="Ej. ÁRABE UNIDO">
+                  </div>
+                  <div class="s-field">
+                    <label>Categoría</label>
+                    <input type="text" id="tr_newCat" placeholder="+35 / +40 / Fem">
+                  </div>
+                  <div class="s-field">
+                    <label>Escudo Equipo (Opcional)</label>
+                    <div class="mini-file">
+                      <input type="file" id="tr_newLogoIn" accept="image/*">
+                    </div>
+                  </div>
+                </div>
+                <div style="margin-bottom:8px;">
+                  <button type="button" id="tr_addPlayerBtn" class="btn" style="padding:5px 12px; font-size:0.72rem;">+ Agregar Participante Triples</button>
+                </div>
+                <input type="file" id="tr_rowLogoPicker" accept="image/*" style="display:none;">
+                <table class="sp-table">
+                  <thead>
+                    <tr>
+                      <th>Escudo</th>
+                      <th>Jugador</th>
+                      <th>Equipo</th>
+                      <th>Cat.</th>
+                      <th>Mejor Pts</th>
+                      <th>Acción</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tr_playersBody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Paso 4: Pestaña de Configuración Independiente — TIROS LIBRES -->
+            <div id="sp-pane-libres" class="sp-pane">
+              <div class="box-card" style="margin-bottom: 12px;">
+                <div class="box-title">
+                  <span>4. Categoría / Modalidad — Concurso de Tiros Libres</span>
+                  <button type="button" id="saveLibresBtn" class="btn" style="padding: 4px 10px; font-size: 0.7rem;">Guardar Config. Tiros Libres</button>
+                </div>
+
+                <div class="row-4">
+                  <div class="s-field">
+                    <label>Categoría / Modalidad de Tiros Libres</label>
+                    <select id="ft_modePreset">
+                      <option value="time_attack">Time Attack (1:00 Oficial + 0:30 Desempate)</option>
+                      <option value="femicentro">Femicentro (10 Tiros Libres)</option>
+                      <option value="personalizada">Personalizada</option>
+                    </select>
+                  </div>
+                  <div class="s-field">
+                    <label>Título del Torneo</label>
+                    <input type="text" id="ft_title" value="CONCURSO DE TIROS LIBRES — TIEMPO FUERA">
+                  </div>
+                  <div class="s-field">
+                    <label>Instancia / Fase</label>
+                    <select id="ft_stage">
+                      <option value="CLASIFICATORIA">CLASIFICATORIA</option>
+                      <option value="GRUPO A">GRUPO A</option>
+                      <option value="GRUPO B">GRUPO B</option>
+                      <option value="SEMIFINAL">SEMIFINAL</option>
+                      <option value="GRAN FINAL">GRAN FINAL</option>
+                      <option value="DESEMPATE">DESEMPATE</option>
+                    </select>
+                  </div>
+                  <div class="s-field">
+                    <label>Categoría Jugadores</label>
+                    <input type="text" id="ft_categoryLabel" value="TODO COMPETIDOR">
+                  </div>
+                </div>
+
+                <div class="row-4">
+                  <div class="s-field">
+                    <label>Tiempo Ronda Oficial (seg)</label>
+                    <input type="number" id="ft_officialSec" min="0" max="300" value="60">
+                  </div>
+                  <div class="s-field">
+                    <label>Tiempo Desempate (seg)</label>
+                    <input type="number" id="ft_tiebreakSec" min="0" max="180" value="30">
+                  </div>
+                  <div class="s-field">
+                    <label>Cantidad de Tiros (0 = por tiempo)</label>
+                    <input type="number" id="ft_maxShots" min="0" max="50" value="0">
+                  </div>
+                  <div class="s-field">
+                    <label>Puntos por Acierto</label>
+                    <input type="number" id="ft_ptsNormal" min="1" max="10" value="1">
+                  </div>
+                </div>
+
+                <div class="row-4">
+                  <div class="s-field">
+                    <label class="s-check"><input type="checkbox" id="ft_bonusLastEnabled"> Último Balón Especial (+Pts)</label>
+                    <input type="number" id="ft_ptsBonus" min="1" max="10" value="2">
+                  </div>
+                  <div class="s-field">
+                    <label>Puntaje a Superar (0 = Auto)</label>
+                    <input type="number" id="ft_targetOverride" min="0" value="0">
+                  </div>
+                  <div class="s-field">
+                    <label>Logo Competencia Tiros Libres</label>
+                    <div class="mini-file">
+                      <input type="file" id="ft_compLogoIn" accept="image/*">
+                    </div>
+                  </div>
+                  <div class="s-field">
+                    <label>Colores Overlay (Fondo / Acento)</label>
+                    <div class="row-2">
+                      <input type="color" id="ft_colorBg" value="#2b2f38">
+                      <input type="color" id="ft_colorAccent" value="#e11d2e">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row-4">
+                  <div class="s-field">
+                    <label>Tamaño Logo Comp. <span class="v" id="v_ft_compLogoSize">66px</span></label>
+                    <input type="range" id="ft_compLogoSize" min="35" max="115" value="66">
+                  </div>
+                  <div class="s-field">
+                    <label>Tamaño Logo Equipo <span class="v" id="v_ft_teamLogoSize">60px</span></label>
+                    <input type="range" id="ft_teamLogoSize" min="36" max="82" value="60">
+                  </div>
+                  <div class="s-field">
+                    <label>Opacidad Fondo <span class="v" id="v_ft_bgAlpha">85%</span></label>
+                    <input type="range" id="ft_bgAlpha" min="40" max="100" value="85">
+                  </div>
+                  <div class="s-field">
+                    <label>Escala Overlay <span class="v" id="v_ft_scale">100%</span></label>
+                    <input type="range" id="ft_scale" min="75" max="125" value="100">
+                  </div>
+                </div>
+
+                <div class="s-field">
+                  <label>Reglas en Pantalla (Zócalo Inferior al Lanzar)</label>
+                  <textarea id="ft_rulesText">Time Attack: 1 minuto para encestar la mayor cantidad de tiros libres desde la línea. Empates se definen en 30 segundos.</textarea>
+                </div>
+              </div>
+
+              <!-- Lista de Participantes Tiros Libres -->
+              <div class="box-card">
+                <div class="box-title">
+                  <span>Participantes — Concurso de Tiros Libres (<span id="ft_count">0</span>)</span>
+                  <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                    <button type="button" id="ft_clearScoresBtn" class="btn btn-ghost" style="padding:4px 8px; font-size:0.68rem;">Limpiar Puntajes</button>
+                    <button type="button" id="ft_clearAllBtn" class="btn btn-ghost" style="padding:4px 8px; font-size:0.68rem;">Vaciar Lista</button>
+                  </div>
+                </div>
+                <div class="row-4" style="margin-bottom:6px;">
+                  <div class="s-field">
+                    <label>Nombre Jugador</label>
+                    <input type="text" id="ft_newName" placeholder="Ej. Jugador(a)">
+                  </div>
+                  <div class="s-field">
+                    <label>Equipo</label>
+                    <input type="text" id="ft_newTeam" placeholder="Ej. CLUB">
+                  </div>
+                  <div class="s-field">
+                    <label>Categoría</label>
+                    <input type="text" id="ft_newCat" placeholder="Femicentro / Libre">
+                  </div>
+                  <div class="s-field">
+                    <label>Escudo Equipo (Opcional)</label>
+                    <div class="mini-file">
+                      <input type="file" id="ft_newLogoIn" accept="image/*">
+                    </div>
+                  </div>
+                </div>
+                <div style="margin-bottom:8px;">
+                  <button type="button" id="ft_addPlayerBtn" class="btn" style="padding:5px 12px; font-size:0.72rem;">+ Agregar Participante Tiros Libres</button>
+                </div>
+                <input type="file" id="ft_rowLogoPicker" accept="image/*" style="display:none;">
+                <table class="sp-table">
+                  <thead>
+                    <tr>
+                      <th>Escudo</th>
+                      <th>Jugador</th>
+                      <th>Equipo</th>
+                      <th>Cat.</th>
+                      <th>Mejor Pts</th>
+                      <th>Acción</th>
+                    </tr>
+                  </thead>
+                  <tbody id="ft_playersBody"></tbody>
+                </table>
               </div>
             </div>
           </div>
         </div>
+
+        <div id="pane-tercios" class="tab-section"><div class="tab-head"><h3>Tercios Inferiores</h3><label class="enable-check"><input type="checkbox" class="mod-enable" data-mod="tercios"> Habilitar en Control</label></div></div>
+        <div id="pane-sponsors" class="tab-section"><div class="tab-head"><h3>Logos de Sponsors</h3><label class="enable-check"><input type="checkbox" class="mod-enable" data-mod="sponsors"> Habilitar en Control</label></div></div>
+        <div id="pane-auspiciadores" class="tab-section"><div class="tab-head"><h3>Logos de Auspiciadores</h3><label class="enable-check"><input type="checkbox" class="mod-enable" data-mod="auspiciadores"> Habilitar en Control</label></div></div>
+        <div id="pane-cg" class="tab-section"><div class="tab-head"><h3>Control de CG (Scroll)</h3><label class="enable-check"><input type="checkbox" class="mod-enable" data-mod="cg"> Habilitar en Control</label></div></div>
+        <div id="pane-equipos" class="tab-section"><div class="tab-head"><h3>Presentación de Equipos</h3><label class="enable-check"><input type="checkbox" class="mod-enable" data-mod="equipos"> Habilitar en Control</label></div></div>
+        <div id="pane-estadisticas" class="tab-section"><div class="tab-head"><h3>Estadísticas</h3><label class="enable-check"><input type="checkbox" class="mod-enable" data-mod="estadisticas"> Habilitar en Control</label></div></div>
       </div>
     </section>
   </div>
 
-  <div class="toast-bar" id="toastBar">Guardado</div>
-
   <script type="module">
-    import { db, DB_PATH, ref, update, onValue, requireSession } from "./js/firebase.js";
-    import { mountDragCanvas, syncCanvasPositions } from "./js/canvas.js";
-    import { pushToFlexyscore } from "./js/flexyscore-api.js";
+    import { db, DB_PATH, ref, update, get, requireSession } from "./js/firebase.js";
 
-    const GRAYSCALE_DEFAULTS = {
-      accentColor: "#9ca3af",
-      bg1Color: "#2b2d33",
-      text1Color: "#f3f4f6",
-      bg2Color: "#2b2d33",
-      text2Color: "#f3f4f6",
-      scoreBgColor: "#14161a",
-      scoreTextColor: "#f3f4f6",
-      clockBgColor: "#1b1e24",
-      clockTextColor: "#ffffff",
-      periodTextColor: "#d1d5db",
-      foulActiveColor: "#e5e7eb",
-      foulBonusColor: "#dc2626",
-      shotBgColor: "#181a20",
-      shotTextColor: "#f87171"
-    };
+    const SOURCE_FIELDS = ["points_1", "points_2", "timer", "period", "fouls_1", "fouls_2", "shotclock"];
+    const imgs = { logoLiga: "", logo1: "", logo2: "", logoTop: "" };
+    const statusEl = document.getElementById("studio-status");
+    const canvasArea = document.getElementById("canvas-area");
+    const stageEl = document.getElementById("stage");
+    const dragBox = document.getElementById("sbDragBox");
+    const zoomLabel = document.getElementById("zoom-label");
 
-    let cfg = {
-      flexyBoardId: "20152",
-      flexyLiveId: "",
-      sources: {
-        points_1: "manual",
-        points_2: "manual",
-        timer: "manual",
-        period: "manual",
-        fouls_1: "manual",
-        fouls_2: "manual",
-        shotclock: "scoresight"
+    let zoomMode = "fit";
+    let snapActive = true;
+
+    /* ==================== ESTADO COMPETENCIAS ESPECIALES ==================== */
+    const TRIPLES_PRESETS = {
+      time_attack: {
+        title: "TORNEO TRIPLES — TIME ATTACK",
+        officialSec: 60,
+        tiebreakSec: 30,
+        maxShots: 0,
+        ptsNormal: 1,
+        moneyEnabled: true,
+        ptsMoney: 3,
+        halfEnabled: true,
+        ptsHalf: 3,
+        rulesText: "Time Attack: 1 minuto oficial para convertir la mayor cantidad de triples. Empates se definen en rondas de 30 segundos."
       },
-      posX: 50,
-      posY: 84,
-      fontFamily: "'Barlow Condensed', sans-serif",
-      boardScale: 1.0,
-      ligaSize: 92,
-      teamLogoSize: 44,
-      teamFontSize: 25,
-      scoreBoxSize: 48,
-      clockFontSize: 32,
-      ...GRAYSCALE_DEFAULTS,
-      name1: "LOCAL",
-      name2: "VISITA",
-      showShotClock: true,
-      topBadgeEnabled: false,
-      topBadgeType: "text",
-      topTextValue: "",
-      topBadgeOffsetY: -24,
-      topBadgeFontSize: 16,
-      topBadgeMaxSize: 36,
-      logoLiga: "",
-      logo1: "",
-      logo2: "",
-      logoTop: "",
-      socialAutoEnabled: true,
-      socialPosition: "top-left",
-      socialScale: 1.35,
-      socialIntervalSec: 150
+      femicentro: {
+        title: "CONCURSO DE TRIPLES — FEMICENTRO",
+        officialSec: 0,
+        tiebreakSec: 0,
+        maxShots: 6,
+        ptsNormal: 1,
+        moneyEnabled: false,
+        ptsMoney: 3,
+        halfEnabled: false,
+        ptsHalf: 3,
+        rulesText: "Modalidad Femicentro: 6 lanzamientos de triple por participante. Gana quien convierta los 6 puntos o la mayor cantidad de aciertos."
+      }
     };
 
-    let especialesRules = {
-      triples: "5 racks de triples + balón dinero en cada rack. Máximo puntaje define el avance de ronda.",
-      tiros_libres: "Turnos de tiros libres desde la línea. Mayor efectividad o desempate súbito define al ganador."
+    const LIBRES_PRESETS = {
+      time_attack: {
+        title: "TIROS LIBRES — TIME ATTACK",
+        officialSec: 60,
+        tiebreakSec: 30,
+        maxShots: 0,
+        ptsNormal: 1,
+        bonusLastEnabled: false,
+        ptsBonus: 2,
+        rulesText: "Time Attack: 1 minuto para encestar la mayor cantidad de tiros libres desde la línea. Empates se definen en 30 segundos."
+      },
+      femicentro: {
+        title: "TIROS LIBRES — FEMICENTRO",
+        officialSec: 0,
+        tiebreakSec: 0,
+        maxShots: 10,
+        ptsNormal: 1,
+        bonusLastEnabled: false,
+        ptsBonus: 2,
+        rulesText: "Modalidad Femicentro: 10 lanzamientos desde la línea de tiros libres. Gana quien convierta la mayor cantidad de aciertos."
+      }
     };
 
-    let extractedPalette = [];
+    let especialesState = {
+      enabledTriples: true,
+      enabledLibres: false,
+      triples: {
+        modePreset: "time_attack",
+        title: "TORNEO TRIPLES — TIME ATTACK",
+        stage: "GRUPO A",
+        categoryLabel: "TODO COMPETIDOR",
+        officialSec: 60,
+        tiebreakSec: 30,
+        maxShots: 0,
+        ptsNormal: 1,
+        moneyEnabled: true,
+        ptsMoney: 3,
+        halfEnabled: true,
+        ptsHalf: 3,
+        targetOverride: 0,
+        compLogo: "",
+        compLogoSize: 66,
+        teamLogoSize: 60,
+        bgAlpha: 85,
+        scale: 100,
+        colorBg: "#2b2f38",
+        colorAccent: "#e11d2e",
+        rulesText: TRIPLES_PRESETS.time_attack.rulesText,
+        teamLogos: {},
+        players: []
+      },
+      libres: {
+        modePreset: "time_attack",
+        title: "TIROS LIBRES — TIME ATTACK",
+        stage: "CLASIFICATORIA",
+        categoryLabel: "TODO COMPETIDOR",
+        officialSec: 60,
+        tiebreakSec: 30,
+        maxShots: 0,
+        ptsNormal: 1,
+        bonusLastEnabled: false,
+        ptsBonus: 2,
+        targetOverride: 0,
+        compLogo: "",
+        compLogoSize: 66,
+        teamLogoSize: 60,
+        bgAlpha: 85,
+        scale: 100,
+        colorBg: "#2b2f38",
+        colorAccent: "#e11d2e",
+        rulesText: LIBRES_PRESETS.time_attack.rulesText,
+        teamLogos: {},
+        players: []
+      }
+    };
 
-    function showToast(msg, isError = false) {
-      const el = document.getElementById("toastBar");
-      el.textContent = msg;
-      el.style.background = isError ? "var(--accent)" : "var(--ok)";
-      el.classList.add("is-shown");
-      setTimeout(() => el.classList.remove("is-shown"), 2600);
+    /* ==================== LÓGICA MARCADORES (INTACTA) ==================== */
+    function syncTopBadgeInputs() {
+      const mode = document.getElementById("topBadgeType").value;
+      document.getElementById("topTextBox").style.display = mode === "text" ? "flex" : "none";
+      document.getElementById("topImageBox").style.display = mode === "image" ? "flex" : "none";
+    }
+    document.getElementById("topBadgeType").addEventListener("change", syncTopBadgeInputs);
+
+    function applyStageFit() {
+      const pad = 20;
+      const availW = Math.max(240, canvasArea.clientWidth - pad);
+      const availH = Math.max(135, canvasArea.clientHeight - pad);
+      let w = availW;
+      let h = Math.round((w * 9) / 16);
+      if (h > availH) {
+        h = availH;
+        w = Math.round((h * 16) / 9);
+      }
+
+      if (zoomMode !== "fit") {
+        w = Math.round(w * zoomMode);
+        h = Math.round(h * zoomMode);
+        zoomLabel.textContent = `${Math.round(zoomMode * 100)}%`;
+      } else {
+        zoomLabel.textContent = "FIT";
+      }
+
+      stageEl.style.width = `${w}px`;
+      stageEl.style.height = `${h}px`;
+      renderPreview(getSbConfig());
+    }
+
+    document.getElementById("zoom-out").addEventListener("click", () => {
+      const cur = zoomMode === "fit" ? 0.85 : Math.max(0.45, zoomMode - 0.15);
+      zoomMode = Number(cur.toFixed(2));
+      applyStageFit();
+    });
+    document.getElementById("zoom-in").addEventListener("click", () => {
+      const cur = zoomMode === "fit" ? 1.15 : Math.min(1.8, zoomMode + 0.15);
+      zoomMode = Number(cur.toFixed(2));
+      applyStageFit();
+    });
+    document.getElementById("zoom-fit").addEventListener("click", () => {
+      zoomMode = "fit";
+      applyStageFit();
+    });
+    window.addEventListener("resize", applyStageFit);
+
+    const resizer = document.getElementById("dock-resizer");
+    const dockPanel = document.getElementById("dock-panel");
+    let isResizing = false;
+
+    resizer.addEventListener("mousedown", (e) => {
+      e.preventDefault();
+      isResizing = true;
+    });
+    window.addEventListener("mousemove", (e) => {
+      if (!isResizing) return;
+      const totalH = window.innerHeight;
+      const newDockH = Math.max(170, Math.min(totalH - 180, totalH - e.clientY));
+      dockPanel.style.height = `${newDockH}px`;
+      applyStageFit();
+    });
+    window.addEventListener("mouseup", () => {
+      isResizing = false;
+    });
+
+    function extractStrongColors(imgEl) {
+      const c = document.createElement("canvas");
+      c.width = 48;
+      c.height = 48;
+      const ctx = c.getContext("2d");
+      ctx.drawImage(imgEl, 0, 0, 48, 48);
+      const { data } = ctx.getImageData(0, 0, 48, 48);
+      const buckets = new Map();
+
+      for (let i = 0; i < data.length; i += 4) {
+        const a = data[i + 3];
+        if (a < 140) continue;
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+        const maxC = Math.max(r, g, b);
+        const minC = Math.min(r, g, b);
+        const sat = maxC === 0 ? 0 : (maxC - minC) / maxC;
+        if (sat < 0.22 && maxC > 220) continue;
+
+        const qr = Math.round(r / 32) * 32;
+        const qg = Math.round(g / 32) * 32;
+        const qb = Math.round(b / 32) * 32;
+        const hex = "#" + [
+          Math.min(255, qr),
+          Math.min(255, qg),
+          Math.min(255, qb)
+        ].map((x) => x.toString(16).padStart(2, "0")).join("");
+
+        buckets.set(hex, (buckets.get(hex) || 0) + (1 + sat * 2.5));
+      }
+
+      return [...buckets.entries()]
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 6)
+        .map(([hex]) => hex);
+    }
+
+    function renderPalette(colors) {
+      const wrap = document.getElementById("league-palette");
+      wrap.innerHTML = "";
+      if (!colors.length) {
+        wrap.innerHTML = `<span style="font-size:0.7rem; color:var(--muted);">Sin colores destacados</span>`;
+        return;
+      }
+      colors.forEach((hex) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "swatch-btn";
+        btn.style.backgroundColor = hex;
+        btn.title = `Aplicar ${hex}`;
+        btn.addEventListener("click", async () => {
+          const targetId = document.getElementById("paletteTarget").value;
+          const targetInput = document.getElementById(targetId);
+          if (targetInput) {
+            targetInput.value = hex;
+            await saveConfig();
+          }
+        });
+        wrap.appendChild(btn);
+      });
     }
 
     function lum(hex) {
-      hex = (hex || "#2b2d33").replace("#", "");
+      hex = (hex || "#1c1e24").replace("#", "");
       if (hex.length === 3) hex = hex.split("").map((c) => c + c).join("");
       const r = parseInt(hex.substring(0, 2), 16) || 0;
       const g = parseInt(hex.substring(2, 4), 16) || 0;
@@ -623,7 +1197,7 @@
     }
 
     function shade(hex, pct) {
-      hex = (hex || "#2b2d33").replace("#", "");
+      hex = (hex || "#1c1e24").replace("#", "");
       let r = parseInt(hex.substring(0, 2), 16) || 0;
       let g = parseInt(hex.substring(2, 4), 16) || 0;
       let b = parseInt(hex.substring(4, 6), 16) || 0;
@@ -640,442 +1214,670 @@
       return "#" + [r, g, b].map((x) => x.toString(16).padStart(2, "0")).join("");
     }
 
-    function updateSliderLabels() {
-      document.getElementById("valLigaSize").textContent = `${cfg.ligaSize}px`;
-      document.getElementById("valTopOffset").textContent = `${cfg.topBadgeOffsetY}px`;
-      document.getElementById("valTopFont").textContent = `${cfg.topBadgeFontSize}px`;
-      document.getElementById("valTopImg").textContent = `${cfg.topBadgeMaxSize}px`;
-      document.getElementById("valPosX").textContent = `${Number(cfg.posX).toFixed(1)}%`;
-      document.getElementById("valPosY").textContent = `${Number(cfg.posY).toFixed(1)}%`;
-      document.getElementById("valBoardScale").textContent = `${Number(cfg.boardScale).toFixed(2)}x`;
-      document.getElementById("valTeamLogo").textContent = `${cfg.teamLogoSize}px`;
-      document.getElementById("valTeamFont").textContent = `${cfg.teamFontSize}px`;
-      document.getElementById("valScoreFont").textContent = `${cfg.scoreBoxSize}px`;
-      document.getElementById("valClockFont").textContent = `${cfg.clockFontSize}px`;
-      document.getElementById("valSocialScale").textContent = `${Number(cfg.socialScale).toFixed(2)}x`;
-      document.getElementById("valSocialInterval").textContent = `${cfg.socialIntervalSec}s`;
+    function updateRangeLabels() {
+      const n = (id) => parseFloat(document.getElementById(id).value);
+      document.getElementById("v_posX").textContent = n("posX").toFixed(1) + "%";
+      document.getElementById("v_posY").textContent = n("posY").toFixed(1) + "%";
+      document.getElementById("v_topBadgeOffsetY").textContent = n("topBadgeOffsetY") + "px";
+      document.getElementById("v_topBadgeFontSize").textContent = n("topBadgeFontSize") + "px";
+      document.getElementById("v_topBadgeMaxSize").textContent = n("topBadgeMaxSize") + "px";
+      document.getElementById("v_boardScale").textContent = n("boardScale").toFixed(2) + "x";
+      document.getElementById("v_ligaSize").textContent = n("ligaSize") + "px";
+      document.getElementById("v_teamLogoSize").textContent = n("teamLogoSize") + "px";
+      document.getElementById("v_teamFontSize").textContent = n("teamFontSize") + "px";
+      document.getElementById("v_scoreBoxSize").textContent = n("scoreBoxSize") + "px";
+      document.getElementById("v_clockFontSize").textContent = n("clockFontSize") + "px";
     }
 
-    function syncFormFromCfg() {
-      document.getElementById("cfgLigaSize").value = cfg.ligaSize ?? 92;
-      document.getElementById("cfgName1").value = cfg.name1 || "LOCAL";
-      document.getElementById("cfgBg1Color").value = cfg.bg1Color || "#2b2d33";
-      document.getElementById("cfgText1Color").value = cfg.text1Color || "#f3f4f6";
-      document.getElementById("cfgName2").value = cfg.name2 || "VISITA";
-      document.getElementById("cfgBg2Color").value = cfg.bg2Color || "#2b2d33";
-      document.getElementById("cfgText2Color").value = cfg.text2Color || "#f3f4f6";
-
-      document.getElementById("cfgTopBadgeEnabled").checked = Boolean(cfg.topBadgeEnabled);
-      document.getElementById("cfgTopBadgeType").value = cfg.topBadgeType || "text";
-      document.getElementById("cfgTopTextValue").value = cfg.topTextValue || "";
-      document.getElementById("cfgTopBadgeOffsetY").value = cfg.topBadgeOffsetY ?? -24;
-      document.getElementById("cfgTopBadgeFontSize").value = cfg.topBadgeFontSize ?? 16;
-      document.getElementById("cfgTopBadgeMaxSize").value = cfg.topBadgeMaxSize ?? 36;
-
-      document.getElementById("cfgFontFamily").value = cfg.fontFamily || "'Barlow Condensed', sans-serif";
-      document.getElementById("cfgPosX").value = cfg.posX ?? 50;
-      document.getElementById("cfgPosY").value = cfg.posY ?? 84;
-      document.getElementById("cfgBoardScale").value = cfg.boardScale ?? 1.0;
-      document.getElementById("cfgTeamLogoSize").value = cfg.teamLogoSize ?? 44;
-      document.getElementById("cfgTeamFontSize").value = cfg.teamFontSize ?? 25;
-      document.getElementById("cfgScoreBoxSize").value = cfg.scoreBoxSize ?? 48;
-      document.getElementById("cfgClockFontSize").value = cfg.clockFontSize ?? 32;
-
-      document.getElementById("cfgAccentColor").value = cfg.accentColor || "#9ca3af";
-      document.getElementById("cfgScoreBgColor").value = cfg.scoreBgColor || "#14161a";
-      document.getElementById("cfgScoreTextColor").value = cfg.scoreTextColor || "#f3f4f6";
-      document.getElementById("cfgClockBgColor").value = cfg.clockBgColor || "#1b1e24";
-      document.getElementById("cfgClockTextColor").value = cfg.clockTextColor || "#ffffff";
-      document.getElementById("cfgPeriodTextColor").value = cfg.periodTextColor || "#d1d5db";
-      document.getElementById("cfgFoulActiveColor").value = cfg.foulActiveColor || "#e5e7eb";
-      document.getElementById("cfgFoulBonusColor").value = cfg.foulBonusColor || "#dc2626";
-      document.getElementById("cfgShowShotClock").checked = cfg.showShotClock !== false;
-      document.getElementById("cfgShotBgColor").value = cfg.shotBgColor || "#181a20";
-      document.getElementById("cfgShotTextColor").value = cfg.shotTextColor || "#f87171";
-
-      document.getElementById("cfgFlexyBoardId").value = cfg.flexyBoardId || "20152";
-      document.getElementById("cfgFlexyLiveId").value = cfg.flexyLiveId || "";
-
-      ["points_1", "points_2", "timer", "period", "fouls_1", "fouls_2", "shotclock"].forEach((k) => {
-        const el = document.getElementById(`src_${k}`);
-        if (el && cfg.sources?.[k]) el.value = cfg.sources[k];
+    function getSources() {
+      const map = {};
+      SOURCE_FIELDS.forEach((f) => {
+        const el = document.getElementById(`src_${f}`);
+        map[f] = el ? el.value : "manual";
       });
-
-      document.getElementById("cfgSocialAutoEnabled").checked = cfg.socialAutoEnabled !== false;
-      document.getElementById("cfgSocialPosition").value = cfg.socialPosition || "top-left";
-      document.getElementById("cfgSocialScale").value = cfg.socialScale ?? 1.35;
-      document.getElementById("cfgSocialIntervalSec").value = cfg.socialIntervalSec ?? 150;
-
-      document.getElementById("cfgRulesTriples").value = especialesRules.triples;
-      document.getElementById("cfgRulesTirosLibres").value = especialesRules.tiros_libres;
-
-      updateSliderLabels();
+      return map;
     }
 
-    function readCfgFromForm() {
-      cfg.ligaSize = parseInt(document.getElementById("cfgLigaSize").value, 10) || 92;
-      cfg.name1 = document.getElementById("cfgName1").value.trim() || "LOCAL";
-      cfg.bg1Color = document.getElementById("cfgBg1Color").value;
-      cfg.text1Color = document.getElementById("cfgText1Color").value;
-      cfg.name2 = document.getElementById("cfgName2").value.trim() || "VISITA";
-      cfg.bg2Color = document.getElementById("cfgBg2Color").value;
-      cfg.text2Color = document.getElementById("cfgText2Color").value;
-
-      cfg.topBadgeEnabled = document.getElementById("cfgTopBadgeEnabled").checked;
-      cfg.topBadgeType = document.getElementById("cfgTopBadgeType").value;
-      cfg.topTextValue = document.getElementById("cfgTopTextValue").value.trim();
-      cfg.topBadgeOffsetY = parseInt(document.getElementById("cfgTopBadgeOffsetY").value, 10) ?? -24;
-      cfg.topBadgeFontSize = parseInt(document.getElementById("cfgTopBadgeFontSize").value, 10) || 16;
-      cfg.topBadgeMaxSize = parseInt(document.getElementById("cfgTopBadgeMaxSize").value, 10) || 36;
-
-      cfg.fontFamily = document.getElementById("cfgFontFamily").value;
-      cfg.posX = parseFloat(document.getElementById("cfgPosX").value);
-      cfg.posY = parseFloat(document.getElementById("cfgPosY").value);
-      cfg.boardScale = parseFloat(document.getElementById("cfgBoardScale").value) || 1.0;
-      cfg.teamLogoSize = parseInt(document.getElementById("cfgTeamLogoSize").value, 10) || 44;
-      cfg.teamFontSize = parseInt(document.getElementById("cfgTeamFontSize").value, 10) || 25;
-      cfg.scoreBoxSize = parseInt(document.getElementById("cfgScoreBoxSize").value, 10) || 48;
-      cfg.clockFontSize = parseInt(document.getElementById("cfgClockFontSize").value, 10) || 32;
-
-      cfg.accentColor = document.getElementById("cfgAccentColor").value;
-      cfg.scoreBgColor = document.getElementById("cfgScoreBgColor").value;
-      cfg.scoreTextColor = document.getElementById("cfgScoreTextColor").value;
-      cfg.clockBgColor = document.getElementById("cfgClockBgColor").value;
-      cfg.clockTextColor = document.getElementById("cfgClockTextColor").value;
-      cfg.periodTextColor = document.getElementById("cfgPeriodTextColor").value;
-      cfg.foulActiveColor = document.getElementById("cfgFoulActiveColor").value;
-      cfg.foulBonusColor = document.getElementById("cfgFoulBonusColor").value;
-      cfg.showShotClock = document.getElementById("cfgShowShotClock").checked;
-      cfg.shotBgColor = document.getElementById("cfgShotBgColor").value;
-      cfg.shotTextColor = document.getElementById("cfgShotTextColor").value;
-
-      cfg.flexyBoardId = document.getElementById("cfgFlexyBoardId").value.trim();
-      cfg.flexyLiveId = document.getElementById("cfgFlexyLiveId").value.trim();
-
-      cfg.sources = {
-        points_1: document.getElementById("src_points_1").value,
-        points_2: document.getElementById("src_points_2").value,
-        timer: document.getElementById("src_timer").value,
-        period: document.getElementById("src_period").value,
-        fouls_1: document.getElementById("src_fouls_1").value,
-        fouls_2: document.getElementById("src_fouls_2").value,
-        shotclock: document.getElementById("src_shotclock").value
+    function getSbConfig() {
+      updateRangeLabels();
+      return {
+        flexyBoardId: "20152",
+        flexyLiveId: document.getElementById("flexyLiveId").value.trim(),
+        sources: getSources(),
+        posX: parseFloat(document.getElementById("posX").value) ?? 14,
+        posY: parseFloat(document.getElementById("posY").value) ?? 76,
+        fontFamily: document.getElementById("fontFamily").value,
+        boardScale: parseFloat(document.getElementById("boardScale").value) || 1.0,
+        ligaSize: parseInt(document.getElementById("ligaSize").value, 10) || 92,
+        teamLogoSize: parseInt(document.getElementById("teamLogoSize").value, 10) || 44,
+        teamFontSize: parseInt(document.getElementById("teamFontSize").value, 10) || 25,
+        scoreBoxSize: parseInt(document.getElementById("scoreBoxSize").value, 10) || 48,
+        clockFontSize: parseInt(document.getElementById("clockFontSize").value, 10) || 32,
+        name1: (document.getElementById("name1").value || "LOCAL").trim(),
+        bg1Color: document.getElementById("bg1Color").value,
+        text1Color: document.getElementById("text1Color").value,
+        name2: (document.getElementById("name2").value || "VISITA").trim(),
+        bg2Color: document.getElementById("bg2Color").value,
+        text2Color: document.getElementById("text2Color").value,
+        accentColor: document.getElementById("accentColor").value,
+        scoreBgColor: document.getElementById("scoreBgColor").value,
+        scoreTextColor: document.getElementById("scoreTextColor").value,
+        clockBgColor: document.getElementById("clockBgColor").value,
+        clockTextColor: document.getElementById("clockTextColor").value,
+        periodTextColor: document.getElementById("periodTextColor").value,
+        foulActiveColor: document.getElementById("foulActiveColor").value,
+        foulBonusColor: document.getElementById("foulBonusColor").value,
+        showShotClock: document.getElementById("showShotClock").checked,
+        shotBgColor: document.getElementById("shotBgColor").value,
+        shotTextColor: document.getElementById("shotTextColor").value,
+        topBadgeEnabled: document.getElementById("topBadgeEnabled").checked,
+        topBadgeType: document.getElementById("topBadgeType").value,
+        topTextValue: document.getElementById("topTextValue").value.trim(),
+        topBadgeOffsetY: parseInt(document.getElementById("topBadgeOffsetY").value, 10) || -24,
+        topBadgeFontSize: parseInt(document.getElementById("topBadgeFontSize").value, 10) || 16,
+        topBadgeMaxSize: parseInt(document.getElementById("topBadgeMaxSize").value, 10) || 36,
+        socialAutoEnabled: document.getElementById("socialAutoEnabled").checked,
+        socialPosition: document.getElementById("socialPosition").value,
+        socialIntervalSec: Math.max(20, parseInt(document.getElementById("socialIntervalSec").value, 10) || 150),
+        logoLiga: imgs.logoLiga,
+        logo1: imgs.logo1,
+        logo2: imgs.logo2,
+        logoTop: imgs.logoTop
       };
-
-      cfg.socialAutoEnabled = document.getElementById("cfgSocialAutoEnabled").checked;
-      cfg.socialPosition = document.getElementById("cfgSocialPosition").value;
-      cfg.socialScale = parseFloat(document.getElementById("cfgSocialScale").value) || 1.35;
-      cfg.socialIntervalSec = parseInt(document.getElementById("cfgSocialIntervalSec").value, 10) || 150;
-
-      especialesRules = {
-        triples: document.getElementById("cfgRulesTriples").value.trim(),
-        tiros_libres: document.getElementById("cfgRulesTirosLibres").value.trim()
-      };
-
-      updateSliderLabels();
     }
 
-    function renderStagePreview() {
-      const box = document.getElementById("box-marcadores");
-      box.style.left = `${cfg.posX ?? 50}%`;
-      box.style.top = `${cfg.posY ?? 84}%`;
-      box.style.transform = "translateX(-50%)";
-      box.dataset.x = String(cfg.posX ?? 50);
-      box.dataset.y = String(cfg.posY ?? 84);
+    function buildTopBadgePreview(cfg) {
+      if (!cfg.topBadgeEnabled) return "";
+      const yOff = cfg.topBadgeOffsetY ?? -24;
+      if (cfg.topBadgeType === "image" && cfg.logoTop) {
+        const maxH = Math.max(12, Math.round((cfg.topBadgeMaxSize || 36) * 0.72));
+        return `<div style="position:absolute;top:${yOff}px;left:50%;transform:translateX(-50%);max-width:130px;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:5;">
+          <img src="${cfg.logoTop}" style="max-height:${maxH}px;max-width:126px;object-fit:contain;display:block;">
+        </div>`;
+      }
+      if (!cfg.topTextValue) return "";
+      const fSize = Math.max(10, Math.round((cfg.topBadgeFontSize || 16) * 0.82));
+      return `<div style="position:absolute;top:${yOff}px;left:50%;transform:translateX(-50%);max-width:135px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:${cfg.scoreBgColor};border:1.5px solid ${cfg.accentColor};border-radius:5px;padding:1px 9px;font-size:${fSize}px;font-weight:800;color:#fff;z-index:5;">${cfg.topTextValue}</div>`;
+    }
 
-      const stripe1 = lum(cfg.bg1Color) > 0.55 ? "rgba(0,0,0,0.09)" : "rgba(255,255,255,0.06)";
-      const stripe2 = lum(cfg.bg2Color) > 0.55 ? "rgba(0,0,0,0.09)" : "rgba(255,255,255,0.06)";
-      const foulsHtml = Array.from({ length: 5 }, (_, i) =>
-        `<span style="width:19px;height:5px;border-radius:2px;display:inline-block;background:${i < 2 ? cfg.foulActiveColor : "rgba(0,0,0,0.35)"};border:1px solid rgba(255,255,255,0.45);"></span>`
-      ).join("");
+    function renderPreview(cfg) {
+      dragBox.style.left = `${cfg.posX ?? 14}%`;
+      dragBox.style.top = `${cfg.posY ?? 76}%`;
 
-      const topBadgeHtml = cfg.topBadgeEnabled
-        ? (cfg.topBadgeType === "image" && cfg.logoTop
-            ? `<div style="position:absolute;top:${cfg.topBadgeOffsetY}px;left:50%;transform:translateX(-50%);"><img src="${cfg.logoTop}" style="max-height:${cfg.topBadgeMaxSize}px;max-width:165px;object-fit:contain;"></div>`
-            : (cfg.topTextValue
-                ? `<div style="position:absolute;top:${cfg.topBadgeOffsetY}px;left:50%;transform:translateX(-50%);white-space:nowrap;background:${cfg.scoreBgColor};border:1.5px solid ${cfg.accentColor};border-radius:6px;padding:2px 12px;font-size:${cfg.topBadgeFontSize}px;font-weight:800;color:#fff;">${cfg.topTextValue}</div>`
-                : ""))
-        : "";
+      const mount = document.getElementById("studioSbPreview");
+      const stageScale = stageEl.clientWidth / 1920;
+      const s = cfg.boardScale * Math.max(0.32, stageScale * 1.15);
+
+      const stripe1 = lum(cfg.bg1Color) > 0.55 ? "rgba(0,0,0,0.085)" : "rgba(255,255,255,0.05)";
+      const stripe2 = lum(cfg.bg2Color) > 0.55 ? "rgba(0,0,0,0.085)" : "rgba(255,255,255,0.05)";
+
+      const foulsHtml = Array.from({ length: 5 }, (_, i) => {
+        const bg = i < 2 ? cfg.foulActiveColor : "rgba(0,0,0,0.35)";
+        const brd = i < 2 ? "1px solid #111" : "1px solid rgba(255,255,255,0.45)";
+        return `<span style="width:16px;height:4px;border-radius:2px;display:inline-block;background:${bg};border:${brd};"></span>`;
+      }).join("");
+
+      const topHtml = buildTopBadgePreview(cfg);
 
       const shotHtml = cfg.showShotClock
-        ? `<div style="position:absolute;bottom:-17px;left:50%;transform:translateX(-50%);background:${cfg.shotBgColor};color:${cfg.shotTextColor};border:1.5px solid ${cfg.accentColor};border-radius:6px;font-size:19px;font-weight:800;padding:0 7px;min-width:36px;text-align:center;">24</div>`
+        ? `<div style="position:absolute;bottom:-14px;left:50%;transform:translateX(-50%);background:${cfg.shotBgColor};color:${cfg.shotTextColor};border:1.5px solid ${cfg.accentColor};border-radius:5px;font-size:15px;font-weight:800;padding:0 6px;">24</div>`
         : "";
 
-      document.getElementById("stagePreviewMount").innerHTML = `
-        <div style="transform:scale(${cfg.boardScale});transform-origin:top center;display:inline-flex;align-items:center;height:92px;font-family:${cfg.fontFamily};">
-          ${cfg.logoLiga ? `<img src="${cfg.logoLiga}" style="height:${cfg.ligaSize}px;margin-right:10px;object-fit:contain;">` : ""}
-          <div style="position:relative;display:flex;align-items:center;height:60px;min-width:215px;padding:0 14px;gap:10px;background:linear-gradient(90deg,${shade(cfg.bg1Color, -0.14)} 0%,${cfg.bg1Color} 45%,${shade(cfg.bg1Color, 0.2)} 100%);border-top:1.5px solid ${cfg.accentColor};border-bottom:2px solid ${cfg.accentColor};border-left:1.5px solid ${cfg.accentColor};border-radius:10px 0 0 10px;">
-            <div style="position:absolute;inset:0;background-image:repeating-linear-gradient(-45deg,${stripe1} 0px,${stripe1} 2px,transparent 2px,transparent 6px);pointer-events:none;"></div>
-            ${cfg.logo1 ? `<img src="${cfg.logo1}" style="height:${cfg.teamLogoSize}px;width:${cfg.teamLogoSize}px;object-fit:contain;position:relative;z-index:2;">` : ""}
-            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;flex:1;position:relative;z-index:2;">
-              <div style="font-size:${cfg.teamFontSize}px;font-weight:800;text-transform:uppercase;line-height:1;color:${cfg.text1Color};">${cfg.name1}</div>
-              <div style="display:flex;justify-content:center;gap:5px;margin-top:6px;">${foulsHtml}</div>
+      mount.innerHTML = `
+        <style>
+          .pv-wrap { transform: scale(${s}); transform-origin: top left; display: inline-flex; align-items: center; font-family: ${cfg.fontFamily}; }
+          .pv-wing { position: relative; display: flex; align-items: center; height: 56px; min-width: 175px; padding: 0 12px; gap: 8px; overflow: hidden; border-top: 1.5px solid ${cfg.accentColor}; border-bottom: 2px solid ${cfg.accentColor}; box-shadow: inset 0 1px 0 rgba(255,255,255,0.22); }
+          .pv-wing.l { background: linear-gradient(90deg, ${shade(cfg.bg1Color, -0.14)} 0%, ${cfg.bg1Color} 45%, ${shade(cfg.bg1Color, 0.2)} 100%); border-left: 1.5px solid ${cfg.accentColor}; border-radius: 9px 0 0 9px; }
+          .pv-wing.l::before { content: ''; position: absolute; inset: 0; background-image: repeating-linear-gradient(-45deg, ${stripe1} 0px, ${stripe1} 2px, transparent 2px, transparent 6px); pointer-events: none; }
+          .pv-wing.r { flex-direction: row-reverse; background: linear-gradient(270deg, ${shade(cfg.bg2Color, -0.14)} 0%, ${cfg.bg2Color} 45%, ${shade(cfg.bg2Color, 0.2)} 100%); border-radius: 0; }
+          .pv-wing.r::before { content: ''; position: absolute; inset: 0; background-image: repeating-linear-gradient(45deg, ${stripe2} 0px, ${stripe2} 2px, transparent 2px, transparent 6px); pointer-events: none; }
+          .pv-scores { position: relative; display: flex; align-items: center; height: 64px; padding: 0 12px; gap: 6px; background: linear-gradient(180deg, ${shade(cfg.scoreBgColor, 0.14)} 0%, ${cfg.scoreBgColor} 55%, ${shade(cfg.scoreBgColor, -0.18)} 100%); border: 2px solid ${cfg.accentColor}; border-radius: 8px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.22); z-index: 2; }
+          .pv-clock { display: flex; align-items: center; height: 56px; padding: 0 12px; gap: 8px; background: linear-gradient(180deg, ${shade(cfg.clockBgColor, 0.14)} 0%, ${cfg.clockBgColor} 55%, ${shade(cfg.clockBgColor, -0.16)} 100%); border: 1.5px solid ${cfg.accentColor}; border-radius: 0 9px 9px 0; box-shadow: inset 0 1px 0 rgba(255,255,255,0.2); }
+        </style>
+        <div class="pv-wrap">
+          ${cfg.logoLiga ? `<img src="${cfg.logoLiga}" style="height:${Math.round(cfg.ligaSize * 0.8)}px;margin-right:8px;object-fit:contain;">` : ""}
+          <div class="pv-wing l">
+            ${cfg.logo1 ? `<img src="${cfg.logo1}" style="height:${Math.round(cfg.teamLogoSize * 0.85)}px;width:${Math.round(cfg.teamLogoSize * 0.85)}px;object-fit:contain;position:relative;z-index:2;">` : ""}
+            <div style="display:flex;flex-direction:column;align-items:center;flex:1;position:relative;z-index:2;">
+              <span style="font-size:${cfg.teamFontSize}px;font-weight:800;color:${cfg.text1Color};line-height:1;">${cfg.name1}</span>
+              <div style="display:flex;gap:4px;margin-top:5px;">${foulsHtml}</div>
             </div>
           </div>
-          <div style="position:relative;display:flex;align-items:center;height:68px;padding:0 14px;gap:8px;background:linear-gradient(180deg,${shade(cfg.scoreBgColor, 0.14)} 0%,${cfg.scoreBgColor} 55%,${shade(cfg.scoreBgColor, -0.18)} 100%);border:2px solid ${cfg.accentColor};border-radius:9px;z-index:3;">
-            ${topBadgeHtml}
-            <div style="min-width:54px;text-align:center;font-size:${cfg.scoreBoxSize}px;font-weight:800;color:${cfg.scoreTextColor};line-height:0.92;">0</div>
-            <span style="color:${cfg.accentColor};font-size:28px;font-weight:800;">-</span>
-            <div style="min-width:54px;text-align:center;font-size:${cfg.scoreBoxSize}px;font-weight:800;color:${cfg.scoreTextColor};line-height:0.92;">0</div>
+          <div class="pv-scores">
+            ${topHtml}
+            <span style="font-size:${cfg.scoreBoxSize}px;font-weight:800;color:${cfg.scoreTextColor};line-height:0.95;">64</span>
+            <span style="font-size:${Math.round(cfg.scoreBoxSize * 0.6)}px;font-weight:800;color:${cfg.accentColor};">-</span>
+            <span style="font-size:${cfg.scoreBoxSize}px;font-weight:800;color:${cfg.scoreTextColor};line-height:0.95;">58</span>
             ${shotHtml}
           </div>
-          <div style="position:relative;display:flex;align-items:center;flex-direction:row-reverse;height:60px;min-width:215px;padding:0 14px;gap:10px;background:linear-gradient(270deg,${shade(cfg.bg2Color, -0.14)} 0%,${cfg.bg2Color} 45%,${shade(cfg.bg2Color, 0.2)} 100%);border-top:1.5px solid ${cfg.accentColor};border-bottom:2px solid ${cfg.accentColor};border-right:1.5px solid ${cfg.accentColor};border-radius:0 10px 10px 0;">
-            <div style="position:absolute;inset:0;background-image:repeating-linear-gradient(45deg,${stripe2} 0px,${stripe2} 2px,transparent 2px,transparent 6px);pointer-events:none;"></div>
-            ${cfg.logo2 ? `<img src="${cfg.logo2}" style="height:${cfg.teamLogoSize}px;width:${cfg.teamLogoSize}px;object-fit:contain;position:relative;z-index:2;">` : ""}
-            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;flex:1;position:relative;z-index:2;">
-              <div style="font-size:${cfg.teamFontSize}px;font-weight:800;text-transform:uppercase;line-height:1;color:${cfg.text2Color};">${cfg.name2}</div>
-              <div style="display:flex;justify-content:center;gap:5px;margin-top:6px;">${foulsHtml}</div>
+          <div class="pv-wing r">
+            ${cfg.logo2 ? `<img src="${cfg.logo2}" style="height:${Math.round(cfg.teamLogoSize * 0.85)}px;width:${Math.round(cfg.teamLogoSize * 0.85)}px;object-fit:contain;position:relative;z-index:2;">` : ""}
+            <div style="display:flex;flex-direction:column;align-items:center;flex:1;position:relative;z-index:2;">
+              <span style="font-size:${cfg.teamFontSize}px;font-weight:800;color:${cfg.text2Color};line-height:1;">${cfg.name2}</span>
+              <div style="display:flex;gap:4px;margin-top:5px;">${foulsHtml}</div>
             </div>
           </div>
-          <div style="display:flex;align-items:center;height:60px;margin-left:8px;padding:0 14px;gap:10px;background:linear-gradient(180deg,${shade(cfg.clockBgColor, 0.14)} 0%,${cfg.clockBgColor} 55%,${shade(cfg.clockBgColor, -0.16)} 100%);border:1.5px solid ${cfg.accentColor};border-radius:10px;">
-            <div style="font-size:${cfg.clockFontSize}px;font-weight:700;color:${cfg.clockTextColor};">10:00</div>
-            <div style="font-size:${Math.round(cfg.clockFontSize * 0.72)}px;font-weight:800;color:${cfg.periodTextColor};background:rgba(255,255,255,0.08);padding:4px 8px;border-radius:6px;border:1px solid rgba(255,255,255,0.2);">Q1</div>
+          <div class="pv-clock">
+            <span style="font-size:${cfg.clockFontSize}px;font-weight:700;color:${cfg.clockTextColor};">04:32</span>
+            <span style="font-size:${Math.round(cfg.clockFontSize * 0.72)}px;font-weight:800;color:${cfg.periodTextColor};background:rgba(255,255,255,0.08);padding:3px 7px;border-radius:5px;border:1px solid rgba(255,255,255,0.2);">Q4</span>
           </div>
         </div>
       `;
     }
 
-    function captureLigaPalette(dataUrl) {
-      const img = new Image();
-      img.onload = () => {
-        const c = document.createElement("canvas");
-        c.width = 48;
-        c.height = 48;
-        const ctx = c.getContext("2d");
-        ctx.drawImage(img, 0, 0, 48, 48);
-        const data = ctx.getImageData(0, 0, 48, 48).data;
-        const counts = new Map();
-        for (let i = 0; i < data.length; i += 4) {
-          if (data[i + 3] < 150) continue;
-          const r = Math.round(data[i] / 28) * 28;
-          const g = Math.round(data[i + 1] / 28) * 28;
-          const b = Math.round(data[i + 2] / 28) * 28;
-          const hex = "#" + [r, g, b].map((v) => Math.min(255, v).toString(16).padStart(2, "0")).join("");
-          counts.set(hex, (counts.get(hex) || 0) + 1);
-        }
-        extractedPalette = [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 4).map((e) => e[0]);
-        const swMount = document.getElementById("ligaSwatches");
-        const applyBtn = document.getElementById("applyLigaPaletteBtn");
-        if (extractedPalette.length) {
-          swMount.innerHTML = extractedPalette.map((h) => `<span class="swatch-chip" style="background:${h};" title="${h}"></span>`).join("");
-          applyBtn.style.display = "inline-block";
-        }
-      };
-      img.src = dataUrl;
+    async function saveConfig() {
+      const cfg = getSbConfig();
+      renderPreview(cfg);
+      await update(ref(db, `${DB_PATH}/modules/marcadores`), {
+        config: cfg,
+        pos: { x: cfg.posX, y: cfg.posY }
+      });
+      await saveEspecialesConfig(false);
+      statusEl.textContent = "Sincronizado";
+      setTimeout(() => { statusEl.textContent = "Listo"; }, 1100);
     }
 
-    document.getElementById("applyLigaPaletteBtn").addEventListener("click", () => {
-      if (!extractedPalette.length) return;
-      const primary = extractedPalette[0];
-      const secondary = extractedPalette[1] || primary;
-      cfg.accentColor = primary;
-      cfg.scoreTextColor = lum(primary) > 0.45 ? primary : "#ffffff";
-      cfg.periodTextColor = cfg.scoreTextColor;
-      cfg.bg1Color = shade(primary, -0.55);
-      cfg.bg2Color = shade(secondary, -0.55);
-      cfg.text1Color = lum(cfg.bg1Color) > 0.5 ? "#111111" : "#ffffff";
-      cfg.text2Color = lum(cfg.bg2Color) > 0.5 ? "#111111" : "#ffffff";
-      syncFormFromCfg();
-      renderStagePreview();
-      showToast("Paleta de la competencia aplicada");
-    });
+    /* ==================== LÓGICA COMPETENCIAS ESPECIALES (PASOS 1–4) ==================== */
+    function syncEspecialesEnableUI() {
+      const mainEnabled = document.getElementById("modEspecialesCheck").checked;
+      document.getElementById("especialesConfigBody").classList.toggle("sp-disabled-overlay", !mainEnabled);
+    }
 
-    document.getElementById("grayscaleModeBtn").addEventListener("click", () => {
-      cfg = { ...cfg, ...GRAYSCALE_DEFAULTS };
-      syncFormFromCfg();
-      renderStagePreview();
-      showToast("Estilo sobrio en escala de grises aplicado");
-    });
+    function updateEspecialesSliders() {
+      document.getElementById("v_tr_compLogoSize").textContent = document.getElementById("tr_compLogoSize").value + "px";
+      document.getElementById("v_tr_teamLogoSize").textContent = document.getElementById("tr_teamLogoSize").value + "px";
+      document.getElementById("v_tr_bgAlpha").textContent = document.getElementById("tr_bgAlpha").value + "%";
+      document.getElementById("v_tr_scale").textContent = document.getElementById("tr_scale").value + "%";
 
-    function bindFile(inputId, key, onLoaded) {
-      document.getElementById(inputId).addEventListener("change", (e) => {
-        const f = e.target.files?.[0];
-        if (!f) return;
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-          cfg[key] = ev.target.result;
-          renderStagePreview();
-          if (onLoaded) onLoaded(ev.target.result);
-          showToast("Imagen cargada");
+      document.getElementById("v_ft_compLogoSize").textContent = document.getElementById("ft_compLogoSize").value + "px";
+      document.getElementById("v_ft_teamLogoSize").textContent = document.getElementById("ft_teamLogoSize").value + "px";
+      document.getElementById("v_ft_bgAlpha").textContent = document.getElementById("ft_bgAlpha").value + "%";
+      document.getElementById("v_ft_scale").textContent = document.getElementById("ft_scale").value + "%";
+    }
+
+    function syncTriplesFormFromState() {
+      const t = especialesState.triples;
+      document.getElementById("tr_modePreset").value = t.modePreset || "time_attack";
+      document.getElementById("tr_title").value = t.title || "";
+      document.getElementById("tr_stage").value = t.stage || "GRUPO A";
+      document.getElementById("tr_categoryLabel").value = t.categoryLabel || "TODO COMPETIDOR";
+      document.getElementById("tr_officialSec").value = t.officialSec ?? 60;
+      document.getElementById("tr_tiebreakSec").value = t.tiebreakSec ?? 30;
+      document.getElementById("tr_maxShots").value = t.maxShots ?? 0;
+      document.getElementById("tr_ptsNormal").value = t.ptsNormal ?? 1;
+      document.getElementById("tr_moneyEnabled").checked = Boolean(t.moneyEnabled);
+      document.getElementById("tr_ptsMoney").value = t.ptsMoney ?? 3;
+      document.getElementById("tr_halfEnabled").checked = Boolean(t.halfEnabled);
+      document.getElementById("tr_ptsHalf").value = t.ptsHalf ?? 3;
+      document.getElementById("tr_targetOverride").value = t.targetOverride ?? 0;
+      document.getElementById("tr_compLogoSize").value = t.compLogoSize ?? 66;
+      document.getElementById("tr_teamLogoSize").value = t.teamLogoSize ?? 60;
+      document.getElementById("tr_bgAlpha").value = t.bgAlpha ?? 85;
+      document.getElementById("tr_scale").value = t.scale ?? 100;
+      document.getElementById("tr_colorBg").value = t.colorBg || "#2b2f38";
+      document.getElementById("tr_colorAccent").value = t.colorAccent || "#e11d2e";
+      document.getElementById("tr_rulesText").value = t.rulesText || "";
+      updateEspecialesSliders();
+      renderSpecialPlayersTable("triples");
+    }
+
+    function syncLibresFormFromState() {
+      const f = especialesState.libres;
+      document.getElementById("ft_modePreset").value = f.modePreset || "time_attack";
+      document.getElementById("ft_title").value = f.title || "";
+      document.getElementById("ft_stage").value = f.stage || "CLASIFICATORIA";
+      document.getElementById("ft_categoryLabel").value = f.categoryLabel || "TODO COMPETIDOR";
+      document.getElementById("ft_officialSec").value = f.officialSec ?? 60;
+      document.getElementById("ft_tiebreakSec").value = f.tiebreakSec ?? 30;
+      document.getElementById("ft_maxShots").value = f.maxShots ?? 0;
+      document.getElementById("ft_ptsNormal").value = f.ptsNormal ?? 1;
+      document.getElementById("ft_bonusLastEnabled").checked = Boolean(f.bonusLastEnabled);
+      document.getElementById("ft_ptsBonus").value = f.ptsBonus ?? 2;
+      document.getElementById("ft_targetOverride").value = f.targetOverride ?? 0;
+      document.getElementById("ft_compLogoSize").value = f.compLogoSize ?? 66;
+      document.getElementById("ft_teamLogoSize").value = f.teamLogoSize ?? 60;
+      document.getElementById("ft_bgAlpha").value = f.bgAlpha ?? 85;
+      document.getElementById("ft_scale").value = f.scale ?? 100;
+      document.getElementById("ft_colorBg").value = f.colorBg || "#2b2f38";
+      document.getElementById("ft_colorAccent").value = f.colorAccent || "#e11d2e";
+      document.getElementById("ft_rulesText").value = f.rulesText || "";
+      updateEspecialesSliders();
+      renderSpecialPlayersTable("libres");
+    }
+
+    function readEspecialesFromForms() {
+      especialesState.enabledTriples = document.getElementById("spEnableTriples").checked;
+      especialesState.enabledLibres = document.getElementById("spEnableLibres").checked;
+
+      especialesState.triples = {
+        ...especialesState.triples,
+        modePreset: document.getElementById("tr_modePreset").value,
+        title: document.getElementById("tr_title").value.trim(),
+        stage: document.getElementById("tr_stage").value,
+        categoryLabel: document.getElementById("tr_categoryLabel").value.trim(),
+        officialSec: parseInt(document.getElementById("tr_officialSec").value, 10) || 0,
+        tiebreakSec: parseInt(document.getElementById("tr_tiebreakSec").value, 10) || 0,
+        maxShots: parseInt(document.getElementById("tr_maxShots").value, 10) || 0,
+        ptsNormal: parseInt(document.getElementById("tr_ptsNormal").value, 10) || 1,
+        moneyEnabled: document.getElementById("tr_moneyEnabled").checked,
+        ptsMoney: parseInt(document.getElementById("tr_ptsMoney").value, 10) || 3,
+        halfEnabled: document.getElementById("tr_halfEnabled").checked,
+        ptsHalf: parseInt(document.getElementById("tr_ptsHalf").value, 10) || 3,
+        targetOverride: parseInt(document.getElementById("tr_targetOverride").value, 10) || 0,
+        compLogoSize: parseInt(document.getElementById("tr_compLogoSize").value, 10) || 66,
+        teamLogoSize: parseInt(document.getElementById("tr_teamLogoSize").value, 10) || 60,
+        bgAlpha: parseInt(document.getElementById("tr_bgAlpha").value, 10) || 85,
+        scale: parseInt(document.getElementById("tr_scale").value, 10) || 100,
+        colorBg: document.getElementById("tr_colorBg").value,
+        colorAccent: document.getElementById("tr_colorAccent").value,
+        rulesText: document.getElementById("tr_rulesText").value.trim()
+      };
+
+      especialesState.libres = {
+        ...especialesState.libres,
+        modePreset: document.getElementById("ft_modePreset").value,
+        title: document.getElementById("ft_title").value.trim(),
+        stage: document.getElementById("ft_stage").value,
+        categoryLabel: document.getElementById("ft_categoryLabel").value.trim(),
+        officialSec: parseInt(document.getElementById("ft_officialSec").value, 10) || 0,
+        tiebreakSec: parseInt(document.getElementById("ft_tiebreakSec").value, 10) || 0,
+        maxShots: parseInt(document.getElementById("ft_maxShots").value, 10) || 0,
+        ptsNormal: parseInt(document.getElementById("ft_ptsNormal").value, 10) || 1,
+        bonusLastEnabled: document.getElementById("ft_bonusLastEnabled").checked,
+        ptsBonus: parseInt(document.getElementById("ft_ptsBonus").value, 10) || 2,
+        targetOverride: parseInt(document.getElementById("ft_targetOverride").value, 10) || 0,
+        compLogoSize: parseInt(document.getElementById("ft_compLogoSize").value, 10) || 66,
+        teamLogoSize: parseInt(document.getElementById("ft_teamLogoSize").value, 10) || 60,
+        bgAlpha: parseInt(document.getElementById("ft_bgAlpha").value, 10) || 85,
+        scale: parseInt(document.getElementById("ft_scale").value, 10) || 100,
+        colorBg: document.getElementById("ft_colorBg").value,
+        colorAccent: document.getElementById("ft_colorAccent").value,
+        rulesText: document.getElementById("ft_rulesText").value.trim()
+      };
+    }
+
+    async function saveEspecialesConfig(notify = true) {
+      readEspecialesFromForms();
+      const enabled = document.getElementById("modEspecialesCheck").checked;
+      await update(ref(db, `${DB_PATH}/modules/especiales`), {
+        enabled,
+        config: especialesState
+      });
+      if (notify) {
+        statusEl.textContent = "Configuración Especiales Guardada";
+        setTimeout(() => { statusEl.textContent = "Listo"; }, 1200);
+      }
+    }
+
+    // Cambio de categoría/modalidad en Triples
+    document.getElementById("tr_modePreset").addEventListener("change", (e) => {
+      const preset = TRIPLES_PRESETS[e.target.value];
+      if (preset) {
+        especialesState.triples = {
+          ...especialesState.triples,
+          modePreset: e.target.value,
+          ...preset
         };
-        reader.readAsDataURL(f);
+        syncTriplesFormFromState();
+      } else {
+        especialesState.triples.modePreset = "personalizada";
+      }
+    });
+
+    // Cambio de categoría/modalidad en Tiros Libres
+    document.getElementById("ft_modePreset").addEventListener("change", (e) => {
+      const preset = LIBRES_PRESETS[e.target.value];
+      if (preset) {
+        especialesState.libres = {
+          ...especialesState.libres,
+          modePreset: e.target.value,
+          ...preset
+        };
+        syncLibresFormFromState();
+      } else {
+        especialesState.libres.modePreset = "personalizada";
+      }
+    });
+
+    // Sub-pestañas Triples / Tiros Libres
+    document.querySelectorAll(".sp-subtab").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".sp-subtab").forEach((b) => b.classList.remove("is-active"));
+        document.querySelectorAll(".sp-pane").forEach((p) => p.classList.remove("is-active"));
+        btn.classList.add("is-active");
+        document.getElementById(btn.dataset.spTab).classList.add("is-active");
+      });
+    });
+
+    let pendingLogoTarget = { kind: "triples", team: "" };
+
+    function renderSpecialPlayersTable(kind) {
+      const prefix = kind === "triples" ? "tr" : "ft";
+      const bucket = especialesState[kind];
+      const list = bucket.players || [];
+      document.getElementById(`${prefix}_count`).textContent = list.length;
+      const tbody = document.getElementById(`${prefix}_playersBody`);
+
+      if (!list.length) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--muted); padding:14px;">Sin participantes cargados aún.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = list.map((p) => {
+        const logo = bucket.teamLogos?.[p.team] || "";
+        const logoCell = logo
+          ? `<img src="${logo}" class="sp-tbl-logo" style="cursor:pointer;" data-pick-logo="${kind}:${p.team}">`
+          : `<button type="button" class="btn btn-ghost" style="padding:2px 6px; font-size:0.65rem;" data-pick-logo="${kind}:${p.team}">+ Logo</button>`;
+
+        return `<tr>
+          <td>${logoCell}</td>
+          <td><strong>${p.name}</strong></td>
+          <td>${p.team}</td>
+          <td>${p.cat || "-"}</td>
+          <td style="font-weight:800;">${p.bestScore !== null && p.bestScore !== undefined ? p.bestScore : "-"}</td>
+          <td><button type="button" class="btn btn-ghost" style="padding:2px 7px; font-size:0.68rem;" data-del-player="${kind}:${p.id}">✕</button></td>
+        </tr>`;
+      }).join("");
+
+      tbody.querySelectorAll("[data-pick-logo]").forEach((el) => {
+        el.addEventListener("click", () => {
+          const [k, team] = el.dataset.pickLogo.split(":");
+          pendingLogoTarget = { kind: k, team };
+          const picker = document.getElementById(k === "triples" ? "tr_rowLogoPicker" : "ft_rowLogoPicker");
+          picker.value = "";
+          picker.click();
+        });
+      });
+
+      tbody.querySelectorAll("[data-del-player]").forEach((el) => {
+        el.addEventListener("click", async () => {
+          const [k, idStr] = el.dataset.delPlayer.split(":");
+          especialesState[k].players = (especialesState[k].players || []).filter((x) => String(x.id) !== idStr);
+          renderSpecialPlayersTable(k);
+          await saveEspecialesConfig(true);
+        });
       });
     }
 
-    bindFile("inLogoLiga", "logoLiga", captureLigaPalette);
-    bindFile("inLogo1", "logo1");
-    bindFile("inLogo2", "logo2");
-    bindFile("inLogoTop", "logoTop");
+    function bindSpecialListEvents(kind) {
+      const prefix = kind === "triples" ? "tr" : "ft";
 
-    document.getElementById("clearLogosBtn").addEventListener("click", () => {
-      cfg.logo1 = "";
-      cfg.logo2 = "";
-      document.getElementById("inLogo1").value = "";
-      document.getElementById("inLogo2").value = "";
-      renderStagePreview();
-      showToast("Logos de equipos limpiados");
+      document.getElementById(`${prefix}_compLogoIn`).addEventListener("change", (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const r = new FileReader();
+        r.onload = async (ev) => {
+          especialesState[kind].compLogo = ev.target.result;
+          await saveEspecialesConfig(true);
+        };
+        r.readAsDataURL(file);
+      });
+
+      document.getElementById(`${prefix}_rowLogoPicker`).addEventListener("change", (e) => {
+        const file = e.target.files?.[0];
+        if (!file || !pendingLogoTarget.team) return;
+        const r = new FileReader();
+        r.onload = async (ev) => {
+          especialesState[pendingLogoTarget.kind].teamLogos = {
+            ...(especialesState[pendingLogoTarget.kind].teamLogos || {}),
+            [pendingLogoTarget.team]: ev.target.result
+          };
+          renderSpecialPlayersTable(pendingLogoTarget.kind);
+          await saveEspecialesConfig(true);
+        };
+        r.readAsDataURL(file);
+      });
+
+      document.getElementById(`${prefix}_addPlayerBtn`).addEventListener("click", async () => {
+        const name = document.getElementById(`${prefix}_newName`).value.trim();
+        const team = document.getElementById(`${prefix}_newTeam`).value.trim().toUpperCase() || "SIN EQUIPO";
+        const cat = document.getElementById(`${prefix}_newCat`).value.trim() || "GENERAL";
+        const logoIn = document.getElementById(`${prefix}_newLogoIn`);
+        if (!name) return;
+
+        const finish = async () => {
+          especialesState[kind].players = [
+            ...(especialesState[kind].players || []),
+            { id: Date.now(), name, team, cat, bestScore: null }
+          ];
+          document.getElementById(`${prefix}_newName`).value = "";
+          document.getElementById(`${prefix}_newTeam`).value = "";
+          document.getElementById(`${prefix}_newCat`).value = "";
+          logoIn.value = "";
+          renderSpecialPlayersTable(kind);
+          await saveEspecialesConfig(true);
+        };
+
+        if (logoIn.files?.[0]) {
+          const r = new FileReader();
+          r.onload = async (ev) => {
+            especialesState[kind].teamLogos = {
+              ...(especialesState[kind].teamLogos || {}),
+              [team]: ev.target.result
+            };
+            await finish();
+          };
+          r.readAsDataURL(logoIn.files[0]);
+        } else {
+          await finish();
+        }
+      });
+
+      document.getElementById(`${prefix}_clearScoresBtn`).addEventListener("click", async () => {
+        especialesState[kind].players = (especialesState[kind].players || []).map((p) => ({ ...p, bestScore: null }));
+        renderSpecialPlayersTable(kind);
+        await saveEspecialesConfig(true);
+      });
+
+      document.getElementById(`${prefix}_clearAllBtn`).addEventListener("click", async () => {
+        especialesState[kind].players = [];
+        renderSpecialPlayersTable(kind);
+        await saveEspecialesConfig(true);
+      });
+    }
+
+    bindSpecialListEvents("triples");
+    bindSpecialListEvents("libres");
+
+    document.getElementById("saveTriplesBtn").addEventListener("click", () => saveEspecialesConfig(true));
+    document.getElementById("saveLibresBtn").addEventListener("click", () => saveEspecialesConfig(true));
+
+    document.querySelectorAll("#pane-especiales input[type='range']").forEach((r) => {
+      r.addEventListener("input", updateEspecialesSliders);
     });
+
+    /* ==================== DRAG CANVAS MARCADOR (INTACTO) ==================== */
+    let dragging = false;
+    let startX = 0;
+    let startY = 0;
+    let origLeftPct = 14;
+    let origTopPct = 76;
+
+    dragBox.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
+      dragging = true;
+      dragBox.setPointerCapture(e.pointerId);
+      startX = e.clientX;
+      startY = e.clientY;
+      origLeftPct = parseFloat(document.getElementById("posX").value) || 14;
+      origTopPct = parseFloat(document.getElementById("posY").value) || 76;
+    });
+
+    dragBox.addEventListener("pointermove", (e) => {
+      if (!dragging) return;
+      const stageRect = stageEl.getBoundingClientRect();
+      if (!stageRect.width || !stageRect.height) return;
+      const dxPct = ((e.clientX - startX) / stageRect.width) * 100;
+      const dyPct = ((e.clientY - startY) / stageRect.height) * 100;
+
+      let nx = Math.max(0, Math.min(85, origLeftPct + dxPct));
+      let ny = Math.max(0, Math.min(90, origTopPct + dyPct));
+
+      const boxRect = dragBox.getBoundingClientRect();
+      const widthPct = (boxRect.width / stageRect.width) * 100;
+      const centerPct = nx + widthPct / 2;
+      if (snapActive && Math.abs(centerPct - 50) < 1.3) {
+        nx = 50 - widthPct / 2;
+      }
+
+      nx = Number(nx.toFixed(1));
+      ny = Number(ny.toFixed(1));
+      document.getElementById("posX").value = nx;
+      document.getElementById("posY").value = ny;
+      renderPreview(getSbConfig());
+    });
+
+    dragBox.addEventListener("pointerup", async (e) => {
+      if (!dragging) return;
+      dragging = false;
+      dragBox.releasePointerCapture(e.pointerId);
+      await saveConfig();
+    });
+
+    document.getElementById("center-x-btn").addEventListener("click", async () => {
+      const stageRect = stageEl.getBoundingClientRect();
+      const boxRect = dragBox.getBoundingClientRect();
+      if (!stageRect.width || !boxRect.width) return;
+      const widthPct = (boxRect.width / stageRect.width) * 100;
+      const centeredX = Number(Math.max(0, Math.min(85, 50 - widthPct / 2)).toFixed(1));
+      document.getElementById("posX").value = centeredX;
+      await saveConfig();
+    });
+
+    document.querySelectorAll("#pane-marcadores input, #pane-marcadores select").forEach((el) => {
+      if (el.type === "file" || el.id === "paletteTarget") return;
+      el.addEventListener("input", () => renderPreview(getSbConfig()));
+      el.addEventListener("change", saveConfig);
+    });
+
+    document.querySelectorAll("input[type='file'][data-img]").forEach((input) => {
+      input.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        const key = e.target.dataset.img;
+        if (!file || !key) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          const img = new Image();
+          img.onload = async () => {
+            imgs[key] = reader.result;
+            if (key === "logoLiga") {
+              renderPalette(extractStrongColors(img));
+            }
+            await saveConfig();
+          };
+          img.src = reader.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+
+    document.getElementById("swap-teams-btn").addEventListener("click", async () => {
+      const n1 = document.getElementById("name1").value;
+      const bg1 = document.getElementById("bg1Color").value;
+      const tx1 = document.getElementById("text1Color").value;
+      const l1 = imgs.logo1;
+
+      document.getElementById("name1").value = document.getElementById("name2").value;
+      document.getElementById("bg1Color").value = document.getElementById("bg2Color").value;
+      document.getElementById("text1Color").value = document.getElementById("text2Color").value;
+      imgs.logo1 = imgs.logo2;
+
+      document.getElementById("name2").value = n1;
+      document.getElementById("bg2Color").value = bg1;
+      document.getElementById("text2Color").value = tx1;
+      imgs.logo2 = l1;
+
+      await saveConfig();
+    });
+
+    const snapBtn = document.getElementById("snap-toggle");
+    snapBtn.addEventListener("click", () => {
+      snapActive = !snapActive;
+      snapBtn.textContent = snapActive ? "Snap: ON" : "Snap: OFF";
+    });
+
+    document.getElementById("save-publish-btn").addEventListener("click", saveConfig);
+
+    requireSession(async () => {
+      const snap = await get(ref(db, `${DB_PATH}/modules`));
+      if (snap.exists()) {
+        const mods = snap.val();
+        document.querySelectorAll(".mod-enable").forEach((chk) => {
+          chk.checked = Boolean(mods[chk.dataset.mod]?.enabled);
+        });
+        const cfg = mods.marcadores?.config;
+        if (cfg) {
+          Object.entries(cfg).forEach(([k, v]) => {
+            if (k in imgs) imgs[k] = v || "";
+            const el = document.getElementById(k);
+            if (!el) return;
+            if (el.type === "checkbox") el.checked = Boolean(v);
+            else el.value = v;
+          });
+          if (mods.marcadores?.pos) {
+            if (mods.marcadores.pos.x !== undefined) document.getElementById("posX").value = mods.marcadores.pos.x;
+            if (mods.marcadores.pos.y !== undefined) document.getElementById("posY").value = mods.marcadores.pos.y;
+          }
+          syncTopBadgeInputs();
+          if (cfg.sources) {
+            SOURCE_FIELDS.forEach((f) => {
+              const sel = document.getElementById(`src_${f}`);
+              if (sel && cfg.sources[f]) sel.value = cfg.sources[f];
+            });
+          }
+          if (imgs.logoLiga) {
+            const tempImg = new Image();
+            tempImg.onload = () => renderPalette(extractStrongColors(tempImg));
+            tempImg.src = imgs.logoLiga;
+          }
+        }
+
+        if (mods.especiales?.config) {
+          especialesState = {
+            ...especialesState,
+            ...mods.especiales.config,
+            triples: { ...especialesState.triples, ...(mods.especiales.config.triples || {}) },
+            libres: { ...especialesState.libres, ...(mods.especiales.config.libres || {}) }
+          };
+          document.getElementById("spEnableTriples").checked = especialesState.enabledTriples !== false;
+          document.getElementById("spEnableLibres").checked = Boolean(especialesState.enabledLibres);
+        }
+      }
+
+      syncEspecialesEnableUI();
+      syncTriplesFormFromState();
+      syncLibresFormFromState();
+      applyStageFit();
+    }, { requireAdmin: true });
 
     document.querySelectorAll(".dock-tab").forEach((tab) => {
       tab.addEventListener("click", () => {
         document.querySelectorAll(".dock-tab").forEach((t) => t.classList.remove("is-active"));
-        tab.classList.add("is-active");
         document.querySelectorAll(".tab-section").forEach((s) => s.classList.remove("is-active"));
-        document.getElementById(tab.dataset.tab).classList.add("is-active");
+        tab.classList.add("is-active");
+        document.getElementById(`pane-${tab.dataset.target}`).classList.add("is-active");
       });
     });
 
-    const resizer = document.getElementById("dockResizer");
-    const dockPanel = document.getElementById("dockPanel");
-    let resizing = false;
-    resizer.addEventListener("mousedown", (e) => { e.preventDefault(); resizing = true; });
-    window.addEventListener("mousemove", (e) => {
-      if (!resizing) return;
-      dockPanel.style.height = `${Math.max(180, Math.min(window.innerHeight * 0.78, window.innerHeight - e.clientY))}px`;
-    });
-    window.addEventListener("mouseup", () => { resizing = false; });
-
-    document.getElementById("toggleGridCheck").addEventListener("change", (e) => {
-      document.getElementById("stageGrid").classList.toggle("is-off", !e.target.checked);
+    const gridBtn = document.getElementById("grid-toggle");
+    const gridEl = document.getElementById("stage-grid");
+    gridBtn.addEventListener("click", () => {
+      gridEl.classList.toggle("is-off");
+      gridBtn.textContent = gridEl.classList.contains("is-off") ? "Grilla: OFF" : "Grilla: ON";
     });
 
-    document.querySelectorAll(".dock-body input, .dock-body select, .dock-body textarea").forEach((el) => {
-      el.addEventListener("input", () => { readCfgFromForm(); renderStagePreview(); });
-      el.addEventListener("change", () => { readCfgFromForm(); renderStagePreview(); });
-    });
-
-    document.getElementById("newMatchBtn").addEventListener("click", async () => {
-      cfg = {
-        ...cfg,
-        posX: 50,
-        posY: 84,
-        name1: "LOCAL",
-        name2: "VISITA",
-        logo1: "",
-        logo2: "",
-        topTextValue: "",
-        topBadgeEnabled: false
-      };
-      document.getElementById("inLogo1").value = "";
-      document.getElementById("inLogo2").value = "";
-      syncFormFromCfg();
-      renderStagePreview();
-
-      await update(ref(db, `${DB_PATH}/modules/marcadores`), {
-        on: false,
-        config: cfg,
-        pos: { x: 50, y: 84 },
-        liveData: null,
-        feeds: {
-          manual: {
-            points_1: 0,
-            points_2: 0,
-            timer: "10:00",
-            period: 1,
-            fouls_1: 0,
-            fouls_2: 0,
-            shotclock: 24
-          },
-          scoresight: null,
-          flexyscore: null
+    document.querySelectorAll(".mod-enable").forEach((chk) => {
+      chk.addEventListener("change", async (e) => {
+        if (e.target.dataset.mod === "especiales") {
+          syncEspecialesEnableUI();
+          await saveEspecialesConfig(true);
+          return;
         }
+        await update(ref(db, `${DB_PATH}/modules/${e.target.dataset.mod}`), {
+          enabled: e.target.checked
+        });
       });
-
-      showToast("Nuevo partido listo: marcador oculto, centrado abajo y en 0");
     });
-
-    document.getElementById("saveStudioBtn").addEventListener("click", async () => {
-      readCfgFromForm();
-      const box = document.getElementById("box-marcadores");
-      cfg.posX = parseFloat(box.dataset.x ?? cfg.posX ?? 50);
-      cfg.posY = parseFloat(box.dataset.y ?? cfg.posY ?? 84);
-      updateSliderLabels();
-
-      const marcEnabled = document.getElementById("modMarcadoresEnabled").checked;
-      const espEnabled = document.getElementById("modEspecialesEnabled").checked;
-      const mods = [];
-      if (document.getElementById("spModTriples").checked) mods.push("triples");
-      if (document.getElementById("spModTirosLibres").checked) mods.push("tiros_libres");
-
-      await update(ref(db, `${DB_PATH}/modules/marcadores`), {
-        enabled: marcEnabled,
-        config: cfg,
-        pos: { x: cfg.posX, y: cfg.posY }
-      });
-
-      await update(ref(db, `${DB_PATH}/modules/especiales`), {
-        enabled: espEnabled,
-        config: {
-          modules: mods.length ? mods : ["triples", "tiros_libres"],
-          rules: especialesRules
-        }
-      });
-
-      showToast("Configuración guardada");
-    });
-
-    document.getElementById("testFlexyBtn").addEventListener("click", async () => {
-      readCfgFromForm();
-      try {
-        await pushToFlexyscore(cfg.flexyLiveId, {
-          team_1: cfg.name1,
-          team_2: cfg.name2,
-          points_1: 0,
-          points_2: 0,
-          moment: 1
-        }, true);
-        showToast("Conexión Flexyscore OK");
-      } catch (err) {
-        showToast(err.message || "Error Flexyscore", true);
-      }
-    });
-
-    requireSession(async () => {
-      mountDragCanvas("stage", {
-        getSnapEnabled: () => document.getElementById("toggleGridCheck").checked
-      });
-      await syncCanvasPositions();
-
-      onValue(ref(db, `${DB_PATH}/modules/marcadores`), (snap) => {
-        if (!snap.exists()) return;
-        const val = snap.val();
-        const isOn = Boolean(val.on);
-        const badge = document.getElementById("liveBadge");
-        badge.textContent = isOn ? "ON AIR" : "OFF AIR";
-        badge.style.color = isOn ? "var(--ok)" : "var(--muted)";
-
-        document.getElementById("modMarcadoresEnabled").checked = val.enabled !== false;
-
-        if (val.config) {
-          cfg = {
-            ...cfg,
-            ...val.config,
-            posX: val.pos?.x ?? val.config.posX ?? 50,
-            posY: val.pos?.y ?? val.config.posY ?? 84,
-            sources: { ...cfg.sources, ...(val.config.sources || {}) }
-          };
-          syncFormFromCfg();
-          renderStagePreview();
-        }
-      });
-
-      onValue(ref(db, `${DB_PATH}/modules/especiales`), (snap) => {
-        if (!snap.exists()) return;
-        const val = snap.val();
-        document.getElementById("modEspecialesEnabled").checked = Boolean(val.enabled);
-        const mods = Array.isArray(val.config?.modules) ? val.config.modules : ["triples", "tiros_libres"];
-        document.getElementById("spModTriples").checked = mods.includes("triples");
-        document.getElementById("spModTirosLibres").checked = mods.includes("tiros_libres");
-        if (val.config?.rules) {
-          especialesRules = { ...especialesRules, ...val.config.rules };
-          document.getElementById("cfgRulesTriples").value = especialesRules.triples;
-          document.getElementById("cfgRulesTirosLibres").value = especialesRules.tiros_libres;
-        }
-      });
-    }, { requireAdmin: true });
-
-    syncFormFromCfg();
-    renderStagePreview();
   </script>
 </body>
 </html>
