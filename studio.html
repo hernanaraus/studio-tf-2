@@ -10,15 +10,16 @@
   <style>
     .form-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(195px, 1fr));
       gap: 10px;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
     }
     .form-grid .field {
       margin-bottom: 0;
     }
     .form-grid select,
-    .form-grid input[type="color"] {
+    .form-grid input[type="text"],
+    .form-grid textarea {
       width: 100%;
       padding: 8px 10px;
       border-radius: 6px;
@@ -27,9 +28,40 @@
       color: var(--text);
       font-size: 0.85rem;
     }
+    .form-grid textarea {
+      min-height: 58px;
+      resize: vertical;
+    }
     .form-grid input[type="color"] {
-      height: 38px;
+      width: 100%;
+      height: 36px;
       padding: 2px 4px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--bg-app);
+      cursor: pointer;
+    }
+    .slider-field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    .slider-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+    .slider-val {
+      color: var(--text);
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+    .slider-field input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
       cursor: pointer;
     }
     .sub-block {
@@ -52,18 +84,17 @@
       gap: 8px;
       flex-wrap: wrap;
     }
-    .palette-swatches {
+    .palette-box {
       display: flex;
       gap: 6px;
       flex-wrap: wrap;
       align-items: center;
     }
-    .swatch-btn {
-      width: 22px;
-      height: 22px;
+    .swatch-chip {
+      width: 20px;
+      height: 20px;
       border-radius: 4px;
-      border: 1px solid #fff;
-      cursor: pointer;
+      border: 1px solid rgba(255, 255, 255, 0.55);
     }
     .btn-new-match {
       background: #1d4ed8;
@@ -118,8 +149,8 @@
       <div class="stage-16x9" id="stage">
         <div class="stage-grid" id="stageGrid"></div>
 
-        <div class="overlay-box is-selected" id="box-marcadores" data-module="marcadores" style="left:14%; top:76%;">
-          <div id="stagePreviewMount" style="transform:scale(0.3333); transform-origin:top left;"></div>
+        <div class="overlay-box is-selected" id="box-marcadores" data-module="marcadores" style="left:50%; top:84%; transform:translateX(-50%);">
+          <div id="stagePreviewMount" style="transform:scale(0.3333); transform-origin:top center;"></div>
         </div>
       </div>
     </div>
@@ -130,48 +161,49 @@
     <!-- PANEL INFERIOR CON PESTAÑAS -->
     <section class="dock-panel" id="dockPanel">
       <nav class="dock-tabs">
-        <button type="button" class="dock-tab is-active" data-tab="sec-equipos">Equipos y Logos</button>
-        <button type="button" class="dock-tab" data-tab="sec-estilo">Estilo y Medidas</button>
+        <button type="button" class="dock-tab is-active" data-tab="sec-equipos">Equipos y Competencia</button>
+        <button type="button" class="dock-tab" data-tab="sec-estilo">Estilo y Sliders</button>
         <button type="button" class="dock-tab" data-tab="sec-fuentes">Fuentes y Flexyscore</button>
         <button type="button" class="dock-tab" data-tab="sec-rrss">Redes Sociales</button>
         <button type="button" class="dock-tab" data-tab="sec-especiales">Competencias Especiales</button>
       </nav>
 
       <div class="dock-body">
-        <!-- SECCIÓN 1: EQUIPOS Y LOGOS -->
+        <!-- SECCIÓN 1: EQUIPOS Y COMPETENCIA -->
         <div class="tab-section is-active" id="sec-equipos">
           <div class="tab-head">
             <label class="enable-check">
               <input type="checkbox" id="modMarcadoresEnabled" checked>
               <span>Habilitar Módulo de Marcadores</span>
             </label>
-            <div style="display:flex; gap:8px;">
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button type="button" id="grayscaleModeBtn" class="btn btn-ghost" style="padding:6px 10px; font-size:0.74rem;">Escala de Grises Sobria</button>
               <button type="button" id="clearLogosBtn" class="btn btn-ghost" style="padding:6px 10px; font-size:0.74rem;">Limpiar Logos Equipos</button>
             </div>
           </div>
 
           <div class="sub-block">
             <div class="sub-block-title">
-              <span>Logo de Competencia / Liga (Extractor de Paleta)</span>
-              <div class="palette-swatches" id="ligaSwatches"></div>
+              <span>Logo de Competencia / Liga</span>
+              <div class="palette-box">
+                <div id="ligaSwatches" class="palette-box"></div>
+                <button type="button" id="applyLigaPaletteBtn" class="btn btn-ghost" style="padding:4px 9px; font-size:0.72rem; display:none;">Aplicar paleta</button>
+              </div>
             </div>
             <div class="form-grid">
               <div class="field">
-                <label>Subir Logo Liga</label>
+                <label>Subir Logo Competencia</label>
                 <input type="file" id="inLogoLiga" accept="image/*">
               </div>
-              <div class="field">
-                <label>Alto Logo Liga (px)</label>
-                <input type="number" id="cfgLigaSize" min="30" max="180" value="92">
+              <div class="slider-field">
+                <div class="slider-top"><span>Alto Logo Liga</span><span class="slider-val" id="valLigaSize">92px</span></div>
+                <input type="range" id="cfgLigaSize" min="36" max="150" value="92">
               </div>
             </div>
           </div>
 
           <div class="sub-block">
-            <div class="sub-block-title">
-              <span>Equipo 1 (Local)</span>
-              <div class="palette-swatches" id="team1Swatches"></div>
-            </div>
+            <div class="sub-block-title"><span>Equipo 1 (Local)</span></div>
             <div class="form-grid">
               <div class="field">
                 <label>Nombre Local</label>
@@ -183,20 +215,17 @@
               </div>
               <div class="field">
                 <label>Fondo Local</label>
-                <input type="color" id="cfgBg1Color" value="#1c1e24">
+                <input type="color" id="cfgBg1Color" value="#2b2d33">
               </div>
               <div class="field">
                 <label>Texto Local</label>
-                <input type="color" id="cfgText1Color" value="#ffffff">
+                <input type="color" id="cfgText1Color" value="#f3f4f6">
               </div>
             </div>
           </div>
 
           <div class="sub-block">
-            <div class="sub-block-title">
-              <span>Equipo 2 (Visita)</span>
-              <div class="palette-swatches" id="team2Swatches"></div>
-            </div>
+            <div class="sub-block-title"><span>Equipo 2 (Visita)</span></div>
             <div class="form-grid">
               <div class="field">
                 <label>Nombre Visita</label>
@@ -208,18 +237,18 @@
               </div>
               <div class="field">
                 <label>Fondo Visita</label>
-                <input type="color" id="cfgBg2Color" value="#1c1e24">
+                <input type="color" id="cfgBg2Color" value="#2b2d33">
               </div>
               <div class="field">
                 <label>Texto Visita</label>
-                <input type="color" id="cfgText2Color" value="#ffffff">
+                <input type="color" id="cfgText2Color" value="#f3f4f6">
               </div>
             </div>
           </div>
 
           <div class="sub-block">
             <div class="sub-block-title">
-              <span>Etiqueta / Badge Superior Central</span>
+              <span>Badge Superior Central</span>
               <label class="enable-check" style="font-size:0.75rem;">
                 <input type="checkbox" id="cfgTopBadgeEnabled">
                 <span>Mostrar Badge Superior</span>
@@ -227,40 +256,40 @@
             </div>
             <div class="form-grid">
               <div class="field">
-                <label>Tipo de Badge</label>
+                <label>Tipo</label>
                 <select id="cfgTopBadgeType">
-                  <option value="text">Texto (Ej. FINAL / U23)</option>
-                  <option value="image">Imagen / Sponsor</option>
+                  <option value="text">Texto</option>
+                  <option value="image">Imagen</option>
                 </select>
               </div>
               <div class="field">
                 <label>Texto Superior</label>
-                <input type="text" id="cfgTopTextValue" placeholder="Ej. FINAL FEMISCENTRO">
+                <input type="text" id="cfgTopTextValue" placeholder="Ej. FINAL / COPA">
               </div>
               <div class="field">
-                <label>Imagen Badge Superior</label>
+                <label>Imagen Superior</label>
                 <input type="file" id="inLogoTop" accept="image/*">
               </div>
-              <div class="field">
-                <label>Desplazamiento Y (px)</label>
-                <input type="number" id="cfgTopBadgeOffsetY" min="-60" max="10" value="-24">
+              <div class="slider-field">
+                <div class="slider-top"><span>Posición Y Badge</span><span class="slider-val" id="valTopOffset">-24px</span></div>
+                <input type="range" id="cfgTopBadgeOffsetY" min="-55" max="8" value="-24">
               </div>
-              <div class="field">
-                <label>Tamaño Texto (px)</label>
-                <input type="number" id="cfgTopBadgeFontSize" min="10" max="32" value="16">
+              <div class="slider-field">
+                <div class="slider-top"><span>Tamaño Texto</span><span class="slider-val" id="valTopFont">16px</span></div>
+                <input type="range" id="cfgTopBadgeFontSize" min="11" max="28" value="16">
               </div>
-              <div class="field">
-                <label>Alto Máx. Imagen (px)</label>
-                <input type="number" id="cfgTopBadgeMaxSize" min="16" max="80" value="36">
+              <div class="slider-field">
+                <div class="slider-top"><span>Alto Máx. Imagen</span><span class="slider-val" id="valTopImg">36px</span></div>
+                <input type="range" id="cfgTopBadgeMaxSize" min="18" max="64" value="36">
               </div>
             </div>
           </div>
         </div>
 
-        <!-- SECCIÓN 2: ESTILO Y MEDIDAS -->
+        <!-- SECCIÓN 2: ESTILO Y SLIDERS -->
         <div class="tab-section" id="sec-estilo">
           <div class="sub-block">
-            <div class="sub-block-title"><span>Tipografía y Proporciones</span></div>
+            <div class="sub-block-title"><span>Posición, Escala y Tamaños</span></div>
             <div class="form-grid">
               <div class="field">
                 <label>Tipografía</label>
@@ -275,47 +304,55 @@
                   <option value="'Teko', sans-serif">Teko</option>
                 </select>
               </div>
-              <div class="field">
-                <label>Escala General</label>
-                <input type="number" id="cfgBoardScale" step="0.05" min="0.5" max="1.6" value="1.0">
+              <div class="slider-field">
+                <div class="slider-top"><span>Posición X (%)</span><span class="slider-val" id="valPosX">50%</span></div>
+                <input type="range" id="cfgPosX" min="5" max="95" step="0.5" value="50">
               </div>
-              <div class="field">
-                <label>Tamaño Logos Equipos (px)</label>
-                <input type="number" id="cfgTeamLogoSize" min="20" max="80" value="44">
+              <div class="slider-field">
+                <div class="slider-top"><span>Posición Y (%)</span><span class="slider-val" id="valPosY">84%</span></div>
+                <input type="range" id="cfgPosY" min="5" max="92" step="0.5" value="84">
               </div>
-              <div class="field">
-                <label>Fuente Nombres (px)</label>
-                <input type="number" id="cfgTeamFontSize" min="14" max="44" value="25">
+              <div class="slider-field">
+                <div class="slider-top"><span>Escala Marcador</span><span class="slider-val" id="valBoardScale">1.00x</span></div>
+                <input type="range" id="cfgBoardScale" min="0.6" max="1.45" step="0.05" value="1.0">
               </div>
-              <div class="field">
-                <label>Fuente Puntos (px)</label>
-                <input type="number" id="cfgScoreBoxSize" min="24" max="72" value="48">
+              <div class="slider-field">
+                <div class="slider-top"><span>Logos Equipos</span><span class="slider-val" id="valTeamLogo">44px</span></div>
+                <input type="range" id="cfgTeamLogoSize" min="24" max="72" value="44">
               </div>
-              <div class="field">
-                <label>Fuente Reloj (px)</label>
-                <input type="number" id="cfgClockFontSize" min="18" max="54" value="32">
+              <div class="slider-field">
+                <div class="slider-top"><span>Fuente Nombres</span><span class="slider-val" id="valTeamFont">25px</span></div>
+                <input type="range" id="cfgTeamFontSize" min="16" max="38" value="25">
+              </div>
+              <div class="slider-field">
+                <div class="slider-top"><span>Fuente Puntos</span><span class="slider-val" id="valScoreFont">48px</span></div>
+                <input type="range" id="cfgScoreBoxSize" min="30" max="68" value="48">
+              </div>
+              <div class="slider-field">
+                <div class="slider-top"><span>Fuente Reloj</span><span class="slider-val" id="valClockFont">32px</span></div>
+                <input type="range" id="cfgClockFontSize" min="20" max="48" value="32">
               </div>
             </div>
           </div>
 
           <div class="sub-block">
-            <div class="sub-block-title"><span>Colores de Marcador, Reloj y Faltas</span></div>
+            <div class="sub-block-title"><span>Colores y Reloj 24s</span></div>
             <div class="form-grid">
               <div class="field">
-                <label>Bordes / Acento</label>
-                <input type="color" id="cfgAccentColor" value="#e3b857">
+                <label>Borde / Acento</label>
+                <input type="color" id="cfgAccentColor" value="#9ca3af">
               </div>
               <div class="field">
                 <label>Fondo Puntos</label>
-                <input type="color" id="cfgScoreBgColor" value="#0c0d10">
+                <input type="color" id="cfgScoreBgColor" value="#14161a">
               </div>
               <div class="field">
                 <label>Texto Puntos</label>
-                <input type="color" id="cfgScoreTextColor" value="#e3b857">
+                <input type="color" id="cfgScoreTextColor" value="#f3f4f6">
               </div>
               <div class="field">
                 <label>Fondo Reloj</label>
-                <input type="color" id="cfgClockBgColor" value="#141519">
+                <input type="color" id="cfgClockBgColor" value="#1b1e24">
               </div>
               <div class="field">
                 <label>Texto Reloj</label>
@@ -323,44 +360,36 @@
               </div>
               <div class="field">
                 <label>Texto Cuarto</label>
-                <input type="color" id="cfgPeriodTextColor" value="#e3b857">
+                <input type="color" id="cfgPeriodTextColor" value="#d1d5db">
               </div>
               <div class="field">
                 <label>Falta Activa (1–4)</label>
-                <input type="color" id="cfgFoulActiveColor" value="#ffe600">
+                <input type="color" id="cfgFoulActiveColor" value="#e5e7eb">
               </div>
               <div class="field">
                 <label>Falta Bonus (5)</label>
-                <input type="color" id="cfgFoulBonusColor" value="#ff1744">
+                <input type="color" id="cfgFoulBonusColor" value="#dc2626">
               </div>
-            </div>
-          </div>
-
-          <div class="sub-block">
-            <div class="sub-block-title">
-              <span>Reloj de Posesión (24s)</span>
-              <label class="enable-check" style="font-size:0.75rem;">
-                <input type="checkbox" id="cfgShowShotClock" checked>
-                <span>Mostrar Reloj 24s</span>
-              </label>
-            </div>
-            <div class="form-grid">
               <div class="field">
                 <label>Fondo 24s</label>
-                <input type="color" id="cfgShotBgColor" value="#141519">
+                <input type="color" id="cfgShotBgColor" value="#181a20">
               </div>
               <div class="field">
                 <label>Texto 24s</label>
-                <input type="color" id="cfgShotTextColor" value="#ff2a2a">
+                <input type="color" id="cfgShotTextColor" value="#f87171">
               </div>
             </div>
+            <label class="enable-check">
+              <input type="checkbox" id="cfgShowShotClock" checked>
+              <span>Mostrar Reloj de Posesión (24s)</span>
+            </label>
           </div>
         </div>
 
         <!-- SECCIÓN 3: FUENTES DE DATOS Y FLEXYSCORE -->
         <div class="tab-section" id="sec-fuentes">
           <div class="sub-block">
-            <div class="sub-block-title"><span>Asignación de Fuente por Campo</span></div>
+            <div class="sub-block-title"><span>Origen por Campo</span></div>
             <div class="form-grid">
               <div class="field">
                 <label>Puntos Local</label>
@@ -422,20 +451,18 @@
           </div>
 
           <div class="sub-block">
-            <div class="sub-block-title"><span>Integración Flexyscore</span></div>
+            <div class="sub-block-title"><span>Flexyscore</span></div>
             <div class="form-grid">
               <div class="field">
-                <label>Board ID Flexyscore</label>
+                <label>Board ID</label>
                 <input type="text" id="cfgFlexyBoardId" value="20152">
               </div>
               <div class="field">
-                <label>Live ID / Token Dispatcher</label>
+                <label>Token Live ID</label>
                 <input type="text" id="cfgFlexyLiveId" placeholder="Token liveid">
               </div>
             </div>
-            <button type="button" id="testFlexyBtn" class="btn btn-ghost" style="padding:6px 12px; font-size:0.75rem;">
-              Probar Envío a Flexyscore
-            </button>
+            <button type="button" id="testFlexyBtn" class="btn btn-ghost" style="padding:6px 12px; font-size:0.75rem;">Probar Flexyscore</button>
           </div>
         </div>
 
@@ -443,43 +470,44 @@
         <div class="tab-section" id="sec-rrss">
           <div class="sub-block">
             <div class="sub-block-title">
-              <span>Banner Automático @tiempofuera_cl</span>
+              <span>Rotación Automática (@tiempofuera_cl)</span>
               <label class="enable-check" style="font-size:0.75rem;">
                 <input type="checkbox" id="cfgSocialAutoEnabled" checked>
-                <span>Rotación Automática</span>
+                <span>Activar Rotación</span>
               </label>
             </div>
             <div class="form-grid">
               <div class="field">
-                <label>Posición en Pantalla</label>
+                <label>Posición</label>
                 <select id="cfgSocialPosition">
                   <option value="top-left">Superior Izquierda</option>
                   <option value="top-right">Superior Derecha</option>
                 </select>
               </div>
-              <div class="field">
-                <label>Escala Banner</label>
-                <input type="number" id="cfgSocialScale" step="0.05" min="0.8" max="2.0" value="1.35">
+              <div class="slider-field">
+                <div class="slider-top"><span>Escala Banner</span><span class="slider-val" id="valSocialScale">1.35x</span></div>
+                <input type="range" id="cfgSocialScale" min="0.8" max="2.0" step="0.05" value="1.35">
               </div>
-              <div class="field">
-                <label>Intervalo (segundos)</label>
-                <input type="number" id="cfgSocialIntervalSec" min="20" max="900" value="150">
+              <div class="slider-field">
+                <div class="slider-top"><span>Intervalo (seg)</span><span class="slider-val" id="valSocialInterval">150s</span></div>
+                <input type="range" id="cfgSocialIntervalSec" min="30" max="600" step="10" value="150">
               </div>
             </div>
           </div>
         </div>
 
-        <!-- SECCIÓN 5: COMPETENCIAS ESPECIALES -->
+        <!-- SECCIÓN 5: COMPETENCIAS ESPECIALES (CONFIGURACIÓN Y REGLAS) -->
         <div class="tab-section" id="sec-especiales">
           <div class="tab-head">
             <label class="enable-check">
               <input type="checkbox" id="modEspecialesEnabled">
-              <span>Habilitar Competencias Especiales en Control y Live</span>
+              <span>Habilitar Competencias Especiales</span>
             </label>
           </div>
+
           <div class="sub-block">
-            <div class="sub-block-title"><span>Modalidades Disponibles</span></div>
-            <div style="display:flex; gap:18px; flex-wrap:wrap;">
+            <div class="sub-block-title"><span>Modalidades y Reglas en Pantalla Inferior</span></div>
+            <div style="display:flex; gap:18px; flex-wrap:wrap; margin-bottom:10px;">
               <label class="enable-check">
                 <input type="checkbox" id="spModTriples" checked>
                 <span>Concurso de Triples</span>
@@ -488,6 +516,16 @@
                 <input type="checkbox" id="spModTirosLibres" checked>
                 <span>Concurso de Tiros Libres</span>
               </label>
+            </div>
+            <div class="form-grid">
+              <div class="field">
+                <label>Reglas Concurso de Triples (Zócalo Inferior)</label>
+                <textarea id="cfgRulesTriples">5 racks de triples + balón dinero en cada rack. Máximo puntaje define el avance de ronda.</textarea>
+              </div>
+              <div class="field">
+                <label>Reglas Concurso de Tiros Libres (Zócalo Inferior)</label>
+                <textarea id="cfgRulesTirosLibres">Turnos de tiros libres desde la línea. Mayor efectividad o desempate súbito define al ganador.</textarea>
+              </div>
             </div>
           </div>
         </div>
@@ -502,6 +540,23 @@
     import { mountDragCanvas, syncCanvasPositions } from "./js/canvas.js";
     import { pushToFlexyscore } from "./js/flexyscore-api.js";
 
+    const GRAYSCALE_DEFAULTS = {
+      accentColor: "#9ca3af",
+      bg1Color: "#2b2d33",
+      text1Color: "#f3f4f6",
+      bg2Color: "#2b2d33",
+      text2Color: "#f3f4f6",
+      scoreBgColor: "#14161a",
+      scoreTextColor: "#f3f4f6",
+      clockBgColor: "#1b1e24",
+      clockTextColor: "#ffffff",
+      periodTextColor: "#d1d5db",
+      foulActiveColor: "#e5e7eb",
+      foulBonusColor: "#dc2626",
+      shotBgColor: "#181a20",
+      shotTextColor: "#f87171"
+    };
+
     let cfg = {
       flexyBoardId: "20152",
       flexyLiveId: "",
@@ -514,8 +569,8 @@
         fouls_2: "manual",
         shotclock: "scoresight"
       },
-      posX: 14,
-      posY: 76,
+      posX: 50,
+      posY: 84,
       fontFamily: "'Barlow Condensed', sans-serif",
       boardScale: 1.0,
       ligaSize: 92,
@@ -523,22 +578,9 @@
       teamFontSize: 25,
       scoreBoxSize: 48,
       clockFontSize: 32,
-      accentColor: "#e3b857",
-      foulActiveColor: "#ffe600",
-      foulBonusColor: "#ff1744",
+      ...GRAYSCALE_DEFAULTS,
       name1: "LOCAL",
-      bg1Color: "#1c1e24",
-      text1Color: "#ffffff",
       name2: "VISITA",
-      bg2Color: "#1c1e24",
-      text2Color: "#ffffff",
-      scoreBgColor: "#0c0d10",
-      scoreTextColor: "#e3b857",
-      shotBgColor: "#141519",
-      shotTextColor: "#ff2a2a",
-      clockBgColor: "#141519",
-      clockTextColor: "#ffffff",
-      periodTextColor: "#e3b857",
       showShotClock: true,
       topBadgeEnabled: false,
       topBadgeType: "text",
@@ -556,6 +598,13 @@
       socialIntervalSec: 150
     };
 
+    let especialesRules = {
+      triples: "5 racks de triples + balón dinero en cada rack. Máximo puntaje define el avance de ronda.",
+      tiros_libres: "Turnos de tiros libres desde la línea. Mayor efectividad o desempate súbito define al ganador."
+    };
+
+    let extractedPalette = [];
+
     function showToast(msg, isError = false) {
       const el = document.getElementById("toastBar");
       el.textContent = msg;
@@ -565,7 +614,7 @@
     }
 
     function lum(hex) {
-      hex = (hex || "#1c1e24").replace("#", "");
+      hex = (hex || "#2b2d33").replace("#", "");
       if (hex.length === 3) hex = hex.split("").map((c) => c + c).join("");
       const r = parseInt(hex.substring(0, 2), 16) || 0;
       const g = parseInt(hex.substring(2, 4), 16) || 0;
@@ -574,7 +623,7 @@
     }
 
     function shade(hex, pct) {
-      hex = (hex || "#1c1e24").replace("#", "");
+      hex = (hex || "#2b2d33").replace("#", "");
       let r = parseInt(hex.substring(0, 2), 16) || 0;
       let g = parseInt(hex.substring(2, 4), 16) || 0;
       let b = parseInt(hex.substring(4, 6), 16) || 0;
@@ -591,53 +640,31 @@
       return "#" + [r, g, b].map((x) => x.toString(16).padStart(2, "0")).join("");
     }
 
-    // Extractor de paleta dominante desde imagen
-    function extractPalette(dataUrl, mountId, targetInputs) {
-      const mount = document.getElementById(mountId);
-      if (!mount || !dataUrl) return;
-      const img = new Image();
-      img.onload = () => {
-        const c = document.createElement("canvas");
-        c.width = 40;
-        c.height = 40;
-        const ctx = c.getContext("2d");
-        ctx.drawImage(img, 0, 0, 40, 40);
-        const data = ctx.getImageData(0, 0, 40, 40).data;
-        const counts = new Map();
-        for (let i = 0; i < data.length; i += 4) {
-          if (data[i + 3] < 140) continue;
-          const r = Math.round(data[i] / 24) * 24;
-          const g = Math.round(data[i + 1] / 24) * 24;
-          const b = Math.round(data[i + 2] / 24) * 24;
-          const hex = "#" + [r, g, b].map((v) => Math.min(255, v).toString(16).padStart(2, "0")).join("");
-          counts.set(hex, (counts.get(hex) || 0) + 1);
-        }
-        const top = [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5).map((e) => e[0]);
-        mount.innerHTML = top.map((hex) =>
-          `<button type="button" class="swatch-btn" style="background:${hex};" title="Aplicar ${hex}" data-hex="${hex}"></button>`
-        ).join("");
-        mount.querySelectorAll(".swatch-btn").forEach((btn) => {
-          btn.addEventListener("click", () => {
-            targetInputs.forEach((inpId) => {
-              const inp = document.getElementById(inpId);
-              if (inp) inp.value = btn.dataset.hex;
-            });
-            readCfgFromForm();
-            renderStagePreview();
-          });
-        });
-      };
-      img.src = dataUrl;
+    function updateSliderLabels() {
+      document.getElementById("valLigaSize").textContent = `${cfg.ligaSize}px`;
+      document.getElementById("valTopOffset").textContent = `${cfg.topBadgeOffsetY}px`;
+      document.getElementById("valTopFont").textContent = `${cfg.topBadgeFontSize}px`;
+      document.getElementById("valTopImg").textContent = `${cfg.topBadgeMaxSize}px`;
+      document.getElementById("valPosX").textContent = `${Number(cfg.posX).toFixed(1)}%`;
+      document.getElementById("valPosY").textContent = `${Number(cfg.posY).toFixed(1)}%`;
+      document.getElementById("valBoardScale").textContent = `${Number(cfg.boardScale).toFixed(2)}x`;
+      document.getElementById("valTeamLogo").textContent = `${cfg.teamLogoSize}px`;
+      document.getElementById("valTeamFont").textContent = `${cfg.teamFontSize}px`;
+      document.getElementById("valScoreFont").textContent = `${cfg.scoreBoxSize}px`;
+      document.getElementById("valClockFont").textContent = `${cfg.clockFontSize}px`;
+      document.getElementById("valSocialScale").textContent = `${Number(cfg.socialScale).toFixed(2)}x`;
+      document.getElementById("valSocialInterval").textContent = `${cfg.socialIntervalSec}s`;
     }
 
     function syncFormFromCfg() {
       document.getElementById("cfgLigaSize").value = cfg.ligaSize ?? 92;
       document.getElementById("cfgName1").value = cfg.name1 || "LOCAL";
-      document.getElementById("cfgBg1Color").value = cfg.bg1Color || "#1c1e24";
-      document.getElementById("cfgText1Color").value = cfg.text1Color || "#ffffff";
+      document.getElementById("cfgBg1Color").value = cfg.bg1Color || "#2b2d33";
+      document.getElementById("cfgText1Color").value = cfg.text1Color || "#f3f4f6";
       document.getElementById("cfgName2").value = cfg.name2 || "VISITA";
-      document.getElementById("cfgBg2Color").value = cfg.bg2Color || "#1c1e24";
-      document.getElementById("cfgText2Color").value = cfg.text2Color || "#ffffff";
+      document.getElementById("cfgBg2Color").value = cfg.bg2Color || "#2b2d33";
+      document.getElementById("cfgText2Color").value = cfg.text2Color || "#f3f4f6";
+
       document.getElementById("cfgTopBadgeEnabled").checked = Boolean(cfg.topBadgeEnabled);
       document.getElementById("cfgTopBadgeType").value = cfg.topBadgeType || "text";
       document.getElementById("cfgTopTextValue").value = cfg.topTextValue || "";
@@ -646,24 +673,25 @@
       document.getElementById("cfgTopBadgeMaxSize").value = cfg.topBadgeMaxSize ?? 36;
 
       document.getElementById("cfgFontFamily").value = cfg.fontFamily || "'Barlow Condensed', sans-serif";
+      document.getElementById("cfgPosX").value = cfg.posX ?? 50;
+      document.getElementById("cfgPosY").value = cfg.posY ?? 84;
       document.getElementById("cfgBoardScale").value = cfg.boardScale ?? 1.0;
       document.getElementById("cfgTeamLogoSize").value = cfg.teamLogoSize ?? 44;
       document.getElementById("cfgTeamFontSize").value = cfg.teamFontSize ?? 25;
       document.getElementById("cfgScoreBoxSize").value = cfg.scoreBoxSize ?? 48;
       document.getElementById("cfgClockFontSize").value = cfg.clockFontSize ?? 32;
 
-      document.getElementById("cfgAccentColor").value = cfg.accentColor || "#e3b857";
-      document.getElementById("cfgScoreBgColor").value = cfg.scoreBgColor || "#0c0d10";
-      document.getElementById("cfgScoreTextColor").value = cfg.scoreTextColor || "#e3b857";
-      document.getElementById("cfgClockBgColor").value = cfg.clockBgColor || "#141519";
+      document.getElementById("cfgAccentColor").value = cfg.accentColor || "#9ca3af";
+      document.getElementById("cfgScoreBgColor").value = cfg.scoreBgColor || "#14161a";
+      document.getElementById("cfgScoreTextColor").value = cfg.scoreTextColor || "#f3f4f6";
+      document.getElementById("cfgClockBgColor").value = cfg.clockBgColor || "#1b1e24";
       document.getElementById("cfgClockTextColor").value = cfg.clockTextColor || "#ffffff";
-      document.getElementById("cfgPeriodTextColor").value = cfg.periodTextColor || "#e3b857";
-      document.getElementById("cfgFoulActiveColor").value = cfg.foulActiveColor || "#ffe600";
-      document.getElementById("cfgFoulBonusColor").value = cfg.foulBonusColor || "#ff1744";
-
+      document.getElementById("cfgPeriodTextColor").value = cfg.periodTextColor || "#d1d5db";
+      document.getElementById("cfgFoulActiveColor").value = cfg.foulActiveColor || "#e5e7eb";
+      document.getElementById("cfgFoulBonusColor").value = cfg.foulBonusColor || "#dc2626";
       document.getElementById("cfgShowShotClock").checked = cfg.showShotClock !== false;
-      document.getElementById("cfgShotBgColor").value = cfg.shotBgColor || "#141519";
-      document.getElementById("cfgShotTextColor").value = cfg.shotTextColor || "#ff2a2a";
+      document.getElementById("cfgShotBgColor").value = cfg.shotBgColor || "#181a20";
+      document.getElementById("cfgShotTextColor").value = cfg.shotTextColor || "#f87171";
 
       document.getElementById("cfgFlexyBoardId").value = cfg.flexyBoardId || "20152";
       document.getElementById("cfgFlexyLiveId").value = cfg.flexyLiveId || "";
@@ -677,6 +705,11 @@
       document.getElementById("cfgSocialPosition").value = cfg.socialPosition || "top-left";
       document.getElementById("cfgSocialScale").value = cfg.socialScale ?? 1.35;
       document.getElementById("cfgSocialIntervalSec").value = cfg.socialIntervalSec ?? 150;
+
+      document.getElementById("cfgRulesTriples").value = especialesRules.triples;
+      document.getElementById("cfgRulesTirosLibres").value = especialesRules.tiros_libres;
+
+      updateSliderLabels();
     }
 
     function readCfgFromForm() {
@@ -687,6 +720,7 @@
       cfg.name2 = document.getElementById("cfgName2").value.trim() || "VISITA";
       cfg.bg2Color = document.getElementById("cfgBg2Color").value;
       cfg.text2Color = document.getElementById("cfgText2Color").value;
+
       cfg.topBadgeEnabled = document.getElementById("cfgTopBadgeEnabled").checked;
       cfg.topBadgeType = document.getElementById("cfgTopBadgeType").value;
       cfg.topTextValue = document.getElementById("cfgTopTextValue").value.trim();
@@ -695,6 +729,8 @@
       cfg.topBadgeMaxSize = parseInt(document.getElementById("cfgTopBadgeMaxSize").value, 10) || 36;
 
       cfg.fontFamily = document.getElementById("cfgFontFamily").value;
+      cfg.posX = parseFloat(document.getElementById("cfgPosX").value);
+      cfg.posY = parseFloat(document.getElementById("cfgPosY").value);
       cfg.boardScale = parseFloat(document.getElementById("cfgBoardScale").value) || 1.0;
       cfg.teamLogoSize = parseInt(document.getElementById("cfgTeamLogoSize").value, 10) || 44;
       cfg.teamFontSize = parseInt(document.getElementById("cfgTeamFontSize").value, 10) || 25;
@@ -709,7 +745,6 @@
       cfg.periodTextColor = document.getElementById("cfgPeriodTextColor").value;
       cfg.foulActiveColor = document.getElementById("cfgFoulActiveColor").value;
       cfg.foulBonusColor = document.getElementById("cfgFoulBonusColor").value;
-
       cfg.showShotClock = document.getElementById("cfgShowShotClock").checked;
       cfg.shotBgColor = document.getElementById("cfgShotBgColor").value;
       cfg.shotTextColor = document.getElementById("cfgShotTextColor").value;
@@ -731,14 +766,22 @@
       cfg.socialPosition = document.getElementById("cfgSocialPosition").value;
       cfg.socialScale = parseFloat(document.getElementById("cfgSocialScale").value) || 1.35;
       cfg.socialIntervalSec = parseInt(document.getElementById("cfgSocialIntervalSec").value, 10) || 150;
+
+      especialesRules = {
+        triples: document.getElementById("cfgRulesTriples").value.trim(),
+        tiros_libres: document.getElementById("cfgRulesTirosLibres").value.trim()
+      };
+
+      updateSliderLabels();
     }
 
     function renderStagePreview() {
       const box = document.getElementById("box-marcadores");
-      const posX = parseFloat(box.dataset.x ?? cfg.posX ?? 14);
-      const posY = parseFloat(box.dataset.y ?? cfg.posY ?? 76);
-      cfg.posX = posX;
-      cfg.posY = posY;
+      box.style.left = `${cfg.posX ?? 50}%`;
+      box.style.top = `${cfg.posY ?? 84}%`;
+      box.style.transform = "translateX(-50%)";
+      box.dataset.x = String(cfg.posX ?? 50);
+      box.dataset.y = String(cfg.posY ?? 84);
 
       const stripe1 = lum(cfg.bg1Color) > 0.55 ? "rgba(0,0,0,0.09)" : "rgba(255,255,255,0.06)";
       const stripe2 = lum(cfg.bg2Color) > 0.55 ? "rgba(0,0,0,0.09)" : "rgba(255,255,255,0.06)";
@@ -759,7 +802,7 @@
         : "";
 
       document.getElementById("stagePreviewMount").innerHTML = `
-        <div style="transform:scale(${cfg.boardScale});transform-origin:top left;display:inline-flex;align-items:center;height:92px;font-family:${cfg.fontFamily};">
+        <div style="transform:scale(${cfg.boardScale});transform-origin:top center;display:inline-flex;align-items:center;height:92px;font-family:${cfg.fontFamily};">
           ${cfg.logoLiga ? `<img src="${cfg.logoLiga}" style="height:${cfg.ligaSize}px;margin-right:10px;object-fit:contain;">` : ""}
           <div style="position:relative;display:flex;align-items:center;height:60px;min-width:215px;padding:0 14px;gap:10px;background:linear-gradient(90deg,${shade(cfg.bg1Color, -0.14)} 0%,${cfg.bg1Color} 45%,${shade(cfg.bg1Color, 0.2)} 100%);border-top:1.5px solid ${cfg.accentColor};border-bottom:2px solid ${cfg.accentColor};border-left:1.5px solid ${cfg.accentColor};border-radius:10px 0 0 10px;">
             <div style="position:absolute;inset:0;background-image:repeating-linear-gradient(-45deg,${stripe1} 0px,${stripe1} 2px,transparent 2px,transparent 6px);pointer-events:none;"></div>
@@ -792,40 +835,87 @@
       `;
     }
 
-    function bindImageUpload(inputId, cfgKey, swatchId, targetInputs) {
+    function captureLigaPalette(dataUrl) {
+      const img = new Image();
+      img.onload = () => {
+        const c = document.createElement("canvas");
+        c.width = 48;
+        c.height = 48;
+        const ctx = c.getContext("2d");
+        ctx.drawImage(img, 0, 0, 48, 48);
+        const data = ctx.getImageData(0, 0, 48, 48).data;
+        const counts = new Map();
+        for (let i = 0; i < data.length; i += 4) {
+          if (data[i + 3] < 150) continue;
+          const r = Math.round(data[i] / 28) * 28;
+          const g = Math.round(data[i + 1] / 28) * 28;
+          const b = Math.round(data[i + 2] / 28) * 28;
+          const hex = "#" + [r, g, b].map((v) => Math.min(255, v).toString(16).padStart(2, "0")).join("");
+          counts.set(hex, (counts.get(hex) || 0) + 1);
+        }
+        extractedPalette = [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 4).map((e) => e[0]);
+        const swMount = document.getElementById("ligaSwatches");
+        const applyBtn = document.getElementById("applyLigaPaletteBtn");
+        if (extractedPalette.length) {
+          swMount.innerHTML = extractedPalette.map((h) => `<span class="swatch-chip" style="background:${h};" title="${h}"></span>`).join("");
+          applyBtn.style.display = "inline-block";
+        }
+      };
+      img.src = dataUrl;
+    }
+
+    document.getElementById("applyLigaPaletteBtn").addEventListener("click", () => {
+      if (!extractedPalette.length) return;
+      const primary = extractedPalette[0];
+      const secondary = extractedPalette[1] || primary;
+      cfg.accentColor = primary;
+      cfg.scoreTextColor = lum(primary) > 0.45 ? primary : "#ffffff";
+      cfg.periodTextColor = cfg.scoreTextColor;
+      cfg.bg1Color = shade(primary, -0.55);
+      cfg.bg2Color = shade(secondary, -0.55);
+      cfg.text1Color = lum(cfg.bg1Color) > 0.5 ? "#111111" : "#ffffff";
+      cfg.text2Color = lum(cfg.bg2Color) > 0.5 ? "#111111" : "#ffffff";
+      syncFormFromCfg();
+      renderStagePreview();
+      showToast("Paleta de la competencia aplicada");
+    });
+
+    document.getElementById("grayscaleModeBtn").addEventListener("click", () => {
+      cfg = { ...cfg, ...GRAYSCALE_DEFAULTS };
+      syncFormFromCfg();
+      renderStagePreview();
+      showToast("Estilo sobrio en escala de grises aplicado");
+    });
+
+    function bindFile(inputId, key, onLoaded) {
       document.getElementById(inputId).addEventListener("change", (e) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
+        const f = e.target.files?.[0];
+        if (!f) return;
         const reader = new FileReader();
         reader.onload = (ev) => {
-          cfg[cfgKey] = ev.target.result;
+          cfg[key] = ev.target.result;
           renderStagePreview();
-          if (swatchId && targetInputs) {
-            extractPalette(ev.target.result, swatchId, targetInputs);
-          }
+          if (onLoaded) onLoaded(ev.target.result);
           showToast("Imagen cargada");
         };
-        reader.readAsDataURL(file);
+        reader.readAsDataURL(f);
       });
     }
 
-    bindImageUpload("inLogoLiga", "logoLiga", "ligaSwatches", ["cfgAccentColor", "cfgScoreTextColor"]);
-    bindImageUpload("inLogo1", "logo1", "team1Swatches", ["cfgBg1Color"]);
-    bindImageUpload("inLogo2", "logo2", "team2Swatches", ["cfgBg2Color"]);
-    bindImageUpload("inLogoTop", "logoTop", null, null);
+    bindFile("inLogoLiga", "logoLiga", captureLigaPalette);
+    bindFile("inLogo1", "logo1");
+    bindFile("inLogo2", "logo2");
+    bindFile("inLogoTop", "logoTop");
 
     document.getElementById("clearLogosBtn").addEventListener("click", () => {
       cfg.logo1 = "";
       cfg.logo2 = "";
       document.getElementById("inLogo1").value = "";
       document.getElementById("inLogo2").value = "";
-      document.getElementById("team1Swatches").innerHTML = "";
-      document.getElementById("team2Swatches").innerHTML = "";
       renderStagePreview();
       showToast("Logos de equipos limpiados");
     });
 
-    // Pestañas del dock inferior
     document.querySelectorAll(".dock-tab").forEach((tab) => {
       tab.addEventListener("click", () => {
         document.querySelectorAll(".dock-tab").forEach((t) => t.classList.remove("is-active"));
@@ -835,19 +925,13 @@
       });
     });
 
-    // Divisor redimensionable entre Canvas y Dock
     const resizer = document.getElementById("dockResizer");
     const dockPanel = document.getElementById("dockPanel");
     let resizing = false;
-
-    resizer.addEventListener("mousedown", (e) => {
-      e.preventDefault();
-      resizing = true;
-    });
+    resizer.addEventListener("mousedown", (e) => { e.preventDefault(); resizing = true; });
     window.addEventListener("mousemove", (e) => {
       if (!resizing) return;
-      const newHeight = window.innerHeight - e.clientY;
-      dockPanel.style.height = `${Math.max(180, Math.min(window.innerHeight * 0.78, newHeight))}px`;
+      dockPanel.style.height = `${Math.max(180, Math.min(window.innerHeight * 0.78, window.innerHeight - e.clientY))}px`;
     });
     window.addEventListener("mouseup", () => { resizing = false; });
 
@@ -855,15 +939,16 @@
       document.getElementById("stageGrid").classList.toggle("is-off", !e.target.checked);
     });
 
-    document.querySelectorAll(".dock-body input, .dock-body select").forEach((el) => {
+    document.querySelectorAll(".dock-body input, .dock-body select, .dock-body textarea").forEach((el) => {
       el.addEventListener("input", () => { readCfgFromForm(); renderStagePreview(); });
       el.addEventListener("change", () => { readCfgFromForm(); renderStagePreview(); });
     });
 
-    // Nuevo Partido: apaga marcador en vivo y resetea puntos/faltas/reloj/cuarto y equipos
     document.getElementById("newMatchBtn").addEventListener("click", async () => {
       cfg = {
         ...cfg,
+        posX: 50,
+        posY: 84,
         name1: "LOCAL",
         name2: "VISITA",
         logo1: "",
@@ -873,15 +958,13 @@
       };
       document.getElementById("inLogo1").value = "";
       document.getElementById("inLogo2").value = "";
-      document.getElementById("team1Swatches").innerHTML = "";
-      document.getElementById("team2Swatches").innerHTML = "";
       syncFormFromCfg();
       renderStagePreview();
 
       await update(ref(db, `${DB_PATH}/modules/marcadores`), {
         on: false,
         config: cfg,
-        pos: { x: cfg.posX, y: cfg.posY },
+        pos: { x: 50, y: 84 },
         liveData: null,
         feeds: {
           manual: {
@@ -898,14 +981,15 @@
         }
       });
 
-      showToast("Nuevo partido listo: marcador oculto y en 0");
+      showToast("Nuevo partido listo: marcador oculto, centrado abajo y en 0");
     });
 
     document.getElementById("saveStudioBtn").addEventListener("click", async () => {
       readCfgFromForm();
       const box = document.getElementById("box-marcadores");
-      cfg.posX = parseFloat(box.dataset.x ?? cfg.posX ?? 14);
-      cfg.posY = parseFloat(box.dataset.y ?? cfg.posY ?? 76);
+      cfg.posX = parseFloat(box.dataset.x ?? cfg.posX ?? 50);
+      cfg.posY = parseFloat(box.dataset.y ?? cfg.posY ?? 84);
+      updateSliderLabels();
 
       const marcEnabled = document.getElementById("modMarcadoresEnabled").checked;
       const espEnabled = document.getElementById("modEspecialesEnabled").checked;
@@ -921,7 +1005,10 @@
 
       await update(ref(db, `${DB_PATH}/modules/especiales`), {
         enabled: espEnabled,
-        config: { modules: mods.length ? mods : ["triples", "tiros_libres"] }
+        config: {
+          modules: mods.length ? mods : ["triples", "tiros_libres"],
+          rules: especialesRules
+        }
       });
 
       showToast("Configuración guardada");
@@ -963,16 +1050,10 @@
           cfg = {
             ...cfg,
             ...val.config,
-            posX: val.pos?.x ?? val.config.posX ?? cfg.posX,
-            posY: val.pos?.y ?? val.config.posY ?? cfg.posY,
+            posX: val.pos?.x ?? val.config.posX ?? 50,
+            posY: val.pos?.y ?? val.config.posY ?? 84,
             sources: { ...cfg.sources, ...(val.config.sources || {}) }
           };
-          const box = document.getElementById("box-marcadores");
-          box.style.left = `${cfg.posX}%`;
-          box.style.top = `${cfg.posY}%`;
-          box.dataset.x = String(cfg.posX);
-          box.dataset.y = String(cfg.posY);
-
           syncFormFromCfg();
           renderStagePreview();
         }
@@ -985,6 +1066,11 @@
         const mods = Array.isArray(val.config?.modules) ? val.config.modules : ["triples", "tiros_libres"];
         document.getElementById("spModTriples").checked = mods.includes("triples");
         document.getElementById("spModTirosLibres").checked = mods.includes("tiros_libres");
+        if (val.config?.rules) {
+          especialesRules = { ...especialesRules, ...val.config.rules };
+          document.getElementById("cfgRulesTriples").value = especialesRules.triples;
+          document.getElementById("cfgRulesTirosLibres").value = especialesRules.tiros_libres;
+        }
       });
     }, { requireAdmin: true });
 
