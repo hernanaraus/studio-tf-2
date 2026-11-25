@@ -2,649 +2,926 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Live Overlay — Studio TF 2.0</title>
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;0,900;1,700;1,800&display=swap" rel="stylesheet">
+  <title>Live — Studio TF 2.0</title>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;1,700;1,800&family=Bebas+Neue&family=Chakra+Petch:wght@600;700&family=Oswald:wght@600;700&family=Rajdhani:wght@600;700&family=Russo+One&family=Teko:wght@600;700&display=swap" rel="stylesheet">
   <style>
-    * { box-sizing: border-box; font-family: 'Barlow Condensed', sans-serif; }
     html, body {
       margin: 0;
       padding: 0;
-      width: 1920px;
-      height: 1080px;
+      width: 100vw;
+      height: 100vh;
       background: transparent !important;
       overflow: hidden;
     }
 
-    .layer-fade {
-      transition: opacity 0.45s ease, transform 0.45s ease;
-    }
-    .layer-hidden {
-      opacity: 0 !important;
-      pointer-events: none !important;
-      transform: translateY(14px);
+    #canvas1920 {
+      position: relative;
+      width: 1920px;
+      height: 1080px;
+      transform-origin: top left;
     }
 
-    /* ==================== 1. MARCADOR DE PARTIDO ==================== */
-    .match-stage {
+    .live-layer {
       position: absolute;
-      bottom: 44px;
-      left: 50%;
-      transform: translateX(-50%);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.35s ease;
+    }
+
+    .live-layer.is-visible {
+      opacity: 1;
+    }
+
+    /* Banner centrado de 10 segundos para Competencias Especiales */
+    .special-banner-wrap {
+      position: fixed;
+      inset: 0;
       display: flex;
-      flex-direction: column;
       align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      opacity: 0;
+      transform: scale(0.95);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      z-index: 45;
     }
-    .match-stage.layer-hidden {
-      transform: translate(-50%, 16px);
+
+    .special-banner-wrap.is-shown {
+      opacity: 1;
+      transform: scale(1);
     }
-    .match-top-tag {
-      background: rgba(16, 19, 26, 0.94);
-      color: #e3b857;
-      border: 1px solid rgba(227, 184, 87, 0.5);
-      border-bottom: none;
-      padding: 2px 16px;
-      border-radius: 8px 8px 0 0;
-      font-size: 13px;
-      font-weight: 800;
-      letter-spacing: 1.4px;
+
+    .special-banner-card {
+      background: linear-gradient(135deg, #111318 0%, #1c1f29 100%);
+      border: 2.5px solid var(--sb-accent, #e3b857);
+      border-radius: 16px;
+      padding: 26px 54px;
+      text-align: center;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75);
+      font-family: 'Barlow Condensed', sans-serif;
+    }
+
+    .special-banner-sub {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 3px;
       text-transform: uppercase;
+      color: var(--sb-accent, #e3b857);
+      margin-bottom: 4px;
     }
-    .match-bar {
+
+    .special-banner-title {
+      font-size: 54px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #ffffff;
+      line-height: 1;
+    }
+
+    /* Overlay de Competencias Especiales (Triples / Tiros Libres) */
+    #live-especiales {
+      left: 50%;
+      bottom: 52px;
+      transform: translateX(-50%);
+      width: 1180px;
+      font-family: 'Barlow Condensed', sans-serif;
+      z-index: 25;
+    }
+
+    .sp-panel {
+      background: rgba(15, 17, 22, 0.94);
+      border: 2px solid var(--sb-accent, #e3b857);
+      border-radius: 14px;
+      padding: 16px 22px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65);
+      color: #ffffff;
+    }
+
+    .sp-header {
       display: flex;
-      align-items: stretch;
-      height: 82px;
-      background: rgba(16, 19, 26, 0.96);
-      border: 2px solid #e3b857;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 14px 36px rgba(0, 0, 0, 0.85);
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+      padding-bottom: 10px;
+      margin-bottom: 12px;
+      gap: 12px;
     }
-    .team-block {
+
+    .sp-title {
+      font-size: 28px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--sb-accent, #e3b857);
+    }
+
+    .sp-inst {
+      font-size: 19px;
+      font-weight: 700;
+      color: #e5e7eb;
+    }
+
+    .sp-active-box {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 12px;
+    }
+
+    .sp-shooter-info {
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 8px 20px;
-      min-width: 280px;
-      position: relative;
+      min-width: 240px;
     }
-    .team-block.right {
-      flex-direction: row-reverse;
-      text-align: right;
-    }
-    .team-accent-bar {
-      width: 7px;
-      height: 100%;
-      position: absolute;
-      top: 0;
-      left: 0;
-    }
-    .team-block.right .team-accent-bar {
-      left: auto;
-      right: 0;
-    }
-    .team-logo-img {
-      width: 54px;
-      height: 54px;
+
+    .sp-shooter-logo {
+      width: 44px;
+      height: 44px;
       object-fit: contain;
-      filter: drop-shadow(0 0 5px rgba(255,255,255,0.35));
-      flex-shrink: 0;
+      border-radius: 6px;
     }
-    .team-logo-img.empty { display: none; }
-    .team-text {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
-    .team-name {
+
+    .sp-shooter-name {
       font-size: 28px;
-      font-weight: 900;
-      color: #fff;
+      font-weight: 800;
       text-transform: uppercase;
-      line-height: 0.98;
-      letter-spacing: 0.6px;
-      white-space: nowrap;
+      line-height: 1.05;
     }
-    .fouls-dots {
-      display: flex;
-      gap: 5px;
-      margin-top: 5px;
-    }
-    .team-block.right .fouls-dots { justify-content: flex-end; }
-    .foul-dot {
-      width: 11px;
-      height: 6px;
-      border-radius: 2px;
-      background: rgba(255, 255, 255, 0.16);
-    }
-    .foul-dot.active { background: #ef4444; box-shadow: 0 0 6px #ef4444; }
-    .foul-dot.bonus { background: #f59e0b; box-shadow: 0 0 8px #f59e0b; }
 
-    .score-box {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 96px;
-      padding: 0 16px;
-      background: rgba(255, 255, 255, 0.06);
-      font-size: 52px;
-      font-weight: 900;
-      color: #fff;
-      font-variant-numeric: tabular-nums;
-      border-left: 1px solid rgba(255,255,255,0.12);
-      border-right: 1px solid rgba(255,255,255,0.12);
-    }
-    .clock-center {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-width: 150px;
-      padding: 6px 18px;
-      background: #0b0d12;
-    }
-    .clock-period {
-      font-size: 14px;
-      font-weight: 900;
-      color: #e3b857;
-      letter-spacing: 1.2px;
+    .sp-shooter-team {
+      font-size: 16px;
+      font-weight: 700;
+      color: #9ca3af;
       text-transform: uppercase;
     }
-    .clock-time {
-      font-size: 40px;
-      font-weight: 900;
-      color: #fff;
-      line-height: 0.96;
-      font-variant-numeric: tabular-nums;
-    }
-    .clock-time.clutch { color: #ef4444; }
 
-    /* ==================== 2. BANNER CENTRADO 10 SEGUNDOS ==================== */
-    .intro-banner {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%) scale(0.95);
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.6s ease, transform 0.6s ease;
-      background: linear-gradient(135deg, rgba(16, 19, 26, 0.97), rgba(28, 33, 46, 0.97));
-      border: 3px solid #e3b857;
-      border-radius: 18px;
-      padding: 28px 56px;
-      text-align: center;
-      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.9);
-      z-index: 30;
+    .sp-balls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      flex: 1;
+      justify-content: center;
     }
-    .intro-banner.visible {
-      opacity: 1;
-      transform: translate(-50%, -50%) scale(1);
-    }
-    .intro-kicker {
+
+    .sp-ball-item {
+      padding: 4px 10px;
+      border-radius: 7px;
       font-size: 18px;
       font-weight: 800;
-      letter-spacing: 3px;
-      color: #e3b857;
-      text-transform: uppercase;
-    }
-    .intro-main {
-      font-size: 56px;
-      font-weight: 900;
-      color: #ffffff;
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      line-height: 1.05;
-      margin-top: 4px;
-    }
-    .intro-sub {
-      font-size: 20px;
-      font-weight: 700;
-      color: #cbd5e1;
-      margin-top: 6px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
     }
 
-    /* ==================== 3. MARCADOR COMPETENCIAS ESPECIALES ==================== */
-    .comp-stage {
-      position: absolute;
-      bottom: 44px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+    .sp-ball-item.hit {
+      background: rgba(234, 88, 12, 0.25);
+      border: 1px solid #fb923c;
+      color: #fed7aa;
     }
-    .comp-stage.layer-hidden {
-      transform: translate(-50%, 16px);
+
+    .sp-ball-item.bonus {
+      background: rgba(234, 179, 8, 0.28);
+      border: 1px solid #facc15;
+      color: #fef08a;
     }
-    .comp-bar {
-      display: flex;
-      align-items: stretch;
-      min-height: 94px;
-      background: rgba(16, 19, 26, 0.96);
-      border: 2px solid #e3b857;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 14px 36px rgba(0, 0, 0, 0.85);
+
+    .sp-ball-item.miss {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: #9ca3af;
     }
-    .comp-meta {
-      padding: 10px 22px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      background: rgba(0, 0, 0, 0.35);
-      border-right: 1px solid rgba(255, 255, 255, 0.14);
-      min-width: 230px;
+
+    .sp-score-box {
+      text-align: right;
+      min-width: 110px;
     }
-    .comp-title {
-      font-size: 16px;
-      font-weight: 900;
-      color: #e3b857;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-    }
-    .comp-round {
-      font-size: 14px;
-      font-weight: 700;
-      color: #cbd5e1;
-      text-transform: uppercase;
-      margin-top: 2px;
-    }
-    .comp-leader {
-      margin-top: 6px;
-      font-size: 14px;
+
+    .sp-score-val {
+      font-size: 38px;
       font-weight: 800;
-      color: #fff;
-      background: rgba(255,255,255,0.08);
-      padding: 2px 9px;
-      border-radius: 4px;
-      width: fit-content;
+      line-height: 0.95;
+      color: var(--sb-accent, #e3b857);
     }
-    .comp-leader span { color: #e3b857; }
 
-    .comp-player {
-      padding: 8px 24px;
+    .sp-board-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 8px;
+    }
+
+    .sp-row {
       display: flex;
       align-items: center;
-      gap: 14px;
-      min-width: 300px;
-      border-right: 1px solid rgba(255, 255, 255, 0.14);
-    }
-    .comp-player-logo {
-      width: 64px;
-      height: 64px;
-      object-fit: contain;
-      filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.38));
-      flex-shrink: 0;
-    }
-    .comp-player-logo.empty { display: none; }
-    .comp-player-name {
-      font-size: 32px;
-      font-weight: 900;
-      color: #fff;
-      text-transform: uppercase;
-      line-height: 0.98;
-      white-space: nowrap;
-    }
-    .comp-player-team {
-      font-size: 15px;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 7px 11px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      font-size: 19px;
       font-weight: 700;
-      color: #94a3b8;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-top: 3px;
     }
 
-    .comp-score-box {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 6px 24px;
-      min-width: 120px;
-      background: linear-gradient(180deg, rgba(227, 184, 87, 0.22) 0%, rgba(227, 184, 87, 0.06) 100%);
-      border-right: 1px solid rgba(255, 255, 255, 0.14);
-    }
-    .comp-score-box small, .comp-shots-box small {
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: 1.3px;
-      color: #cbd5e1;
-      text-transform: uppercase;
-    }
-    .comp-score-val {
-      font-size: 54px;
-      font-weight: 900;
-      color: #e3b857;
-      line-height: 0.92;
-      font-variant-numeric: tabular-nums;
+    .sp-row.is-winner {
+      border-color: #22c55e;
+      background: rgba(34, 197, 94, 0.16);
     }
 
-    .comp-shots-box {
-      padding: 10px 22px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      gap: 6px;
-      min-width: 340px;
-    }
-    .bballs-strip {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      min-height: 30px;
-    }
-    .bball-icon {
-      width: 26px;
-      height: 26px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 15px;
-      font-weight: 900;
-      flex-shrink: 0;
-    }
-    .bball-icon.hit {
-      background: radial-gradient(circle at 30% 30%, #fb923c, #c2410c);
-      border: 1.5px solid #fed7aa;
-      box-shadow: 0 0 10px rgba(234, 88, 12, 0.75);
-    }
-    .bball-icon.bonus {
-      background: radial-gradient(circle at 30% 30%, #fde047, #d97706);
-      color: #111;
-      font-size: 12px;
-      border: 1.5px solid #fff;
-    }
-    .bball-icon.miss {
-      background: rgba(255, 255, 255, 0.08);
-      color: rgba(255, 255, 255, 0.42);
-      font-size: 13px;
-      border: 1px solid rgba(255, 255, 255, 0.16);
-    }
-
-    /* ==================== 4. TOAST REDES SOCIALES ==================== */
-    .social-toast {
+    .social-pill-wrap {
       position: absolute;
       top: 44px;
+      left: 48px;
+      transform: translateX(-36px) scale(var(--social-scale, 1.35));
+      transform-origin: top left;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.45s ease, transform 0.45s ease;
+      z-index: 30;
+    }
+
+    .social-pill-wrap.pos-top-right {
+      left: auto;
       right: 48px;
-      background: rgba(16, 19, 26, 0.95);
-      border: 2px solid #e3b857;
-      color: #fff;
-      padding: 12px 22px;
-      border-radius: 12px;
+      transform-origin: top right;
+      transform: translateX(36px) scale(var(--social-scale, 1.35));
+    }
+
+    .social-pill-wrap.active {
+      opacity: 1;
+      transform: translateX(0) scale(var(--social-scale, 1.35));
+    }
+
+    .social-pill {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #14171f;
+      border: 2px solid var(--sb-accent, #e3b857);
+      border-radius: 10px;
+      padding: 9px 18px 9px 13px;
+      white-space: nowrap;
+      font-family: 'Barlow Condensed', sans-serif;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.55);
+    }
+
+    .social-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .social-icon.ig {
+      background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
+    }
+
+    .social-icon.yt {
+      background: linear-gradient(135deg, #ff1e1e 0%, #b80000 100%);
+    }
+
+    .social-texts {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.05;
+    }
+
+    .social-cta {
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--sb-accent, #e3b857);
+    }
+
+    .social-handle {
       font-size: 22px;
       font-weight: 800;
-      letter-spacing: 0.8px;
-      opacity: 0;
-      transform: translateY(-14px);
-      transition: opacity 0.35s ease, transform 0.35s ease;
+      color: #ffffff;
     }
-    .social-toast.visible {
-      opacity: 1;
-      transform: translateY(0);
+
+    @keyframes basketBurst {
+      0% { opacity: 0; transform: translate(-50%, 6px) scale(0.55); }
+      25% { opacity: 1; transform: translate(-50%, -18px) scale(1.28); }
+      75% { opacity: 1; transform: translate(-50%, -24px) scale(1.12); }
+      100% { opacity: 0; transform: translate(-50%, -32px) scale(0.95); }
+    }
+
+    .pts-pop-badge {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      font-weight: 900;
+      font-size: 26px;
+      line-height: 1;
+      padding: 3px 10px;
+      border-radius: 7px;
+      z-index: 30;
+      animation: basketBurst 1.15s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    .pts-pop-badge.triple {
+      background: #f59e0b;
+      color: #111;
+      border: 1.5px solid #fff;
+    }
+
+    .pts-pop-badge.doble {
+      background: #fff;
+      color: #111;
+      border: 1.5px solid var(--sb-accent, #e3b857);
     }
   </style>
 </head>
 <body>
-  <!-- Toast Redes -->
-  <div class="social-toast" id="socialToast">@tiempofuera_cl</div>
+  <div id="canvas1920">
+    <div class="social-pill-wrap" id="socialWrap">
+      <div class="social-pill" id="socialCard"></div>
+    </div>
 
-  <!-- Banner Centrado 10 Segundos Competencia Especial -->
-  <div class="intro-banner" id="introBanner">
-    <div class="intro-kicker" id="introKicker">TIEMPO FUERA • EN VIVO</div>
-    <div class="intro-main" id="introMain">COMPETENCIA DE TRIPLES</div>
-    <div class="intro-sub" id="introSub">RONDA CLASIFICATORIA</div>
-  </div>
-
-  <!-- Capa Marcador de Partido -->
-  <div class="match-stage layer-fade layer-hidden" id="matchStage">
-    <div class="match-top-tag" id="matchTopTag">TIEMPO FUERA</div>
-    <div class="match-bar" id="matchBar">
-      <div class="team-block">
-        <div class="team-accent-bar" id="barColor1" style="background:#dc2626;"></div>
-        <img id="liveLogo1" class="team-logo-img empty" alt="">
-        <div class="team-text">
-          <div class="team-name" id="liveName1">LOCAL</div>
-          <div class="fouls-dots" id="liveFouls1"></div>
-        </div>
-      </div>
-
-      <div class="score-box" id="liveScore1">0</div>
-
-      <div class="clock-center">
-        <div class="clock-period" id="livePeriod">Q1</div>
-        <div class="clock-time" id="liveClock">10:00</div>
-      </div>
-
-      <div class="score-box" id="liveScore2">0</div>
-
-      <div class="team-block right">
-        <div class="team-accent-bar" id="barColor2" style="background:#2563eb;"></div>
-        <img id="liveLogo2" class="team-logo-img empty" alt="">
-        <div class="team-text">
-          <div class="team-name" id="liveName2">VISITA</div>
-          <div class="fouls-dots" id="liveFouls2"></div>
-        </div>
+    <div class="special-banner-wrap" id="specialBanner">
+      <div class="special-banner-card">
+        <div class="special-banner-sub">TIEMPO FUERA · COMPETENCIA ESPECIAL</div>
+        <div class="special-banner-title" id="specialBannerTitle">COMPETENCIA DE TRIPLES</div>
       </div>
     </div>
-  </div>
 
-  <!-- Capa Competencias Especiales (Triples y Tiros Libres) -->
-  <div class="comp-stage layer-fade layer-hidden" id="compStage">
-    <div class="match-top-tag" id="compTopTag">TIEMPO FUERA • COMPETENCIA ESPECIAL</div>
-    <div class="comp-bar" id="compBar">
-      <div class="comp-meta">
-        <div class="comp-title" id="compTitle">COMPETENCIA DE TRIPLES</div>
-        <div class="comp-round" id="compRound">PARTIDO 1</div>
-        <div class="comp-leader" id="compLeaderBox">LÍDER: <span id="compLeaderText">-</span></div>
-      </div>
+    <div id="live-marcadores" class="live-layer" style="left: 14%; top: 76%;">
+      <div id="marcadorMount"></div>
+    </div>
 
-      <div class="comp-player">
-        <img id="compShooterLogo" class="comp-player-logo empty" alt="">
-        <div>
-          <div class="comp-player-name" id="compShooterName">ESPERANDO JUGADORA</div>
-          <div class="comp-player-team" id="compShooterTeam">EN CANCHA</div>
-        </div>
-      </div>
-
-      <div class="comp-score-box">
-        <small>PUNTOS</small>
-        <div class="comp-score-val" id="compScoreVal">0</div>
-      </div>
-
-      <div class="comp-shots-box">
-        <small id="compProgressLabel">LANZAMIENTOS: 0 / 6</small>
-        <div class="bballs-strip" id="compBallsStrip"></div>
-      </div>
+    <div id="live-especiales" class="live-layer">
+      <div id="especialesMount"></div>
     </div>
   </div>
 
   <script type="module">
     import { db, DB_PATH, ref, onValue } from "./js/firebase.js";
 
-    let matchData = { enabled: true, on: false, config: {}, feeds: {} };
-    let specialsData = { active: false, compType: "triples", instanceId: "inst_1", bannerTs: 0, instances: {} };
+    const canvas1920 = document.getElementById("canvas1920");
+    function fitViewportTo1920() {
+      const sx = window.innerWidth / 1920;
+      const sy = window.innerHeight / 1080;
+      const scale = Math.min(sx, sy);
+      const offsetX = Math.round((window.innerWidth - 1920 * scale) / 2);
+      const offsetY = Math.round((window.innerHeight - 1080 * scale) / 2);
+      canvas1920.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
+    }
+    fitViewportTo1920();
+    window.addEventListener("resize", fitViewportTo1920);
+
+    let cfg = {
+      flexyBoardId: "20152",
+      flexyLiveId: "",
+      sources: {
+        points_1: "manual",
+        points_2: "manual",
+        timer: "scoresight",
+        period: "scoresight",
+        fouls_1: "scoresight",
+        fouls_2: "scoresight",
+        shotclock: "scoresight"
+      },
+      posX: 14,
+      posY: 76,
+      fontFamily: "'Barlow Condensed', sans-serif",
+      boardScale: 1.0,
+      ligaSize: 92,
+      teamLogoSize: 44,
+      teamFontSize: 25,
+      scoreBoxSize: 48,
+      clockFontSize: 32,
+      accentColor: "#e3b857",
+      foulActiveColor: "#ffe600",
+      foulBonusColor: "#ff1744",
+      name1: "LOCAL",
+      bg1Color: "#1c1e24",
+      text1Color: "#ffffff",
+      name2: "VISITA",
+      bg2Color: "#1c1e24",
+      text2Color: "#ffffff",
+      scoreBgColor: "#0c0d10",
+      scoreTextColor: "#e3b857",
+      shotBgColor: "#141519",
+      shotTextColor: "#ff2a2a",
+      clockBgColor: "#141519",
+      clockTextColor: "#ffffff",
+      periodTextColor: "#e3b857",
+      showShotClock: true,
+      topBadgeEnabled: false,
+      topBadgeType: "text",
+      topTextValue: "",
+      topBadgeOffsetY: -24,
+      topBadgeFontSize: 16,
+      topBadgeMaxSize: 36,
+      logoLiga: "",
+      logo1: "",
+      logo2: "",
+      logoTop: "",
+      socialAutoEnabled: true,
+      socialPosition: "top-left",
+      socialScale: 1.35,
+      socialIntervalSec: 150
+    };
+
+    let feeds = { scoresight: {}, flexyscore: {}, manual: {} };
+    let marcadoresEnabled = true;
+    let marcadoresOn = false;
+    let especialesEnabled = false;
+    let especialesLive = null;
+
+    let prevPts1 = null;
+    let prevPts2 = null;
+    let lastCmdTs = 0;
     let lastBannerTs = 0;
-    let bannerTimeout = null;
-    let lastSocialTs = 0;
-    let socialTimeout = null;
+    let bannerHideTimeout = null;
 
-    function formatPeriodFiba(p) {
-      const n = parseInt(String(p ?? "1").replace(/[^0-9]/g, ""), 10) || 1;
-      return n <= 4 ? `Q${n}` : `OT${n - 4}`;
+    function lum(hex) {
+      hex = (hex || "#1c1e24").replace("#", "");
+      if (hex.length === 3) hex = hex.split("").map((c) => c + c).join("");
+      const r = parseInt(hex.substring(0, 2), 16) || 0;
+      const g = parseInt(hex.substring(2, 4), 16) || 0;
+      const b = parseInt(hex.substring(4, 6), 16) || 0;
+      return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
     }
 
-    function readMatchField(field, altKeys = []) {
-      const src = matchData.config?.sources?.[field] || "manual";
-      const bucket = matchData.feeds?.[src] || {};
-      for (const k of [field, ...altKeys]) {
-        if (bucket[k] !== undefined && bucket[k] !== null && bucket[k] !== "") return bucket[k];
-      }
-      return matchData.feeds?.manual?.[field];
-    }
-
-    function renderFoulsDots(containerId, count) {
-      const c = Math.max(0, Math.min(5, parseInt(count, 10) || 0));
-      let html = "";
-      for (let i = 1; i <= 5; i++) {
-        const cls = i <= c ? (c >= 5 ? "foul-dot bonus" : "foul-dot active") : "foul-dot";
-        html += `<span class="${cls}"></span>`;
-      }
-      document.getElementById(containerId).innerHTML = html;
-    }
-
-    function setOptionalImg(imgEl, src) {
-      if (src) {
-        imgEl.src = src;
-        imgEl.classList.remove("empty");
+    function shade(hex, pct) {
+      hex = (hex || "#1c1e24").replace("#", "");
+      let r = parseInt(hex.substring(0, 2), 16) || 0;
+      let g = parseInt(hex.substring(2, 4), 16) || 0;
+      let b = parseInt(hex.substring(4, 6), 16) || 0;
+      if (pct >= 0) {
+        r = Math.min(255, Math.floor(r + (255 - r) * pct));
+        g = Math.min(255, Math.floor(g + (255 - g) * pct));
+        b = Math.min(255, Math.floor(b + (255 - b) * pct));
       } else {
-        imgEl.removeAttribute("src");
-        imgEl.classList.add("empty");
+        const f = 1 + pct;
+        r = Math.max(0, Math.floor(r * f));
+        g = Math.max(0, Math.floor(g * f));
+        b = Math.max(0, Math.floor(b * f));
+      }
+      return "#" + [r, g, b].map((x) => x.toString(16).padStart(2, "0")).join("");
+    }
+
+    function resolveField(fieldName, altKeys = []) {
+      const srcMap = cfg.sources || {};
+      const preferred = srcMap[fieldName] || "manual";
+      const order = [preferred, "manual", "scoresight", "flexyscore"].filter((v, i, a) => a.indexOf(v) === i);
+      for (const src of order) {
+        const bucket = feeds[src] || {};
+        for (const k of [fieldName, ...altKeys]) {
+          if (bucket[k] !== undefined && bucket[k] !== null && bucket[k] !== "") return bucket[k];
+        }
+      }
+      return undefined;
+    }
+
+    function actualizarFaltas(id, cantidad) {
+      const cont = document.getElementById(id);
+      if (!cont) return;
+      const barras = cont.querySelectorAll(".foul-bar");
+      const num = parseInt(cantidad, 10) || 0;
+      barras.forEach((b, idx) => {
+        const n = idx + 1;
+        if (n <= num) {
+          b.style.background = n === 5 ? cfg.foulBonusColor : cfg.foulActiveColor;
+          b.style.border = "1px solid #111111";
+        } else {
+          b.style.background = "rgba(0,0,0,0.35)";
+          b.style.border = "1px solid rgba(255,255,255,0.45)";
+        }
+      });
+    }
+
+    function formatearPeriodo(momentRaw) {
+      const n = parseInt(String(momentRaw ?? "").replace(/[^0-9]/g, ""), 10);
+      if (isNaN(n) || n <= 0) return "Q1";
+      return n <= 4 ? "Q" + n : "OT" + (n - 4);
+    }
+
+    function animarCanasta(slotId, ptsId, val, delta) {
+      const slot = document.getElementById(slotId);
+      const el = document.getElementById(ptsId);
+      if (!slot || !el) return;
+      const badge = document.createElement("div");
+      badge.className = "pts-pop-badge " + (delta === 3 ? "triple" : "doble");
+      badge.textContent = "+" + delta;
+      slot.appendChild(badge);
+      setTimeout(() => { el.textContent = val; }, 340);
+      setTimeout(() => badge.remove(), 1200);
+    }
+
+    function buildTopBadgeLive() {
+      if (!cfg.topBadgeEnabled) return "";
+      const yOff = cfg.topBadgeOffsetY ?? -24;
+      if (cfg.topBadgeType === "image" && cfg.logoTop) {
+        const maxH = cfg.topBadgeMaxSize || 36;
+        return `<div style="position:absolute;top:${yOff}px;left:50%;transform:translateX(-50%);max-width:170px;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:5;">
+          <img src="${cfg.logoTop}" style="max-height:${maxH}px;max-width:165px;object-fit:contain;display:block;">
+        </div>`;
+      }
+      if (!cfg.topTextValue) return "";
+      const fSize = cfg.topBadgeFontSize || 16;
+      return `<div style="position:absolute;top:${yOff}px;left:50%;transform:translateX(-50%);max-width:175px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:${cfg.scoreBgColor};border:1.5px solid ${cfg.accentColor};border-radius:6px;padding:2px 12px;font-size:${fSize}px;font-weight:800;color:#fff;z-index:5;">${cfg.topTextValue}</div>`;
+    }
+
+    function renderEstructura() {
+      document.documentElement.style.setProperty("--sb-accent", cfg.accentColor || "#e3b857");
+
+      const layer = document.getElementById("live-marcadores");
+      layer.style.left = `${cfg.posX ?? 14}%`;
+      layer.style.top = `${cfg.posY ?? 76}%`;
+
+      const stripe1 = lum(cfg.bg1Color) > 0.55 ? "rgba(0,0,0,0.085)" : "rgba(255,255,255,0.05)";
+      const stripe2 = lum(cfg.bg2Color) > 0.55 ? "rgba(0,0,0,0.085)" : "rgba(255,255,255,0.05)";
+      const foulsBase = Array.from({ length: 5 }, (_, i) => `<span class="foul-bar" data-idx="${i + 1}"></span>`).join("");
+
+      const topHtml = buildTopBadgeLive();
+      const shotHtml = cfg.showShotClock
+        ? `<div id="shotclock" style="position:absolute;bottom:-17px;left:50%;transform:translateX(-50%);background:${cfg.shotBgColor};color:${cfg.shotTextColor};border:1.5px solid ${cfg.accentColor};border-radius:6px;font-size:19px;font-weight:800;padding:0 7px;min-width:36px;text-align:center;"></div>`
+        : "";
+
+      document.getElementById("marcadorMount").innerHTML = `
+        <style>
+          .lm-bar {
+            transform: scale(${cfg.boardScale || 1});
+            transform-origin: top left;
+            display: inline-flex;
+            align-items: center;
+            height: 92px;
+            font-family: ${cfg.fontFamily};
+            user-select: none;
+          }
+          .lm-wing {
+            position: relative;
+            display: flex;
+            align-items: center;
+            height: 60px;
+            min-width: 205px;
+            padding: 0 14px;
+            gap: 10px;
+            overflow: hidden;
+            border-top: 1.5px solid ${cfg.accentColor};
+            border-bottom: 2px solid ${cfg.accentColor};
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.22);
+          }
+          .lm-wing.home {
+            background: linear-gradient(90deg, ${shade(cfg.bg1Color, -0.14)} 0%, ${cfg.bg1Color} 45%, ${shade(cfg.bg1Color, 0.2)} 100%);
+            border-left: 1.5px solid ${cfg.accentColor};
+            border-radius: 10px 0 0 10px;
+          }
+          .lm-wing.home::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: repeating-linear-gradient(-45deg, ${stripe1} 0px, ${stripe1} 2px, transparent 2px, transparent 6px);
+            pointer-events: none;
+          }
+          .lm-wing.away {
+            flex-direction: row-reverse;
+            background: linear-gradient(270deg, ${shade(cfg.bg2Color, -0.14)} 0%, ${cfg.bg2Color} 45%, ${shade(cfg.bg2Color, 0.2)} 100%);
+            border-radius: 0;
+          }
+          .lm-wing.away::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: repeating-linear-gradient(45deg, ${stripe2} 0px, ${stripe2} 2px, transparent 2px, transparent 6px);
+            pointer-events: none;
+          }
+          .lm-name {
+            font-size: ${cfg.teamFontSize || 25}px;
+            font-weight: 800;
+            text-transform: uppercase;
+            line-height: 1;
+            position: relative;
+            z-index: 2;
+          }
+          .lm-fouls {
+            display: flex;
+            gap: 5px;
+            margin-top: 6px;
+            position: relative;
+            z-index: 2;
+          }
+          .foul-bar {
+            width: 19px;
+            height: 5px;
+            border-radius: 2px;
+            display: inline-block;
+          }
+          .lm-scores {
+            position: relative;
+            display: flex;
+            align-items: center;
+            height: 68px;
+            padding: 0 14px;
+            gap: 8px;
+            background: linear-gradient(180deg, ${shade(cfg.scoreBgColor, 0.14)} 0%, ${cfg.scoreBgColor} 55%, ${shade(cfg.scoreBgColor, -0.18)} 100%);
+            border: 2px solid ${cfg.accentColor};
+            border-radius: 9px;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.22);
+            z-index: 3;
+          }
+          .lm-slot {
+            position: relative;
+            min-width: 54px;
+            text-align: center;
+          }
+          .lm-pts {
+            font-size: ${cfg.scoreBoxSize || 48}px;
+            font-weight: 800;
+            color: ${cfg.scoreTextColor};
+            font-variant-numeric: tabular-nums;
+            line-height: 0.92;
+          }
+          .lm-clock {
+            display: flex;
+            align-items: center;
+            height: 60px;
+            padding: 0 14px;
+            gap: 10px;
+            background: linear-gradient(180deg, ${shade(cfg.clockBgColor, 0.14)} 0%, ${cfg.clockBgColor} 55%, ${shade(cfg.clockBgColor, -0.16)} 100%);
+            border: 1.5px solid ${cfg.accentColor};
+            border-radius: 0 10px 10px 0;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.2);
+          }
+          .lm-timer {
+            font-size: ${cfg.clockFontSize || 32}px;
+            font-weight: 700;
+            color: ${cfg.clockTextColor};
+            font-variant-numeric: tabular-nums;
+          }
+          .lm-period {
+            font-size: ${Math.round((cfg.clockFontSize || 32) * 0.72)}px;
+            font-weight: 800;
+            color: ${cfg.periodTextColor};
+            background: rgba(255,255,255,0.08);
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.2);
+          }
+        </style>
+        <div class="lm-bar">
+          ${cfg.logoLiga ? `<img src="${cfg.logoLiga}" style="height:${cfg.ligaSize || 92}px;margin-right:10px;object-fit:contain;">` : ""}
+          <div class="lm-wing home">
+            ${cfg.logo1 ? `<img src="${cfg.logo1}" style="height:${cfg.teamLogoSize || 44}px;width:${cfg.teamLogoSize || 44}px;object-fit:contain;position:relative;z-index:2;">` : ""}
+            <div style="display:flex;flex-direction:column;align-items:center;flex:1;">
+              <div class="lm-name" style="color:${cfg.text1Color};">${cfg.name1}</div>
+              <div class="lm-fouls" id="fouls1">${foulsBase}</div>
+            </div>
+          </div>
+          <div class="lm-scores">
+            ${topHtml}
+            <div class="lm-slot" id="slotPoints1"><div class="lm-pts" id="points1">0</div></div>
+            <span style="color:${cfg.accentColor};font-size:28px;font-weight:800;">-</span>
+            <div class="lm-slot" id="slotPoints2"><div class="lm-pts" id="points2">0</div></div>
+            ${shotHtml}
+          </div>
+          <div class="lm-wing away">
+            ${cfg.logo2 ? `<img src="${cfg.logo2}" style="height:${cfg.teamLogoSize || 44}px;width:${cfg.teamLogoSize || 44}px;object-fit:contain;position:relative;z-index:2;">` : ""}
+            <div style="display:flex;flex-direction:column;align-items:center;flex:1;">
+              <div class="lm-name" style="color:${cfg.text2Color};">${cfg.name2}</div>
+              <div class="lm-fouls" id="fouls2">${foulsBase}</div>
+            </div>
+          </div>
+          <div class="lm-clock">
+            <div class="lm-timer" id="timer">10:00</div>
+            <div class="lm-period" id="period">Q1</div>
+          </div>
+        </div>
+      `;
+      aplicarDatos(true);
+    }
+
+    function aplicarDatos(esInicial = false) {
+      const p1Raw = String(resolveField("points_1", ["points1", "score_1", "score1"]) ?? "").replace(/[^0-9]/g, "");
+      const p2Raw = String(resolveField("points_2", ["points2", "score_2", "score2"]) ?? "").replace(/[^0-9]/g, "");
+
+      if (p1Raw !== "") {
+        const n1 = parseInt(p1Raw, 10);
+        const el1 = document.getElementById("points1");
+        if (el1) {
+          if (!esInicial && prevPts1 !== null && (n1 - prevPts1 === 2 || n1 - prevPts1 === 3)) {
+            animarCanasta("slotPoints1", "points1", p1Raw, n1 - prevPts1);
+          } else {
+            el1.textContent = p1Raw;
+          }
+        }
+        prevPts1 = n1;
+      }
+
+      if (p2Raw !== "") {
+        const n2 = parseInt(p2Raw, 10);
+        const el2 = document.getElementById("points2");
+        if (el2) {
+          if (!esInicial && prevPts2 !== null && (n2 - prevPts2 === 2 || n2 - prevPts2 === 3)) {
+            animarCanasta("slotPoints2", "points2", p2Raw, n2 - prevPts2);
+          } else {
+            el2.textContent = p2Raw;
+          }
+        }
+        prevPts2 = n2;
+      }
+
+      const tVal = resolveField("timer");
+      if (tVal !== undefined) {
+        const tEl = document.getElementById("timer");
+        if (tEl) tEl.textContent = tVal;
+      }
+
+      const qVal = resolveField("period", ["moment"]);
+      if (qVal !== undefined) {
+        const perEl = document.getElementById("period");
+        if (perEl) perEl.textContent = formatearPeriodo(qVal);
+      }
+
+      const f1Val = resolveField("fouls_1", ["fouls1"]);
+      if (f1Val !== undefined) actualizarFaltas("fouls1", f1Val);
+
+      const f2Val = resolveField("fouls_2", ["fouls2"]);
+      if (f2Val !== undefined) actualizarFaltas("fouls2", f2Val);
+
+      const scVal = resolveField("shotclock", ["shot_clock", "shot"]);
+      if (cfg.showShotClock && scVal !== undefined) {
+        const scEl = document.getElementById("shotclock");
+        if (scEl) scEl.textContent = String(scVal).replace(/[^0-9]/g, "");
       }
     }
 
-    function renderAll() {
-      const cfg = matchData.config || {};
-      const accent = cfg.accentColor || "#e3b857";
+    function triggerSpecialBanner(titleText) {
+      const wrap = document.getElementById("specialBanner");
+      const titleEl = document.getElementById("specialBannerTitle");
+      if (!wrap || !titleEl) return;
+      titleEl.textContent = titleText || "COMPETENCIA ESPECIAL";
+      wrap.classList.add("is-shown");
+      clearTimeout(bannerHideTimeout);
+      bannerHideTimeout = setTimeout(() => {
+        wrap.classList.remove("is-shown");
+      }, 10000);
+    }
 
-      /* 1. Exclusividad entre Competencias Especiales y Marcador de Partido */
-      const specialIsActive = Boolean(specialsData.active);
-      const matchIsVisible = Boolean(matchData.on) && !specialIsActive;
+    function renderEspecialesLive() {
+      const mount = document.getElementById("especialesMount");
+      const layer = document.getElementById("live-especiales");
+      const show = Boolean(especialesEnabled && especialesLive?.active);
+      layer.classList.toggle("is-visible", show);
 
-      document.getElementById("matchStage").classList.toggle("layer-hidden", !matchIsVisible);
-      document.getElementById("compStage").classList.toggle("layer-hidden", !specialIsActive);
+      if (!show || !especialesLive) return;
 
-      /* 2. Render Marcador de Partido */
-      document.getElementById("matchBar").style.borderColor = accent;
-      document.getElementById("matchTopTag").style.color = accent;
-      document.getElementById("matchTopTag").textContent = cfg.tournamentName || "TIEMPO FUERA";
-      document.getElementById("liveName1").textContent = cfg.name1 || "LOCAL";
-      document.getElementById("liveName2").textContent = cfg.name2 || "VISITA";
-      document.getElementById("barColor1").style.background = cfg.color1 || "#dc2626";
-      document.getElementById("barColor2").style.background = cfg.color2 || "#2563eb";
-      setOptionalImg(document.getElementById("liveLogo1"), cfg.logo1 || "");
-      setOptionalImg(document.getElementById("liveLogo2"), cfg.logo2 || "");
-
-      document.getElementById("liveScore1").textContent = parseInt(readMatchField("points_1", ["points1", "score_1"]) ?? 0, 10) || 0;
-      document.getElementById("liveScore2").textContent = parseInt(readMatchField("points_2", ["points2", "score_2"]) ?? 0, 10) || 0;
-      renderFoulsDots("liveFouls1", readMatchField("fouls_1", ["fouls1"]) ?? 0);
-      renderFoulsDots("liveFouls2", readMatchField("fouls_2", ["fouls2"]) ?? 0);
-
-      const tmr = String(readMatchField("timer") ?? "10:00");
-      const clockEl = document.getElementById("liveClock");
-      clockEl.textContent = tmr;
-      clockEl.classList.toggle("clutch", tmr.split(":").length === 3);
-
-      const per = readMatchField("period", ["moment"]) ?? 1;
-      document.getElementById("livePeriod").textContent = formatPeriodFiba(per);
-      document.getElementById("livePeriod").style.color = accent;
-
-      /* 3. Render Competencias Especiales */
-      const cType = specialsData.compType || "triples";
-      const bucket = specialsData.instances?.[cType] || {};
-      const inst = bucket[specialsData.instanceId] || Object.values(bucket)[0] || {};
-      const isFt = cType === "tiros_libres";
-
-      document.getElementById("compBar").style.borderColor = accent;
-      document.getElementById("compTopTag").style.color = accent;
-      document.getElementById("compTitle").style.color = accent;
-      document.getElementById("compTitle").textContent = isFt ? "COMPETENCIA DE TIROS LIBRES" : "COMPETENCIA DE TRIPLES";
-      document.getElementById("compRound").textContent = inst.name || (cfg.tournamentName || "RONDA EN VIVO");
-
+      const compType = especialesLive.compType || "triples";
+      const compTitle = compType === "tiros_libres" ? "CONCURSO DE TIROS LIBRES" : "CONCURSO DE TRIPLES";
+      const bucket = especialesLive.instances?.[compType] || {};
+      const inst = bucket[especialesLive.instanceId] || Object.values(bucket)[0] || {};
       const shooters = inst.shooters || [];
-      const activeShooter = specialsData.activeShooter || shooters.find((s) => s.id === inst.activeShooterId) || null;
-      const turnShots = specialsData.turnShots || inst.turnShots || [];
-      const maxShots = inst.rules?.shotsCount || (isFt ? 10 : 6);
-      const turnScore = turnShots.reduce((acc, s) => acc + (s.pts || 0), 0);
+      const turnShots = especialesLive.turnShots || inst.turnShots || [];
+      const activeShooter = especialesLive.activeShooter || shooters.find((s) => s.id === inst.activeShooterId) || null;
+      const turnPts = turnShots.reduce((a, b) => a + (b.pts || 0), 0);
 
-      /* Líder o Ganador de la instancia */
-      const scored = shooters.filter((s) => typeof s.score === "number");
-      let leaderStr = "-";
-      if (inst.winnerId) {
-        const w = shooters.find((s) => s.id === inst.winnerId);
-        if (w) leaderStr = `🏆 ${w.name} (${w.score})`;
-      } else if (scored.length) {
-        const best = [...scored].sort((a, b) => b.score - a.score)[0];
-        leaderStr = `${best.name} (${best.score})`;
-      }
-      document.getElementById("compLeaderText").textContent = leaderStr;
-      document.getElementById("compLeaderText").style.color = accent;
-
-      if (activeShooter) {
-        document.getElementById("compShooterName").textContent = activeShooter.name || "";
-        document.getElementById("compShooterTeam").textContent = activeShooter.team || "EN CANCHA";
-        setOptionalImg(document.getElementById("compShooterLogo"), activeShooter.logo || "");
-      } else {
-        document.getElementById("compShooterName").textContent = inst.winnerId ? "RONDA FINALIZADA" : "PRÓXIMA JUGADORA";
-        document.getElementById("compShooterTeam").textContent = inst.name || "ESPERANDO TURNO";
-        setOptionalImg(document.getElementById("compShooterLogo"), "");
-      }
-
-      document.getElementById("compScoreVal").textContent = turnScore;
-      document.getElementById("compScoreVal").style.color = accent;
-      document.getElementById("compProgressLabel").textContent = `LANZAMIENTOS: ${turnShots.length} / ${maxShots}`;
-
-      document.getElementById("compBallsStrip").innerHTML = turnShots.map((s) => {
-        if (s.type === "bonus") return `<div class="bball-icon bonus">+${s.pts}</div>`;
-        if (s.hit) return `<div class="bball-icon hit">🏀</div>`;
-        return `<div class="bball-icon miss">✕</div>`;
+      const ballsHtml = turnShots.map((s) => {
+        if (s.type === "bonus") return `<span class="sp-ball-item bonus">🏀 +${s.pts}</span>`;
+        if (s.hit) return `<span class="sp-ball-item hit">🏀 +${s.pts}</span>`;
+        return `<span class="sp-ball-item miss">✕</span>`;
       }).join("");
 
-      /* 4. Banner centrado de 10 segundos al activar competencia */
-      if (specialIsActive && specialsData.bannerTs && specialsData.bannerTs !== lastBannerTs) {
-        lastBannerTs = specialsData.bannerTs;
-        const banner = document.getElementById("introBanner");
-        banner.style.borderColor = accent;
-        document.getElementById("introKicker").style.color = accent;
-        document.getElementById("introMain").textContent = specialsData.bannerTitle || (isFt ? "COMPETENCIA DE TIROS LIBRES" : "COMPETENCIA DE TRIPLES");
-        document.getElementById("introSub").textContent = inst.name || (cfg.tournamentName || "TIEMPO FUERA");
-        banner.classList.add("visible");
-        if (bannerTimeout) clearTimeout(bannerTimeout);
-        bannerTimeout = setTimeout(() => {
-          banner.classList.remove("visible");
-        }, 10000);
-      }
-      if (!specialIsActive) {
-        document.getElementById("introBanner").classList.remove("visible");
-      }
+      const activeHtml = activeShooter
+        ? `<div class="sp-active-box">
+            <div class="sp-shooter-info">
+              ${activeShooter.logo ? `<img src="${activeShooter.logo}" class="sp-shooter-logo" alt="">` : ""}
+              <div>
+                <div class="sp-shooter-name">${activeShooter.name}</div>
+                <div class="sp-shooter-team">${activeShooter.team || ""}</div>
+              </div>
+            </div>
+            <div class="sp-balls">${ballsHtml}</div>
+            <div class="sp-score-box">
+              <div style="font-size:14px;color:#9ca3af;font-weight:700;">TURNO</div>
+              <div class="sp-score-val">${turnPts}</div>
+            </div>
+          </div>`
+        : "";
+
+      const listHtml = shooters.map((s, idx) => {
+        const isWin = s.id === inst.winnerId;
+        const logoTag = s.logo ? `<img src="${s.logo}" style="width:24px;height:24px;object-fit:contain;border-radius:4px;">` : "";
+        return `<div class="sp-row ${isWin ? "is-winner" : ""}">
+          <div style="display:flex;align-items:center;gap:8px;min-width:0;">
+            <span style="color:#9ca3af;">#${idx + 1}</span>
+            ${logoTag}
+            <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.name}</span>
+          </div>
+          <span style="color:var(--sb-accent, #e3b857);font-weight:800;">${s.score ?? "—"}</span>
+        </div>`;
+      }).join("");
+
+      mount.innerHTML = `
+        <div class="sp-panel">
+          <div class="sp-header">
+            <div class="sp-title">${compTitle}</div>
+            <div class="sp-inst">${inst.name || ""} ${inst.closed ? "· RONDA CERRADA" : ""}</div>
+          </div>
+          ${activeHtml}
+          <div class="sp-board-grid">${listHtml}</div>
+        </div>
+      `;
     }
+
+    function syncLayerVisibility() {
+      const mLayer = document.getElementById("live-marcadores");
+      const compActive = Boolean(especialesEnabled && especialesLive?.active);
+      if (marcadoresEnabled && marcadoresOn && !compActive) {
+        mLayer.classList.add("is-visible");
+      } else {
+        mLayer.classList.remove("is-visible");
+      }
+      renderEspecialesLive();
+    }
+
+    let turnoSocial = 0;
+    let socialTimer = null;
+
+    function mostrarSocial(net) {
+      if (net === "ig") turnoSocial = 0;
+      if (net === "yt") turnoSocial = 1;
+      const wrap = document.getElementById("socialWrap");
+      const card = document.getElementById("socialCard");
+      wrap.classList.toggle("pos-top-right", cfg.socialPosition === "top-right");
+      wrap.style.setProperty("--social-scale", cfg.socialScale || 1.35);
+
+      card.innerHTML = turnoSocial === 0
+        ? `<div class="social-icon ig"><span style="color:#fff;font-weight:900;">IG</span></div><div class="social-texts"><span class="social-cta">Síguenos en Instagram</span><span class="social-handle">@tiempofuera_cl</span></div>`
+        : `<div class="social-icon yt"><span style="color:#fff;font-weight:900;">YT</span></div><div class="social-texts"><span class="social-cta">¡Suscríbete en YouTube!</span><span class="social-handle">@tiempofuera_cl</span></div>`;
+
+      turnoSocial = (turnoSocial + 1) % 2;
+      wrap.classList.add("active");
+      clearTimeout(socialTimer);
+      socialTimer = setTimeout(() => wrap.classList.remove("active"), 11000);
+    }
+
+    setInterval(() => {
+      if (cfg.socialAutoEnabled) {
+        mostrarSocial();
+      }
+    }, (cfg.socialIntervalSec || 150) * 1000);
 
     onValue(ref(db, `${DB_PATH}/modules/marcadores`), (snap) => {
       if (!snap.exists()) return;
-      const val = snap.val();
-      matchData = {
-        enabled: val.enabled !== false,
-        on: Boolean(val.on),
-        config: val.config || {},
-        feeds: {
-          manual: val.feeds?.manual || {},
-          scoresight: { ...(val.liveData || {}), ...(val.feeds?.scoresight || {}) },
-          flexyscore: val.feeds?.flexyscore || {}
-        }
-      };
+      const mod = snap.val();
+      const layer = document.getElementById("live-marcadores");
 
-      const cmd = val.cmd;
-      if (cmd && cmd.action === "social_now" && cmd.ts && cmd.ts !== lastSocialTs) {
-        lastSocialTs = cmd.ts;
-        const toast = document.getElementById("socialToast");
-        const cfg = matchData.config || {};
-        toast.textContent = cmd.network === "yt"
-          ? `▶ YouTube: ${cfg.ytHandle || "@tiempofuera_cl"}`
-          : `📷 Instagram: ${cfg.igHandle || "@tiempofuera_cl"}`;
-        toast.style.borderColor = cfg.accentColor || "#e3b857";
-        toast.classList.add("visible");
-        if (socialTimeout) clearTimeout(socialTimeout);
-        socialTimeout = setTimeout(() => toast.classList.remove("visible"), 7000);
+      if (mod.config) {
+        cfg = {
+          ...cfg,
+          ...mod.config,
+          posX: mod.pos?.x ?? mod.config.posX ?? cfg.posX,
+          posY: mod.pos?.y ?? mod.config.posY ?? cfg.posY,
+          sources: { ...cfg.sources, ...(mod.config.sources || {}) }
+        };
+        renderEstructura();
+      } else if (mod.pos) {
+        layer.style.left = `${mod.pos.x ?? 14}%`;
+        layer.style.top = `${mod.pos.y ?? 76}%`;
       }
 
-      renderAll();
+      feeds = {
+        scoresight: { ...(mod.liveData || {}), ...(mod.feeds?.scoresight || {}) },
+        flexyscore: { ...(mod.feeds?.flexyscore || {}) },
+        manual: { ...(mod.feeds?.manual || {}) }
+      };
+      aplicarDatos(false);
+
+      if (mod.cmd?.action === "social_now" && mod.cmd.ts && mod.cmd.ts !== lastCmdTs) {
+        lastCmdTs = mod.cmd.ts;
+        mostrarSocial(mod.cmd.network);
+      }
+
+      marcadoresEnabled = mod.enabled !== false;
+      marcadoresOn = Boolean(mod.on);
+      syncLayerVisibility();
     });
 
-    onValue(ref(db, `${DB_PATH}/modules/especiales/live`), (snap) => {
-      if (!snap.exists()) return;
-      specialsData = { ...specialsData, ...snap.val() };
-      renderAll();
+    onValue(ref(db, `${DB_PATH}/modules/especiales`), (snap) => {
+      if (!snap.exists()) {
+        especialesEnabled = false;
+        especialesLive = null;
+        syncLayerVisibility();
+        return;
+      }
+      const val = snap.val();
+      especialesEnabled = Boolean(val.enabled);
+      especialesLive = val.live || null;
+
+      if (especialesEnabled && especialesLive?.active && especialesLive.bannerTs && especialesLive.bannerTs !== lastBannerTs) {
+        lastBannerTs = especialesLive.bannerTs;
+        triggerSpecialBanner(especialesLive.bannerTitle);
+      }
+
+      syncLayerVisibility();
     });
   </script>
 </body>
