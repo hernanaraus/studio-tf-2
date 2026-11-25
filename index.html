@@ -3,169 +3,195 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#09090b">
-  <title>Studio TF 2.0 — Acceso y Portal</title>
-  <link rel="manifest" href="manifest.json">
+  <title>Studio TF 2.0 — Acceso</title>
   <link rel="stylesheet" href="css/base.css">
   <style>
-    .portal-wrap {
-      max-width: 1120px;
-      width: 100%;
-      margin: 0 auto;
-      padding: 22px 18px 40px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-    .portal-topbar {
+    .brand-row {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 14px 20px;
-      background: var(--bg-surface);
-      border-bottom: 1px solid var(--border);
-      flex-wrap: wrap;
+      justify-content: center;
+      gap: 14px;
     }
-    .cards-grid {
+    .brand-logo-halo {
+      padding: 6px 10px;
+      border-radius: 12px;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.72) 0%, rgba(255, 255, 255, 0.28) 62%, rgba(255, 255, 255, 0) 100%);
+      box-shadow: 0 0 22px 6px rgba(255, 255, 255, 0.45);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .brand-logo-halo img {
+      height: 46px;
+      width: auto;
+      max-width: 120px;
+      object-fit: contain;
+      display: block;
+    }
+    .selector-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+      width: 100%;
+      max-width: 920px;
     }
-    .mod-card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 22px;
+    .selector-card {
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      gap: 16px;
+      gap: 20px;
+      transition: border-color 0.2s ease;
     }
-    .mod-card h2 {
-      font-size: 1.05rem;
-      letter-spacing: 0.4px;
-      text-transform: uppercase;
-      margin-bottom: 6px;
+    .selector-card:hover {
+      border-color: var(--accent);
     }
-    .mod-card p {
-      font-size: 0.86rem;
+    .selector-card h2 {
+      font-size: 1.2rem;
+      margin-bottom: 8px;
+    }
+    .selector-card p {
+      font-size: 0.88rem;
       color: var(--muted);
       line-height: 1.45;
     }
-    .card-actions {
+    .divider {
       display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
       align-items: center;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 0.75rem;
+      margin: 16px 0;
+      text-transform: uppercase;
+    }
+    .divider::before,
+    .divider::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+    .user-list {
+      margin-top: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
     .user-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 10px;
-      padding: 10px 12px;
-      background: var(--bg-elevated);
+      background: var(--bg-app);
       border: 1px solid var(--border);
-      border-radius: 8px;
+      padding: 8px 12px;
+      border-radius: 6px;
       font-size: 0.85rem;
-      flex-wrap: wrap;
     }
-    .hidden { display: none !important; }
+    .scope-tag {
+      color: var(--muted);
+      margin-left: 8px;
+      font-size: 0.78rem;
+    }
   </style>
 </head>
 <body>
-  <!-- PANTALLA DE LOGIN -->
-  <section id="authSection" class="auth-screen">
+  <main class="auth-screen">
     <div class="brand">
-      <h1>STUDIO <span>TF 2.0</span></h1>
-      <p style="color:var(--muted); font-size:0.88rem; margin-top:4px;">Sistema de Graficación y Control en Vivo</p>
+      <div class="brand-row">
+        <span class="brand-logo-halo">
+          <img src="./logotf.png" alt="Logo Tiempo Fuera">
+        </span>
+        <h1>STUDIO <span>TF 2.0</span></h1>
+      </div>
+      <p style="color: var(--muted); font-size: 0.9rem; margin-top: 8px;">Gestor de Overlays & Transmisión en Vivo</p>
     </div>
 
-    <div class="card" style="width:100%; max-width:400px;">
-      <button type="button" id="googleLoginBtn" class="btn" style="width:100%; margin-bottom:16px;">
-        Ingresar con Google
+    <!-- Login -->
+    <section id="login-panel" class="card" style="width: 100%; max-width: 400px;">
+      <button id="google-login-btn" type="button" class="btn" style="width: 100%; background: #ffffff; color: #111111;">
+        Continuar con Google
       </button>
 
-      <div style="text-align:center; color:var(--muted); font-size:0.76rem; margin-bottom:14px;">
-        O CON CORREO AUTORIZADO
-      </div>
+      <div class="divider">o con correo y contraseña</div>
 
-      <form id="emailLoginForm">
+      <form id="login-form">
         <div class="field">
-          <label for="loginEmail">Correo electrónico</label>
-          <input type="email" id="loginEmail" required placeholder="usuario@tiempofuera.cl">
+          <label for="login-email">Correo</label>
+          <input id="login-email" type="email" required autocomplete="username">
         </div>
         <div class="field">
-          <label for="loginPass">Contraseña</label>
-          <input type="password" id="loginPass" required placeholder="••••••••">
+          <label for="login-password">Contraseña</label>
+          <input id="login-password" type="password" required autocomplete="current-password">
         </div>
-        <button type="submit" class="btn btn-ghost" style="width:100%;">Ingresar con Correo</button>
+        <button type="submit" class="btn btn-ghost" style="width: 100%;">Iniciar Sesión</button>
       </form>
 
-      <div id="authError" class="error-text"></div>
-    </div>
-  </section>
+      <div id="login-error" class="error-text"></div>
+    </section>
 
-  <!-- PORTAL PRINCIPAL -->
-  <section id="portalSection" class="hidden">
-    <header class="portal-topbar">
-      <div style="font-weight:900; font-size:1.1rem; letter-spacing:1.2px;">
-        STUDIO <span style="color:var(--accent);">TF 2.0</span>
+    <!-- Hub tras login -->
+    <section id="hub-panel" style="display: none; width: 100%; max-width: 920px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+        <div id="session-badge" style="font-size: 0.85rem; color: var(--muted);"></div>
+        <button id="logout-btn" class="btn btn-ghost" style="padding: 7px 14px; font-size: 0.75rem;">Cerrar Sesión</button>
       </div>
-      <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-        <span id="userLabel" style="font-size:0.82rem; color:var(--muted);"></span>
-        <button type="button" id="logoutBtn" class="btn btn-ghost" style="padding:7px 12px; font-size:0.76rem;">Salir</button>
-      </div>
-    </header>
 
-    <main class="portal-wrap">
-      <div class="cards-grid">
-        <article class="mod-card" id="cardStudio">
+      <div class="selector-grid">
+        <article id="card-studio" class="card selector-card">
           <div>
-            <h2>1. Estudio de Escena</h2>
-            <p>Configura equipos, logos, paleta automática, tipografía, fuentes de datos (Manual, ScoreSight, Flexyscore), competencias especiales y nuevo partido.</p>
+            <h2>Estudio</h2>
+            <p>Configura estilos, encuadres en grilla 16:9 y habilita pestañas para el control.</p>
           </div>
-          <div class="card-actions">
-            <button type="button" class="btn" onclick="location.href='studio.html'">Abrir Estudio</button>
-          </div>
+          <button class="btn" onclick="location.href='studio.html'">Ir al Estudio</button>
         </article>
 
-        <article class="mod-card" id="cardControl">
+        <article class="card selector-card">
           <div>
-            <h2>2. Control en Vivo</h2>
-            <p>Opera el marcador, reloj con décimas, cuartos/OT FIBA, redes sociales y rondas de Competencias Especiales desde móvil o PC.</p>
+            <h2>Modo Control</h2>
+            <p>Activa o apaga overlays en vivo, opera marcadores y sincroniza con el estudio.</p>
           </div>
-          <div class="card-actions">
-            <button type="button" class="btn" onclick="location.href='control.html'">Abrir Control</button>
-          </div>
+          <button class="btn" onclick="location.href='control.html'">Abrir Control</button>
         </article>
 
-        <article class="mod-card" id="cardLive">
+        <article id="card-live" class="card selector-card">
           <div>
-            <h2>3. Vista Live / OBS</h2>
-            <p>Capa transparente 1920x1080 para OBS Studio o Prism Live Studio con marcadores, animaciones de canasta, RRSS y competencias especiales.</p>
+            <h2>Link Live</h2>
+            <p>Copia la URL pública (sin login) para OBS, vMix o Prism Live Studio.</p>
           </div>
-          <div class="card-actions">
-            <button type="button" class="btn" onclick="window.open('live.html', '_blank')">Abrir Live</button>
-            <button type="button" class="btn btn-ghost" id="copyLiveBtn">Copiar Link Live</button>
-            <span id="copyMsg" style="font-size:0.76rem; color:var(--ok); font-weight:700;"></span>
-          </div>
+          <button id="copy-live-btn" class="btn btn-ghost">Copiar Link Live</button>
         </article>
       </div>
 
-      <!-- GESTIÓN DE OPERADORES (SOLO ADMIN) -->
-      <div class="card hidden" id="adminUsersCard">
-        <h2 style="font-size:0.95rem; text-transform:uppercase; margin-bottom:12px;">Operadores Autorizados (Control)</h2>
-        <div style="display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap;">
-          <input type="email" id="newOpEmail" placeholder="correo@ejemplo.com" style="flex:1; min-width:200px; padding:9px 11px; border-radius:6px; border:1px solid var(--border); background:var(--bg-app); color:var(--text);">
-          <input type="text" id="newOpName" placeholder="Nombre operador" style="width:180px; padding:9px 11px; border-radius:6px; border:1px solid var(--border); background:var(--bg-app); color:var(--text);">
-          <button type="button" id="addOpBtn" class="btn">Agregar Operador</button>
-        </div>
-        <div id="opList" style="display:flex; flex-direction:column; gap:8px;"></div>
-      </div>
-    </main>
-  </section>
+      <!-- Gestión de Usuarios de Control (solo para Admin) -->
+      <section id="users-manager" class="card" style="display: none; margin-top: 22px;">
+        <h3 style="font-size: 1rem; margin-bottom: 6px;">Usuarios de Control Autorizados</h3>
+        <p style="font-size: 0.82rem; color: var(--muted); margin-bottom: 14px;">
+          Agrega correos de operadores (por ejemplo, para controlar un marcador en una competencia puntual).
+        </p>
+
+        <form id="add-user-form" style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <input
+            id="op-email"
+            type="email"
+            required
+            placeholder="operador@correo.cl"
+            style="flex: 1; min-width: 210px; padding: 9px 12px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-app); color: var(--text);"
+          >
+          <select
+            id="op-scope"
+            style="padding: 9px 12px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-app); color: var(--text);"
+          >
+            <option value="all">Todos los módulos habilitados</option>
+            <option value="marcadores">Solo Marcadores</option>
+          </select>
+          <button type="submit" class="btn" style="padding: 9px 16px; font-size: 0.78rem;">Agregar Usuario</button>
+        </form>
+
+        <div id="op-error" class="error-text"></div>
+        <div id="op-list" class="user-list"></div>
+      </section>
+    </section>
+  </main>
 
   <script type="module">
     import {
@@ -176,124 +202,147 @@
       set,
       remove,
       onValue,
-      loginWithGoogle,
-      getUserRole,
-      emailToKey,
+      onAuthStateChanged,
       signInWithEmailAndPassword,
+      loginWithGoogle,
       signOut,
-      onAuthStateChanged
+      getUserRole,
+      emailToKey
     } from "./js/firebase.js";
 
-    const authSection = document.getElementById("authSection");
-    const portalSection = document.getElementById("portalSection");
-    const authError = document.getElementById("authError");
+    const loginPanel = document.getElementById("login-panel");
+    const hubPanel = document.getElementById("hub-panel");
+    const loginForm = document.getElementById("login-form");
+    const loginError = document.getElementById("login-error");
+    const googleBtn = document.getElementById("google-login-btn");
+    const usersManager = document.getElementById("users-manager");
+    const cardStudio = document.getElementById("card-studio");
+    const cardLive = document.getElementById("card-live");
+    const sessionBadge = document.getElementById("session-badge");
 
-    if (new URLSearchParams(window.location.search).get("denied") === "1") {
-      authError.textContent = "Tu correo no tiene permisos asignados para acceder a Studio TF 2.0.";
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("denied") === "1") {
+      loginError.textContent = "Tu cuenta no está autorizada para acceder a Studio TF 2.0.";
     }
-
-    document.getElementById("googleLoginBtn").addEventListener("click", async () => {
-      authError.textContent = "";
-      try {
-        await loginWithGoogle();
-      } catch (err) {
-        authError.textContent = err.message || "Error al iniciar sesión con Google.";
-      }
-    });
-
-    document.getElementById("emailLoginForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      authError.textContent = "";
-      const email = document.getElementById("loginEmail").value.trim();
-      const pass = document.getElementById("loginPass").value;
-      try {
-        await signInWithEmailAndPassword(auth, email, pass);
-      } catch (err) {
-        authError.textContent = "Credenciales inválidas o usuario no registrado.";
-      }
-    });
-
-    document.getElementById("logoutBtn").addEventListener("click", async () => {
-      await signOut(auth);
-    });
-
-    const liveUrl = new URL("live.html", window.location.href).href;
-    document.getElementById("copyLiveBtn").addEventListener("click", async () => {
-      const msg = document.getElementById("copyMsg");
-      try {
-        await navigator.clipboard.writeText(liveUrl);
-      } catch {
-        const inp = document.createElement("input");
-        inp.value = liveUrl;
-        document.body.appendChild(inp);
-        inp.select();
-        document.execCommand("copy");
-        inp.remove();
-      }
-      msg.textContent = "Link copiado";
-      setTimeout(() => { msg.textContent = ""; }, 2400);
-    });
-
-    document.getElementById("addOpBtn").addEventListener("click", async () => {
-      const email = document.getElementById("newOpEmail").value.trim().toLowerCase();
-      const name = document.getElementById("newOpName").value.trim() || email;
-      if (!email) return;
-      await set(ref(db, `${DB_PATH}/controlUsers/${emailToKey(email)}`), {
-        email,
-        name,
-        active: true,
-        addedAt: Date.now()
-      });
-      document.getElementById("newOpEmail").value = "";
-      document.getElementById("newOpName").value = "";
-    });
-
-    window.removeOp = async function removeOp(key) {
-      await remove(ref(db, `${DB_PATH}/controlUsers/${key}`));
-    };
 
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
-        authSection.classList.remove("hidden");
-        portalSection.classList.add("hidden");
+        loginPanel.style.display = "block";
+        hubPanel.style.display = "none";
         return;
       }
 
       const role = await getUserRole(user);
       if (!role) {
+        loginError.textContent = `La cuenta ${user.email} no tiene permisos asignados.`;
         await signOut(auth);
-        authError.textContent = "Usuario sin autorización. Solicita acceso a un administrador.";
         return;
       }
 
-      authSection.classList.add("hidden");
-      portalSection.classList.remove("hidden");
-      document.getElementById("userLabel").textContent = `${user.email} (${role.toUpperCase()})`;
+      loginPanel.style.display = "none";
+      hubPanel.style.display = "block";
+      sessionBadge.innerHTML = `Sesión: <strong>${user.email}</strong> · Rol: <span style="color: var(--accent); font-weight: 700;">${role.toUpperCase()}</span>`;
 
       const isAdmin = role === "admin";
-      document.getElementById("cardStudio").classList.toggle("hidden", !isAdmin);
-      document.getElementById("adminUsersCard").classList.toggle("hidden", !isAdmin);
+      cardStudio.style.display = isAdmin ? "flex" : "none";
+      cardLive.style.display = isAdmin ? "flex" : "none";
+      usersManager.style.display = isAdmin ? "block" : "none";
 
       if (isAdmin) {
-        onValue(ref(db, `${DB_PATH}/controlUsers`), (snap) => {
-          const list = document.getElementById("opList");
-          if (!snap.exists()) {
-            list.innerHTML = `<div style="color:var(--muted); font-size:0.84rem;">No hay operadores adicionales registrados.</div>`;
-            return;
-          }
-          const data = snap.val();
-          list.innerHTML = Object.entries(data).map(([k, v]) => `
-            <div class="user-row">
-              <div>
-                <strong>${v.name || v.email}</strong>
-                <div style="color:var(--muted); font-size:0.76rem;">${v.email}</div>
-              </div>
-              <button type="button" class="btn btn-ghost" style="padding:5px 10px; font-size:0.74rem;" onclick="removeOp('${k}')">Quitar</button>
+        listenControlUsers();
+      }
+    });
+
+    googleBtn.addEventListener("click", async () => {
+      loginError.textContent = "";
+      try {
+        await loginWithGoogle();
+      } catch (err) {
+        loginError.textContent = `Error al iniciar con Google (${err.code || "revisa dominios autorizados"}).`;
+      }
+    });
+
+    loginForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      loginError.textContent = "";
+      const email = document.getElementById("login-email").value.trim();
+      const password = document.getElementById("login-password").value;
+
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+      } catch {
+        loginError.textContent = "No se pudo iniciar sesión. Revisa tus credenciales.";
+      }
+    });
+
+    document.getElementById("logout-btn").addEventListener("click", () => signOut(auth));
+
+    document.getElementById("copy-live-btn").addEventListener("click", async (e) => {
+      const url = new URL("live.html", window.location.href).href;
+      await navigator.clipboard.writeText(url);
+      const btn = e.currentTarget;
+      const prev = btn.textContent;
+      btn.textContent = "Link Copiado";
+      btn.style.borderColor = "var(--ok)";
+      setTimeout(() => {
+        btn.textContent = prev;
+        btn.style.borderColor = "";
+      }, 1800);
+    });
+
+    function listenControlUsers() {
+      const opList = document.getElementById("op-list");
+      onValue(ref(db, `${DB_PATH}/controlUsers`), (snap) => {
+        opList.innerHTML = "";
+        if (!snap.exists()) {
+          opList.innerHTML = "<p style='color: var(--muted); font-size: 0.82rem;'>No hay usuarios de control agregados aún.</p>";
+          return;
+        }
+
+        Object.entries(snap.val()).forEach(([key, info]) => {
+          const row = document.createElement("div");
+          row.className = "user-row";
+          const scopeLabel = info.scope === "marcadores" ? "Solo Marcadores" : "Control General";
+          row.innerHTML = `
+            <div>
+              <strong>${info.email}</strong>
+              <span class="scope-tag">(${scopeLabel})</span>
             </div>
-          `).join("");
+            <button class="btn btn-ghost" data-del="${key}" style="padding: 4px 10px; font-size: 0.72rem;">Quitar</button>
+          `;
+          opList.appendChild(row);
         });
+
+        opList.querySelectorAll("button[data-del]").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            await remove(ref(db, `${DB_PATH}/controlUsers/${btn.dataset.del}`));
+          });
+        });
+      });
+    }
+
+    document.getElementById("add-user-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const opError = document.getElementById("op-error");
+      opError.textContent = "";
+
+      const email = document.getElementById("op-email").value.trim().toLowerCase();
+      const scope = document.getElementById("op-scope").value;
+      if (!email) return;
+
+      try {
+        const key = emailToKey(email);
+        await set(ref(db, `${DB_PATH}/controlUsers/${key}`), {
+          email,
+          scope,
+          active: true
+        });
+        document.getElementById("op-email").value = "";
+      } catch {
+        opError.textContent = "No se pudo guardar el usuario. Revisa las reglas de Firebase.";
       }
     });
   </script>
 </body>
 </html>
+
