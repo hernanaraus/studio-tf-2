@@ -275,6 +275,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      flex-shrink: 0;
     }
 
     .social-icon.ig {
@@ -362,6 +363,9 @@
 
   <script type="module">
     import { db, DB_PATH, ref, onValue } from "./js/firebase.js";
+
+    const IG_SVG = `<svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>`;
+    const YT_SVG = `<svg width="22" height="22" viewBox="0 0 24 24" fill="#ffffff"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31.4 31.4 0 0 0 0 12a31.4 31.4 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1A31.4 31.4 0 0 0 24 12a31.4 31.4 0 0 0-.5-5.8zM9.6 15.6V8.4l6.3 3.6-6.3 3.6z"></path></svg>`;
 
     const canvas1920 = document.getElementById("canvas1920");
     function fitViewportTo1920() {
@@ -537,8 +541,8 @@
       layer.style.left = `${cfg.posX ?? 14}%`;
       layer.style.top = `${cfg.posY ?? 76}%`;
 
-      const stripe1 = lum(cfg.bg1Color) > 0.55 ? "rgba(0,0,0,0.085)" : "rgba(255,255,255,0.05)";
-      const stripe2 = lum(cfg.bg2Color) > 0.55 ? "rgba(0,0,0,0.085)" : "rgba(255,255,255,0.05)";
+      const stripe1 = lum(cfg.bg1Color) > 0.55 ? "rgba(0,0,0,0.09)" : "rgba(255,255,255,0.06)";
+      const stripe2 = lum(cfg.bg2Color) > 0.55 ? "rgba(0,0,0,0.09)" : "rgba(255,255,255,0.06)";
       const foulsBase = Array.from({ length: 5 }, (_, i) => `<span class="foul-bar" data-idx="${i + 1}"></span>`).join("");
 
       const topHtml = buildTopBadgeLive();
@@ -562,7 +566,7 @@
             display: flex;
             align-items: center;
             height: 60px;
-            min-width: 205px;
+            min-width: 215px;
             padding: 0 14px;
             gap: 10px;
             overflow: hidden;
@@ -585,7 +589,8 @@
           .lm-wing.away {
             flex-direction: row-reverse;
             background: linear-gradient(270deg, ${shade(cfg.bg2Color, -0.14)} 0%, ${cfg.bg2Color} 45%, ${shade(cfg.bg2Color, 0.2)} 100%);
-            border-radius: 0;
+            border-right: 1.5px solid ${cfg.accentColor};
+            border-radius: 0 10px 10px 0;
           }
           .lm-wing.away::before {
             content: '';
@@ -594,20 +599,28 @@
             background-image: repeating-linear-gradient(45deg, ${stripe2} 0px, ${stripe2} 2px, transparent 2px, transparent 6px);
             pointer-events: none;
           }
+          .lm-team-center {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            flex: 1;
+            position: relative;
+            z-index: 2;
+          }
           .lm-name {
             font-size: ${cfg.teamFontSize || 25}px;
             font-weight: 800;
             text-transform: uppercase;
+            text-align: center;
             line-height: 1;
-            position: relative;
-            z-index: 2;
           }
           .lm-fouls {
             display: flex;
+            justify-content: center;
             gap: 5px;
             margin-top: 6px;
-            position: relative;
-            z-index: 2;
           }
           .foul-bar {
             width: 19px;
@@ -644,11 +657,12 @@
             display: flex;
             align-items: center;
             height: 60px;
+            margin-left: 8px;
             padding: 0 14px;
             gap: 10px;
             background: linear-gradient(180deg, ${shade(cfg.clockBgColor, 0.14)} 0%, ${cfg.clockBgColor} 55%, ${shade(cfg.clockBgColor, -0.16)} 100%);
             border: 1.5px solid ${cfg.accentColor};
-            border-radius: 0 10px 10px 0;
+            border-radius: 10px;
             box-shadow: inset 0 1px 0 rgba(255,255,255,0.2);
           }
           .lm-timer {
@@ -671,7 +685,7 @@
           ${cfg.logoLiga ? `<img src="${cfg.logoLiga}" style="height:${cfg.ligaSize || 92}px;margin-right:10px;object-fit:contain;">` : ""}
           <div class="lm-wing home">
             ${cfg.logo1 ? `<img src="${cfg.logo1}" style="height:${cfg.teamLogoSize || 44}px;width:${cfg.teamLogoSize || 44}px;object-fit:contain;position:relative;z-index:2;">` : ""}
-            <div style="display:flex;flex-direction:column;align-items:center;flex:1;">
+            <div class="lm-team-center">
               <div class="lm-name" style="color:${cfg.text1Color};">${cfg.name1}</div>
               <div class="lm-fouls" id="fouls1">${foulsBase}</div>
             </div>
@@ -685,7 +699,7 @@
           </div>
           <div class="lm-wing away">
             ${cfg.logo2 ? `<img src="${cfg.logo2}" style="height:${cfg.teamLogoSize || 44}px;width:${cfg.teamLogoSize || 44}px;object-fit:contain;position:relative;z-index:2;">` : ""}
-            <div style="display:flex;flex-direction:column;align-items:center;flex:1;">
+            <div class="lm-team-center">
               <div class="lm-name" style="color:${cfg.text2Color};">${cfg.name2}</div>
               <div class="lm-fouls" id="fouls2">${foulsBase}</div>
             </div>
@@ -854,8 +868,8 @@
       wrap.style.setProperty("--social-scale", cfg.socialScale || 1.35);
 
       card.innerHTML = turnoSocial === 0
-        ? `<div class="social-icon ig"><span style="color:#fff;font-weight:900;">IG</span></div><div class="social-texts"><span class="social-cta">Síguenos en Instagram</span><span class="social-handle">@tiempofuera_cl</span></div>`
-        : `<div class="social-icon yt"><span style="color:#fff;font-weight:900;">YT</span></div><div class="social-texts"><span class="social-cta">¡Suscríbete en YouTube!</span><span class="social-handle">@tiempofuera_cl</span></div>`;
+        ? `<div class="social-icon ig">${IG_SVG}</div><div class="social-texts"><span class="social-cta">Síguenos en Instagram</span><span class="social-handle">@tiempofuera_cl</span></div>`
+        : `<div class="social-icon yt">${YT_SVG}</div><div class="social-texts"><span class="social-cta">¡Suscríbete en YouTube!</span><span class="social-handle">@tiempofuera_cl</span></div>`;
 
       turnoSocial = (turnoSocial + 1) % 2;
       wrap.classList.add("active");
