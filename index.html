@@ -2,318 +2,246 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Studio TF 2.0 — Acceso</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0f1116">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Studio TF 2.0 — Lanzador</title>
+  <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="css/base.css">
   <style>
-    .selector-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 20px;
-      width: 100%;
-      max-width: 920px;
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      background: #0f1116;
+      color: #f3f4f6;
+      font-family: system-ui, -apple-system, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
     }
-    .selector-card {
+    .launcher-wrap {
+      width: 100%;
+      max-width: 760px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .hero-card {
+      background: #171a21;
+      border: 1px solid #2b303c;
+      border-radius: 16px;
+      padding: 24px;
+      text-align: center;
+    }
+    .brand-title {
+      font-size: clamp(1.6rem, 4vw, 2.3rem);
+      font-weight: 900;
+      letter-spacing: 1.5px;
+      margin: 0;
+    }
+    .brand-title span { color: #e3b857; }
+    .brand-sub {
+      color: #9ca3af;
+      font-size: 0.9rem;
+      margin: 6px 0 0;
+    }
+    .nav-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 14px;
+    }
+    .nav-card {
+      background: #171a21;
+      border: 1px solid #2b303c;
+      border-radius: 14px;
+      padding: 20px 18px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      gap: 20px;
-      transition: border-color 0.2s ease;
+      gap: 14px;
+      cursor: pointer;
+      transition: transform 0.12s ease, border-color 0.2s ease;
     }
-    .selector-card:hover {
-      border-color: var(--accent);
+    .nav-card:hover {
+      border-color: #e3b857;
+      transform: translateY(-2px);
     }
-    .selector-card h2 {
-      font-size: 1.2rem;
-      margin-bottom: 8px;
+    .nav-card h2 {
+      margin: 0 0 6px;
+      font-size: 1.15rem;
+      color: #fff;
     }
-    .selector-card p {
-      font-size: 0.88rem;
-      color: var(--muted);
-      line-height: 1.45;
+    .nav-card p {
+      margin: 0;
+      font-size: 0.82rem;
+      color: #9ca3af;
+      line-height: 1.4;
     }
-    .divider {
+    .nav-pill {
+      display: inline-block;
+      width: fit-content;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      background: #e3b857;
+      color: #111;
+    }
+    .live-url-card {
+      background: #171a21;
+      border: 1px solid #2b303c;
+      border-radius: 14px;
+      padding: 16px 18px;
       display: flex;
-      align-items: center;
+      flex-direction: column;
       gap: 10px;
-      color: var(--muted);
-      font-size: 0.75rem;
-      margin: 16px 0;
+    }
+    .live-url-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .live-url-input {
+      flex: 1;
+      min-width: 220px;
+      background: #0f1116;
+      border: 1px solid #374151;
+      color: #e5e7eb;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 0.84rem;
+      font-family: monospace;
+    }
+    .copy-btn {
+      background: #22c55e;
+      color: #052e16;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-weight: 800;
+      font-size: 0.82rem;
+      cursor: pointer;
       text-transform: uppercase;
     }
-    .divider::before,
-    .divider::after {
-      content: "";
-      flex: 1;
-      height: 1px;
-      background: var(--border);
+    .copy-btn.copied {
+      background: #e3b857;
+      color: #111;
     }
-    .user-list {
-      margin-top: 14px;
+    .session-bar {
       display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .user-row {
-      display: flex;
-      align-items: center;
       justify-content: space-between;
-      gap: 10px;
-      background: var(--bg-app);
-      border: 1px solid var(--border);
-      padding: 8px 12px;
-      border-radius: 6px;
-      font-size: 0.85rem;
-    }
-    .scope-tag {
-      color: var(--muted);
-      margin-left: 8px;
+      align-items: center;
       font-size: 0.78rem;
+      color: #9ca3af;
+      padding: 0 4px;
+      flex-wrap: wrap;
+      gap: 8px;
     }
   </style>
 </head>
 <body>
-  <main class="auth-screen">
-    <div class="brand">
-      <h1>STUDIO <span>TF 2.0</span></h1>
-      <p style="color: var(--muted); font-size: 0.9rem;">Gestor de Overlays & Transmisión en Vivo</p>
-    </div>
+  <main class="launcher-wrap">
+    <section class="hero-card">
+      <h1 class="brand-title">STUDIO <span>TF 2.0</span></h1>
+      <p class="brand-sub">Plataforma de Producción y Gráficas en Vivo — Tiempo Fuera</p>
+    </section>
 
-    <!-- Login -->
-    <section id="login-panel" class="card" style="width: 100%; max-width: 400px;">
-      <button id="google-login-btn" type="button" class="btn" style="width: 100%; background: #ffffff; color: #111111;">
-        Continuar con Google
+    <section class="nav-grid">
+      <article class="nav-card" onclick="location.href='studio.html'">
+        <div>
+          <h2>1. Estudio</h2>
+          <p>Configura equipos, logos, fuentes de datos, estética del marcador y competencias especiales del evento.</p>
+        </div>
+        <span class="nav-pill">Abrir Estudio →</span>
+      </article>
+
+      <article class="nav-card" onclick="location.href='control.html'">
+        <div>
+          <h2>2. Control en Vivo</h2>
+          <p>Opera el marcador del partido, el reloj FIBA y las rondas de Triples o Tiros Libres desde PC o celular.</p>
+        </div>
+        <span class="nav-pill">Abrir Control →</span>
+      </article>
+
+      <article class="nav-card" onclick="window.open('live.html', '_blank')">
+        <div>
+          <h2>3. Vista Live (OBS)</h2>
+          <p>Capa gráfica única 1920x1080 transparente que alterna automáticamente marcador y competencias.</p>
+        </div>
+        <span class="nav-pill">Ver Live ↗</span>
+      </article>
+    </section>
+
+    <section class="live-url-card">
+      <div style="font-size:0.8rem; font-weight:800; color:#e3b857; text-transform:uppercase; letter-spacing:0.6px;">
+        Enlace de Fuente Navegador para OBS / PRISM Live
+      </div>
+      <div class="live-url-row">
+        <input type="text" id="liveUrlField" class="live-url-input" readonly>
+        <button type="button" id="copyLiveUrlBtn" class="copy-btn">Copiar Enlace Live</button>
+      </div>
+      <div id="copyFeedback" style="font-size:0.76rem; color:#86efac; min-height:16px;"></div>
+    </section>
+
+    <div class="session-bar">
+      <span id="userStatus">Verificando sesión...</span>
+      <button type="button" id="logoutBtn" style="background:transparent; border:1px solid #374151; color:#9ca3af; padding:5px 10px; border-radius:6px; cursor:pointer; font-size:0.75rem;">
+        Cerrar sesión
       </button>
-
-      <div class="divider">o con correo y contraseña</div>
-
-      <form id="login-form">
-        <div class="field">
-          <label for="login-email">Correo</label>
-          <input id="login-email" type="email" required autocomplete="username">
-        </div>
-        <div class="field">
-          <label for="login-password">Contraseña</label>
-          <input id="login-password" type="password" required autocomplete="current-password">
-        </div>
-        <button type="submit" class="btn btn-ghost" style="width: 100%;">Iniciar Sesión</button>
-      </form>
-
-      <div id="login-error" class="error-text"></div>
-    </section>
-
-    <!-- Hub tras login -->
-    <section id="hub-panel" style="display: none; width: 100%; max-width: 920px;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
-        <div id="session-badge" style="font-size: 0.85rem; color: var(--muted);"></div>
-        <button id="logout-btn" class="btn btn-ghost" style="padding: 7px 14px; font-size: 0.75rem;">Cerrar Sesión</button>
-      </div>
-
-      <div class="selector-grid">
-        <article id="card-studio" class="card selector-card">
-          <div>
-            <h2>Estudio</h2>
-            <p>Configura estilos, encuadres en grilla 16:9 y habilita pestañas para el control.</p>
-          </div>
-          <button class="btn" onclick="location.href='studio.html'">Ir al Estudio</button>
-        </article>
-
-        <article class="card selector-card">
-          <div>
-            <h2>Modo Control</h2>
-            <p>Activa o apaga overlays en vivo, opera marcadores y sincroniza con el estudio.</p>
-          </div>
-          <button class="btn" onclick="location.href='control.html'">Abrir Control</button>
-        </article>
-
-        <article id="card-live" class="card selector-card">
-          <div>
-            <h2>Link Live</h2>
-            <p>Copia la URL pública (sin login) para OBS, vMix o Prism Live Studio.</p>
-          </div>
-          <button id="copy-live-btn" class="btn btn-ghost">Copiar Link Live</button>
-        </article>
-      </div>
-
-      <!-- Gestión de Usuarios de Control (solo para Admin) -->
-      <section id="users-manager" class="card" style="display: none; margin-top: 22px;">
-        <h3 style="font-size: 1rem; margin-bottom: 6px;">Usuarios de Control Autorizados</h3>
-        <p style="font-size: 0.82rem; color: var(--muted); margin-bottom: 14px;">
-          Agrega correos de operadores (por ejemplo, para controlar un marcador en una competencia puntual).
-        </p>
-
-        <form id="add-user-form" style="display: flex; gap: 10px; flex-wrap: wrap;">
-          <input
-            id="op-email"
-            type="email"
-            required
-            placeholder="operador@correo.cl"
-            style="flex: 1; min-width: 210px; padding: 9px 12px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-app); color: var(--text);"
-          >
-          <select
-            id="op-scope"
-            style="padding: 9px 12px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-app); color: var(--text);"
-          >
-            <option value="all">Todos los módulos habilitados</option>
-            <option value="marcadores">Solo Marcadores</option>
-          </select>
-          <button type="submit" class="btn" style="padding: 9px 16px; font-size: 0.78rem;">Agregar Usuario</button>
-        </form>
-
-        <div id="op-error" class="error-text"></div>
-        <div id="op-list" class="user-list"></div>
-      </section>
-    </section>
+    </div>
   </main>
 
   <script type="module">
-    import {
-      auth,
-      db,
-      DB_PATH,
-      ref,
-      set,
-      remove,
-      onValue,
-      onAuthStateChanged,
-      signInWithEmailAndPassword,
-      loginWithGoogle,
-      signOut,
-      getUserRole,
-      emailToKey
-    } from "./js/firebase.js";
+    import { auth, signOut, requireSession } from "./js/firebase.js";
 
-    const loginPanel = document.getElementById("login-panel");
-    const hubPanel = document.getElementById("hub-panel");
-    const loginForm = document.getElementById("login-form");
-    const loginError = document.getElementById("login-error");
-    const googleBtn = document.getElementById("google-login-btn");
-    const usersManager = document.getElementById("users-manager");
-    const cardStudio = document.getElementById("card-studio");
-    const cardLive = document.getElementById("card-live");
-    const sessionBadge = document.getElementById("session-badge");
+    const cleanLiveUrl = new URL("live.html", window.location.href).href;
+    const urlInput = document.getElementById("liveUrlField");
+    const copyBtn = document.getElementById("copyLiveUrlBtn");
+    const feedback = document.getElementById("copyFeedback");
 
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("denied") === "1") {
-      loginError.textContent = "Tu cuenta no está autorizada para acceder a Studio TF 2.0.";
-    }
+    urlInput.value = cleanLiveUrl;
 
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        loginPanel.style.display = "block";
-        hubPanel.style.display = "none";
-        return;
-      }
-
-      const role = await getUserRole(user);
-      if (!role) {
-        loginError.textContent = `La cuenta ${user.email} no tiene permisos asignados.`;
-        await signOut(auth);
-        return;
-      }
-
-      loginPanel.style.display = "none";
-      hubPanel.style.display = "block";
-      sessionBadge.innerHTML = `Sesión: <strong>${user.email}</strong> · Rol: <span style="color: var(--accent); font-weight: 700;">${role.toUpperCase()}</span>`;
-
-      const isAdmin = role === "admin";
-      cardStudio.style.display = isAdmin ? "flex" : "none";
-      cardLive.style.display = isAdmin ? "flex" : "none";
-      usersManager.style.display = isAdmin ? "block" : "none";
-
-      if (isAdmin) {
-        listenControlUsers();
-      }
-    });
-
-    googleBtn.addEventListener("click", async () => {
-      loginError.textContent = "";
+    copyBtn.addEventListener("click", async () => {
+      const textToCopy = cleanLiveUrl;
+      let ok = false;
       try {
-        await loginWithGoogle();
-      } catch (err) {
-        loginError.textContent = `Error al iniciar con Google (${err.code || "revisa dominios autorizados"}).`;
-      }
-    });
-
-    loginForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      loginError.textContent = "";
-      const email = document.getElementById("login-email").value.trim();
-      const password = document.getElementById("login-password").value;
-
-      try {
-        await signInWithEmailAndPassword(auth, email, password);
-      } catch {
-        loginError.textContent = "No se pudo iniciar sesión. Revisa tus credenciales.";
-      }
-    });
-
-    document.getElementById("logout-btn").addEventListener("click", () => signOut(auth));
-
-    document.getElementById("copy-live-btn").addEventListener("click", async (e) => {
-      const url = new URL("live.html", window.location.href).href;
-      await navigator.clipboard.writeText(url);
-      const btn = e.currentTarget;
-      const prev = btn.textContent;
-      btn.textContent = "Link Copiado";
-      btn.style.borderColor = "var(--ok)";
-      setTimeout(() => {
-        btn.textContent = prev;
-        btn.style.borderColor = "";
-      }, 1800);
-    });
-
-    function listenControlUsers() {
-      const opList = document.getElementById("op-list");
-      onValue(ref(db, `${DB_PATH}/controlUsers`), (snap) => {
-        opList.innerHTML = "";
-        if (!snap.exists()) {
-          opList.innerHTML = "<p style='color: var(--muted); font-size: 0.82rem;'>No hay usuarios de control agregados aún.</p>";
-          return;
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(textToCopy);
+          ok = true;
         }
+      } catch {}
 
-        Object.entries(snap.val()).forEach(([key, info]) => {
-          const row = document.createElement("div");
-          row.className = "user-row";
-          const scopeLabel = info.scope === "marcadores" ? "Solo Marcadores" : "Control General";
-          row.innerHTML = `
-            <div>
-              <strong>${info.email}</strong>
-              <span class="scope-tag">(${scopeLabel})</span>
-            </div>
-            <button class="btn btn-ghost" data-del="${key}" style="padding: 4px 10px; font-size: 0.72rem;">Quitar</button>
-          `;
-          opList.appendChild(row);
-        });
-
-        opList.querySelectorAll("button[data-del]").forEach((btn) => {
-          btn.addEventListener("click", async () => {
-            await remove(ref(db, `${DB_PATH}/controlUsers/${btn.dataset.del}`));
-          });
-        });
-      });
-    }
-
-    document.getElementById("add-user-form").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const opError = document.getElementById("op-error");
-      opError.textContent = "";
-
-      const email = document.getElementById("op-email").value.trim().toLowerCase();
-      const scope = document.getElementById("op-scope").value;
-      if (!email) return;
-
-      try {
-        const key = emailToKey(email);
-        await set(ref(db, `${DB_PATH}/controlUsers/${key}`), {
-          email,
-          scope,
-          active: true
-        });
-        document.getElementById("op-email").value = "";
-      } catch {
-        opError.textContent = "No se pudo guardar el usuario. Revisa las reglas de Firebase.";
+      if (!ok) {
+        urlInput.focus();
+        urlInput.select();
+        urlInput.setSelectionRange(0, textToCopy.length);
+        try { ok = document.execCommand("copy"); } catch {}
       }
+
+      if (ok) {
+        copyBtn.textContent = "✔ Enlace Copiado";
+        copyBtn.classList.add("copied");
+        feedback.textContent = `URL copiada: ${textToCopy}`;
+        setTimeout(() => {
+          copyBtn.textContent = "Copiar Enlace Live";
+          copyBtn.classList.remove("copied");
+        }, 2500);
+      }
+    });
+
+    requireSession((user) => {
+      document.getElementById("userStatus").textContent = `Conectado: ${user?.email || "Operador"}`;
+    });
+
+    document.getElementById("logoutBtn").addEventListener("click", async () => {
+      await signOut(auth);
+      location.href = "login.html";
     });
   </script>
 </body>
