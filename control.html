@@ -2,1448 +2,489 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#0f1116">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Control — Studio TF 2.0</title>
-  <link rel="manifest" href="manifest.json">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Control en Vivo — Studio TF 2.0</title>
   <link rel="stylesheet" href="css/base.css">
   <style>
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      background: var(--bg-app);
-      color: var(--text);
-      font-family: system-ui, -apple-system, sans-serif;
-      min-height: 100dvh;
+    .ctrl-wrap {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 16px;
       display: flex;
       flex-direction: column;
+      gap: 14px;
     }
-
     .ctrl-topbar {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 8px;
-      padding: 8px 14px;
+      gap: 10px;
+      padding: 12px 16px;
       background: var(--bg-surface);
       border-bottom: 1px solid var(--border);
       flex-wrap: wrap;
     }
-
-    .brand-link {
-      font-weight: 800;
-      letter-spacing: 1px;
-      cursor: pointer;
-      user-select: none;
-      font-size: 0.98rem;
+    .ctrl-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 14px;
     }
-    .brand-link span { color: var(--accent); }
-
-    .op-alert {
-      display: none;
+    .ctrl-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .ctrl-head {
+      display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 10px;
-      background: rgba(245, 158, 11, 0.16);
-      border-bottom: 1px solid #f59e0b;
-      color: #fde68a;
-      padding: 8px 14px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      flex-wrap: wrap;
-    }
-    .op-alert.is-active { display: flex; }
-
-    .ctrl-tabs {
-      display: flex;
-      gap: 6px;
-      padding: 8px 14px;
-      background: var(--bg-surface);
+      gap: 8px;
       border-bottom: 1px solid var(--border);
-      overflow-x: auto;
+      padding-bottom: 8px;
     }
-    .ctrl-tab {
-      background: var(--bg-app);
-      color: var(--muted);
-      border: 1px solid var(--border);
-      padding: 6px 12px;
-      border-radius: 7px;
-      font-size: 0.76rem;
-      font-weight: 700;
-      cursor: pointer;
-      white-space: nowrap;
-    }
-    .ctrl-tab.is-active {
-      background: var(--accent);
-      color: #111;
-      border-color: var(--accent);
-    }
-
-    /* Switch deslizable superior anti-apagón accidental */
-    .tf-switch {
-      position: relative;
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      cursor: pointer;
-      user-select: none;
-      font-size: 0.68rem;
-      font-weight: 800;
+    .ctrl-head h2 {
+      font-size: 0.92rem;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
-    .tf-switch input {
-      position: absolute;
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-    .tf-slider {
-      position: relative;
-      width: 42px;
-      height: 22px;
-      background: #374151;
-      border: 1px solid rgba(255,255,255,0.2);
-      border-radius: 999px;
-      transition: background 0.2s ease;
-      flex-shrink: 0;
-    }
-    .tf-slider::before {
-      content: "";
-      position: absolute;
-      width: 16px;
-      height: 16px;
-      left: 2px;
-      top: 2px;
-      border-radius: 50%;
-      background: #fff;
-      transition: transform 0.2s ease;
-    }
-    .tf-switch input:checked + .tf-slider {
-      background: #16a34a;
-      border-color: #4ade80;
-    }
-    .tf-switch input:checked + .tf-slider::before {
-      transform: translateX(20px);
-    }
-
-    .ctrl-main {
-      flex: 1;
-      padding: 10px 12px 16px;
-      max-width: 1440px;
-      width: 100%;
-      margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .scoreboard-monitor {
-      display: grid;
-      grid-template-columns: 1fr auto 1fr;
-      align-items: center;
-      gap: 10px;
-      background: var(--bg-surface);
+    .team-score-box {
+      background: var(--bg-elevated);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 8px 14px;
-    }
-    .mon-team {
+      border-radius: 8px;
+      padding: 12px;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      gap: 2px;
-      min-width: 0;
+      gap: 10px;
     }
-    .mon-name {
-      font-size: clamp(0.75rem, 2.2vw, 1rem);
-      font-weight: 800;
-      letter-spacing: 0.4px;
-      text-transform: uppercase;
-      color: var(--muted);
-      text-align: center;
-      max-width: 100%;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-    .mon-pts {
-      font-size: clamp(1.8rem, 5vw, 2.7rem);
+    .score-big {
+      font-size: 2.3rem;
       font-weight: 900;
-      line-height: 1;
-      font-variant-numeric: tabular-nums;
-      color: var(--accent);
-    }
-    .mon-fouls {
-      font-size: clamp(0.68rem, 1.8vw, 0.8rem);
-      font-weight: 700;
-      color: var(--muted);
-    }
-    .mon-center {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 2px;
-      padding: 5px 12px;
-      background: var(--bg-app);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-    }
-    .mon-timer {
-      font-size: clamp(1.3rem, 4vw, 2rem);
-      font-weight: 800;
+      text-align: center;
       font-variant-numeric: tabular-nums;
       line-height: 1;
     }
-    .mon-timer.clutch { color: #f87171; }
-    .mon-period {
-      font-size: 0.78rem;
-      font-weight: 800;
-      color: var(--accent);
-      background: rgba(255,255,255,0.06);
-      padding: 2px 9px;
-      border-radius: 5px;
-    }
-
-    .control-layout {
+    .btn-row {
       display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .teams-parallel {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      align-items: start;
-    }
-    .teams-parallel.single-col {
-      grid-template-columns: minmax(260px, 520px);
-      justify-content: center;
-    }
-
-    @media (min-width: 820px) and (orientation: landscape), (min-width: 1024px) {
-      .control-layout {
-        display: grid;
-        grid-template-columns: 1.45fr 1fr;
-        gap: 14px;
-        align-items: start;
-      }
-      .control-layout.general-only {
-        grid-template-columns: minmax(320px, 560px);
-        justify-content: center;
-      }
-    }
-
-    .col-card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: clamp(10px, 2vw, 15px);
-      display: flex;
-      flex-direction: column;
-      gap: clamp(7px, 1.5vw, 10px);
-      min-width: 0;
-    }
-    .col-title {
-      font-size: clamp(0.72rem, 1.9vw, 0.85rem);
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.6px;
-      color: var(--accent);
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 6px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
       gap: 6px;
-    }
-    .col-title span:first-child {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .pts-pair {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: clamp(6px, 1.5vw, 10px);
-    }
-    .c-btn {
-      border: 1px solid var(--border);
-      background: var(--bg-app);
-      color: var(--text);
-      border-radius: 8px;
-      padding: clamp(8px, 1.7vw, 12px) 8px;
-      font-size: clamp(0.8rem, 2.2vw, 0.96rem);
-      font-weight: 800;
-      cursor: pointer;
-      touch-action: manipulation;
-      transition: transform 0.06s ease, background 0.15s ease;
-    }
-    .c-btn:active { transform: scale(0.97); }
-    .c-btn.plus {
-      background: rgba(34, 197, 94, 0.16);
-      border-color: rgba(34, 197, 94, 0.45);
-      color: #86efac;
-    }
-    .c-btn.minus {
-      background: rgba(239, 68, 68, 0.14);
-      border-color: rgba(239, 68, 68, 0.4);
-      color: #fca5a5;
-    }
-    .c-btn.warn {
-      background: rgba(245, 158, 11, 0.16);
-      border-color: rgba(245, 158, 11, 0.45);
-      color: #fde68a;
-    }
-    .c-btn.gold {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: #111;
-    }
-    .c-btn.running {
-      background: #d97706;
-      border-color: #f59e0b;
-      color: #111;
-    }
-
-    .fouls-row {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 6px;
-    }
-    @media (max-width: 420px) {
-      .fouls-row { grid-template-columns: 1fr; }
-    }
-
-    .time-edit-row {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr) auto;
-      gap: 6px;
-      align-items: center;
-    }
-    .time-edit-row input {
-      width: 100%;
-      background: var(--bg-app);
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 6px 4px;
-      border-radius: 7px;
-      font-size: 0.84rem;
-      font-weight: 700;
-      text-align: center;
-    }
-
-    .preset-row {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 6px;
-    }
-    .preset-btn {
-      background: var(--bg-app);
-      border: 1px solid var(--border);
-      color: var(--muted);
-      padding: 6px;
-      border-radius: 7px;
-      font-size: 0.72rem;
-      font-weight: 700;
-      cursor: pointer;
-    }
-    .preset-btn:hover { color: var(--text); border-color: var(--accent); }
-
-    .period-row {
-      display: grid;
-      grid-template-columns: 1fr auto 1fr;
-      gap: 8px;
-      align-items: center;
-    }
-    .period-badge {
-      padding: 7px 12px;
-      background: var(--bg-app);
-      border: 1px solid var(--accent);
-      border-radius: 8px;
-      font-weight: 900;
-      font-size: 0.92rem;
-      color: var(--accent);
-      min-width: 62px;
-      text-align: center;
-    }
-
-    .comp-choice-row {
-      display: flex;
       flex-wrap: wrap;
-      gap: 8px;
     }
-    .comp-choice-btn {
-      padding: 9px 14px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      background: var(--bg-app);
-      color: var(--text);
-      font-size: 0.82rem;
-      font-weight: 800;
-      cursor: pointer;
-    }
-    .comp-choice-btn.is-active {
-      background: var(--accent);
-      color: #111;
-      border-color: var(--accent);
-    }
-    .instance-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      align-items: center;
-    }
-    .instance-row select,
-    .instance-row input,
-    .cfg-box input,
-    .cfg-box select {
-      background: var(--bg-app);
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 6px 8px;
-      border-radius: 7px;
+    .btn-sm {
+      padding: 8px 11px;
       font-size: 0.78rem;
     }
-    .cfg-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 8px;
+    .btn-on {
+      background: var(--ok);
+      color: #fff;
     }
-    .cfg-field {
+    .btn-on:hover {
+      background: #15803d;
+    }
+    .clock-row {
       display: flex;
-      flex-direction: column;
-      gap: 3px;
-      font-size: 0.7rem;
-      color: var(--muted);
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .clock-row input,
+    .clock-row select {
+      background: var(--bg-app);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 0.88rem;
       font-weight: 700;
     }
-    .balls-strip {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      min-height: 32px;
-      align-items: center;
-      background: var(--bg-app);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 7px;
-    }
-    .shot-pill {
-      padding: 4px 8px;
-      border-radius: 999px;
-      font-size: 0.74rem;
-      font-weight: 800;
-    }
-    .shot-pill.hit { background: rgba(234, 88, 12, 0.25); border: 1px solid #fb923c; color: #fed7aa; }
-    .shot-pill.bonus { background: rgba(234, 179, 8, 0.25); border: 1px solid #facc15; color: #fef08a; }
-    .shot-pill.miss { background: rgba(255, 255, 255, 0.06); border: 1px solid var(--border); color: var(--muted); }
-
-    .shooter-list {
+    .sp-list {
       display: flex;
       flex-direction: column;
       gap: 6px;
-      max-height: 270px;
-      overflow-y: auto;
     }
-    .shooter-row {
+    .sp-item {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 8px;
       padding: 8px 10px;
-      background: var(--bg-app);
+      border-radius: 7px;
+      background: var(--bg-elevated);
       border: 1px solid var(--border);
-      border-radius: 8px;
+      font-size: 0.84rem;
     }
-    .shooter-row.is-active { border-color: var(--accent); background: rgba(227, 184, 87, 0.12); }
-    .shooter-row.is-winner { border-color: #22c55e; background: rgba(34, 197, 94, 0.14); }
-    .shooter-logo { width: 24px; height: 24px; object-fit: contain; border-radius: 4px; flex-shrink: 0; }
-
-    .sub-label {
-      font-size: 0.7rem;
-      color: var(--muted);
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+    .sp-item.is-active {
+      border-color: var(--accent);
     }
     .hidden { display: none !important; }
   </style>
 </head>
 <body>
   <header class="ctrl-topbar">
-    <div class="brand-link" onclick="location.href='index.html'" title="Volver al menú principal">
-      STUDIO <span>TF 2.0</span>
+    <div style="display:flex; align-items:center; gap:12px;">
+      <div style="font-weight:900; letter-spacing:1px; cursor:pointer;" onclick="location.href='index.html'">
+        STUDIO <span style="color:var(--accent);">TF 2.0</span> · CONTROL
+      </div>
+      <span id="roleBadge" style="font-size:0.75rem; color:var(--muted); font-weight:700;"></span>
     </div>
-    <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-      <span id="op-badge" style="font-size:0.74rem; color:var(--muted);">Operador listo</span>
-      <button type="button" class="btn btn-ghost" style="padding:5px 10px; font-size:0.74rem;" onclick="location.href='studio.html'">Estudio</button>
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <button type="button" id="toggleMarcadorBtn" class="btn btn-sm">Marcador: OFF</button>
+      <button type="button" id="studioLinkBtn" class="btn btn-ghost btn-sm hidden" onclick="location.href='studio.html'">Estudio</button>
+      <button type="button" class="btn btn-ghost btn-sm" onclick="location.href='index.html'">Portal</button>
     </div>
   </header>
 
-  <div id="multiOpAlert" class="op-alert">
-    <span id="multiOpText">Otro operador está usando este control en este momento.</span>
-    <button type="button" id="takeControlBtn" class="btn" style="padding:4px 10px; font-size:0.74rem;">Tomar Control</button>
-  </div>
+  <main class="ctrl-wrap">
+    <!-- MARCADOR PRINCIPAL -->
+    <section class="ctrl-card" id="cardMarcador">
+      <div class="ctrl-head">
+        <h2>Marcador de Partido</h2>
+        <span id="matchTitle" style="font-size:0.82rem; color:var(--muted); font-weight:700;">LOCAL vs VISITA</span>
+      </div>
 
-  <nav class="ctrl-tabs" id="ctrlTabs">
-    <button type="button" class="ctrl-tab is-active" data-pane="tab-marcadores">Marcadores</button>
-    <button type="button" class="ctrl-tab hidden" id="tabEspecialesBtn" data-pane="tab-especiales">Competencias Especiales</button>
-  </nav>
-
-  <main class="ctrl-main">
-    <section id="tab-marcadores">
-      <div class="scoreboard-monitor">
-        <div class="mon-team">
-          <div class="mon-name" id="monName1">LOCAL</div>
-          <div class="mon-pts" id="monPts1">0</div>
-          <div class="mon-fouls">Faltas: <span id="monFouls1">0</span>/5</div>
+      <div class="ctrl-grid">
+        <!-- LOCAL -->
+        <div class="team-score-box">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <strong id="labelTeam1" style="font-size:0.95rem; text-transform:uppercase;">LOCAL</strong>
+            <span id="labelFouls1" style="font-size:0.8rem; color:var(--muted); font-weight:700;">Faltas: 0</span>
+          </div>
+          <div class="score-big" id="valPts1">0</div>
+          <div class="btn-row">
+            <button type="button" class="btn btn-sm" data-pts="1:1">+1</button>
+            <button type="button" class="btn btn-sm" data-pts="1:2">+2</button>
+            <button type="button" class="btn btn-sm" data-pts="1:3">+3</button>
+            <button type="button" class="btn btn-ghost btn-sm" data-pts="1:-1">-1</button>
+          </div>
+          <div class="btn-row">
+            <button type="button" class="btn btn-ghost btn-sm" data-foul="1:+1">+ Falta</button>
+            <button type="button" class="btn btn-ghost btn-sm" data-foul="1:-1">- Falta</button>
+          </div>
         </div>
 
-        <div class="mon-center">
-          <div class="mon-timer" id="monTimer">10:00</div>
-          <div class="mon-period" id="monPeriod">Q1</div>
-          <div style="font-size:0.66rem; color:var(--muted);" id="monSourceHint">FIBA / Clutch &lt;10s</div>
-        </div>
-
-        <div class="mon-team">
-          <div class="mon-name" id="monName2">VISITA</div>
-          <div class="mon-pts" id="monPts2">0</div>
-          <div class="mon-fouls">Faltas: <span id="monFouls2">0</span>/5</div>
+        <!-- VISITA -->
+        <div class="team-score-box">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <strong id="labelTeam2" style="font-size:0.95rem; text-transform:uppercase;">VISITA</strong>
+            <span id="labelFouls2" style="font-size:0.8rem; color:var(--muted); font-weight:700;">Faltas: 0</span>
+          </div>
+          <div class="score-big" id="valPts2">0</div>
+          <div class="btn-row">
+            <button type="button" class="btn btn-sm" data-pts="2:1">+1</button>
+            <button type="button" class="btn btn-sm" data-pts="2:2">+2</button>
+            <button type="button" class="btn btn-sm" data-pts="2:3">+3</button>
+            <button type="button" class="btn btn-ghost btn-sm" data-pts="2:-1">-1</button>
+          </div>
+          <div class="btn-row">
+            <button type="button" class="btn btn-ghost btn-sm" data-foul="2:+1">+ Falta</button>
+            <button type="button" class="btn btn-ghost btn-sm" data-foul="2:-1">- Falta</button>
+          </div>
         </div>
       </div>
 
-      <div class="control-layout" id="controlLayout">
-        <div class="teams-parallel" id="teamsParallel">
-          <div class="col-card" id="colLocal">
-            <div class="col-title">
-              <span id="titleLocal">LOCAL</span>
-              <span style="font-size:0.66rem; color:var(--muted);">MANUAL</span>
-            </div>
-
-            <div id="localPointsBox" style="display:flex; flex-direction:column; gap:7px;">
-              <span class="sub-label">Puntos Local</span>
-              <div class="pts-pair">
-                <button type="button" class="c-btn plus" data-pts="1" data-delta="1">+1</button>
-                <button type="button" class="c-btn minus" data-pts="1" data-delta="-1">-1</button>
-              </div>
-              <div class="pts-pair">
-                <button type="button" class="c-btn plus" data-pts="1" data-delta="2">+2</button>
-                <button type="button" class="c-btn minus" data-pts="1" data-delta="-2">-2</button>
-              </div>
-              <div class="pts-pair">
-                <button type="button" class="c-btn plus" data-pts="1" data-delta="3">+3</button>
-                <button type="button" class="c-btn minus" data-pts="1" data-delta="-3">-3</button>
-              </div>
-            </div>
-
-            <div id="localFoulsBox" style="display:flex; flex-direction:column; gap:7px;">
-              <span class="sub-label">Faltas Local</span>
-              <div class="fouls-row">
-                <button type="button" class="c-btn plus" data-foul="1" data-delta="1">+1</button>
-                <button type="button" class="c-btn minus" data-foul="1" data-delta="-1">-1</button>
-                <button type="button" class="c-btn warn" data-foul="1" data-delta="reset">Reset</button>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-card" id="colVisita">
-            <div class="col-title">
-              <span id="titleVisita">VISITA</span>
-              <span style="font-size:0.66rem; color:var(--muted);">MANUAL</span>
-            </div>
-
-            <div id="visitaPointsBox" style="display:flex; flex-direction:column; gap:7px;">
-              <span class="sub-label">Puntos Visita</span>
-              <div class="pts-pair">
-                <button type="button" class="c-btn plus" data-pts="2" data-delta="1">+1</button>
-                <button type="button" class="c-btn minus" data-pts="2" data-delta="-1">-1</button>
-              </div>
-              <div class="pts-pair">
-                <button type="button" class="c-btn plus" data-pts="2" data-delta="2">+2</button>
-                <button type="button" class="c-btn minus" data-pts="2" data-delta="-2">-2</button>
-              </div>
-              <div class="pts-pair">
-                <button type="button" class="c-btn plus" data-pts="2" data-delta="3">+3</button>
-                <button type="button" class="c-btn minus" data-pts="2" data-delta="-3">-3</button>
-              </div>
-            </div>
-
-            <div id="visitaFoulsBox" style="display:flex; flex-direction:column; gap:7px;">
-              <span class="sub-label">Faltas Visita</span>
-              <div class="fouls-row">
-                <button type="button" class="c-btn plus" data-foul="2" data-delta="1">+1</button>
-                <button type="button" class="c-btn minus" data-foul="2" data-delta="-1">-1</button>
-                <button type="button" class="c-btn warn" data-foul="2" data-delta="reset">Reset</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- GENERAL: Switch deslizable arriba + Start/Stop cómodo + Cuartos y ajuste arriba -->
-        <div class="col-card" id="colGeneral">
-          <div class="col-title">
-            <span>Control General</span>
-            <label class="tf-switch" title="Interruptor deslizable anti-apagón accidental">
-              <span id="matchSwitchLabel">OFF AIR</span>
-              <input type="checkbox" id="matchLiveSwitch">
-              <span class="tf-slider"></span>
-            </label>
-          </div>
-
-          <div id="manualTimerBox" style="display:flex; flex-direction:column; gap:7px;">
-            <button type="button" id="timerStartStopBtn" class="c-btn plus">▶ Iniciar Tiempo</button>
-            <div class="preset-row">
-              <button type="button" class="preset-btn" data-preset-min="10" data-preset-sec="0">10:00 Adulto</button>
-              <button type="button" class="preset-btn" data-preset-min="8" data-preset-sec="0">08:00 Formativa</button>
-              <button type="button" class="preset-btn" data-preset-min="5" data-preset-sec="0">05:00 OT</button>
-            </div>
-            <div class="time-edit-row">
-              <input type="number" id="editMin" min="0" max="59" value="10" placeholder="Min">
-              <input type="number" id="editSec" min="0" max="59" value="0" placeholder="Seg">
-              <input type="number" id="editDec" min="0" max="9" value="0" placeholder="Déc">
-              <button type="button" id="applyTimeBtn" class="c-btn" style="padding:6px 10px; font-size:0.76rem;">Fijar</button>
-            </div>
-          </div>
-
-          <div id="manualPeriodBox" style="display:flex; flex-direction:column; gap:6px; border-top:1px solid var(--border); padding-top:8px;">
-            <span class="sub-label">Cuarto / Tiempo Extra (FIBA)</span>
-            <div class="period-row">
-              <button type="button" id="periodMinusBtn" class="c-btn minus">− Cuarto</button>
-              <div class="period-badge" id="ctrlPeriodLabel">Q1</div>
-              <button type="button" id="periodPlusBtn" class="c-btn plus">+ Cuarto</button>
-            </div>
-          </div>
-
-          <div style="display:flex; flex-direction:column; gap:6px; border-top:1px solid var(--border); padding-top:8px;">
-            <span class="sub-label">Redes Sociales (@tiempofuera_cl)</span>
-            <div class="pts-pair">
-              <button type="button" class="c-btn" data-social="ig">Instagram</button>
-              <button type="button" class="c-btn" data-social="yt">YouTube</button>
-            </div>
-          </div>
-        </div>
+      <!-- RELOJ Y CUARTO -->
+      <div class="clock-row">
+        <input type="text" id="inTimer" value="10:00" style="width:90px; text-align:center;">
+        <button type="button" id="applyTimerBtn" class="btn btn-ghost btn-sm">Set Reloj</button>
+        <select id="selPeriod">
+          <option value="1">Q1</option>
+          <option value="2">Q2</option>
+          <option value="3">Q3</option>
+          <option value="4">Q4</option>
+          <option value="5">OT1</option>
+          <option value="6">OT2</option>
+        </select>
+        <button type="button" id="resetFoulsBtn" class="btn btn-ghost btn-sm">Limpiar Faltas</button>
       </div>
     </section>
 
-    <!-- PESTAÑA COMPETENCIAS ESPECIALES -->
-    <section id="tab-especiales" class="hidden">
-      <div class="col-card cfg-box">
-        <div class="col-title">
-          <span>Competencias Especiales</span>
-          <label class="tf-switch" title="Al activar oculta el marcador del partido y lanza banner de 10s">
-            <span id="compSwitchLabel">OFF AIR</span>
-            <input type="checkbox" id="compLiveSwitch">
-            <span class="tf-slider"></span>
-          </label>
+    <!-- RRSS Y COMPETENCIAS ESPECIALES -->
+    <div class="ctrl-grid">
+      <section class="ctrl-card">
+        <div class="ctrl-head">
+          <h2>Redes Sociales</h2>
+        </div>
+        <div class="btn-row">
+          <button type="button" id="sendIgBtn" class="btn btn-ghost btn-sm">Lanzar Instagram</button>
+          <button type="button" id="sendYtBtn" class="btn btn-ghost btn-sm">Lanzar YouTube</button>
+        </div>
+      </section>
+
+      <section class="ctrl-card hidden" id="cardEspeciales">
+        <div class="ctrl-head">
+          <h2>Competencia Especial</h2>
+          <button type="button" id="toggleEspecialBtn" class="btn btn-sm">Lanzar en Live</button>
         </div>
 
-        <div class="comp-choice-row" id="compChoiceRow"></div>
-
-        <div class="instance-row">
-          <select id="instSelect" style="flex:1; min-width:180px;"></select>
-          <input type="text" id="newInstName" placeholder="Nueva instancia (ej. Partido 2 / Final)..." style="flex:1; min-width:170px;">
-          <button type="button" class="c-btn gold" id="addInstBtn" style="padding:6px 12px; font-size:0.76rem;">+ Instancia</button>
-        </div>
-      </div>
-
-      <div class="col-card cfg-box" style="margin-top:10px;">
-        <div class="col-title">
-          <span>Reglas de la Instancia</span>
-          <span id="instRoundBadge" style="font-size:0.68rem; color:var(--accent);">RONDA ABIERTA</span>
+        <div class="clock-row">
+          <select id="spCompType">
+            <option value="triples">Concurso de Triples</option>
+            <option value="tiros_libres">Concurso de Tiros Libres</option>
+          </select>
+          <input type="text" id="spShooterName" placeholder="Nombre tirador" style="flex:1; min-width:130px;">
+          <button type="button" id="addShooterBtn" class="btn btn-ghost btn-sm">+ Tirador</button>
         </div>
 
-        <div class="cfg-grid" id="triplesRulesGrid">
-          <div class="cfg-field">
-            <label>Lanzamientos por Turno (Base: 6)</label>
-            <input type="number" id="rTriplesShots" min="1" max="50" value="6">
-          </div>
-          <div class="cfg-field">
-            <label>Pts Acierto Triple</label>
-            <input type="number" id="rTriplesPts" min="1" max="10" value="1">
-          </div>
-          <div class="cfg-field">
-            <label>Balón Especial (+Pts)</label>
-            <input type="number" id="rTriplesBonus" min="0" max="10" value="3">
-          </div>
-          <div class="cfg-field">
-            <label>Tiempo Límite (Seg, 0=Libre)</label>
-            <input type="number" id="rTriplesSec" min="0" max="300" value="0">
-          </div>
+        <div class="btn-row">
+          <button type="button" class="btn btn-sm" data-shot="hit">🏀 Encesta</button>
+          <button type="button" class="btn btn-ghost btn-sm" data-shot="miss">✕ Falla</button>
+          <button type="button" class="btn btn-ghost btn-sm" id="finishTurnBtn">Guardar Turno</button>
+          <button type="button" class="btn btn-ghost btn-sm" id="closeRoundBtn">Cerrar Ronda</button>
         </div>
 
-        <div class="cfg-grid hidden" id="ftRulesGrid">
-          <div class="cfg-field">
-            <label>Tiros Libres por Turno (Base: 10)</label>
-            <input type="number" id="rFtShots" min="1" max="50" value="10">
-          </div>
-          <div class="cfg-field">
-            <label>Pts por Acierto</label>
-            <input type="number" id="rFtPts" min="1" max="10" value="1">
-          </div>
-          <div class="cfg-field">
-            <label>Tiempo Límite (Seg, 0=Libre)</label>
-            <input type="number" id="rFtSec" min="0" max="300" value="0">
-          </div>
-          <div class="cfg-field">
-            <label>Resolución de Empate</label>
-            <select id="rFtTiebreak">
-              <option value="desempate">Desempate</option>
-              <option value="eliminacion">Eliminación Directa</option>
-            </select>
-          </div>
-        </div>
-
-        <div style="display:flex; gap:8px; flex-wrap:wrap;">
-          <button type="button" class="c-btn" id="saveInstRulesBtn" style="padding:6px 11px; font-size:0.74rem;">Guardar Reglas</button>
-          <button type="button" class="c-btn warn" id="closeInstRoundBtn" style="padding:6px 11px; font-size:0.74rem;">Terminar Ronda / Definir Finalista</button>
-          <button type="button" class="c-btn" id="reopenInstRoundBtn" style="padding:6px 11px; font-size:0.74rem;">Retomar Ronda</button>
-        </div>
-      </div>
-
-      <div class="control-layout" style="margin-top:10px;">
-        <div class="col-card">
-          <div class="col-title">
-            <span id="courtShooterName">Sin jugadora en cancha</span>
-            <span id="courtShooterPts" style="font-size:0.85rem; color:var(--accent);">0 PTS</span>
-          </div>
-
-          <div style="display:flex; justify-content:space-between; font-size:0.76rem; color:var(--muted);">
-            <span>Tiros: <strong id="courtShotsCount" style="color:var(--text);">0/6</strong></span>
-            <span>Tiempo: <strong id="courtTimeInfo" style="color:var(--text);">Libre</strong></span>
-          </div>
-
-          <div class="balls-strip" id="courtBallsStrip"></div>
-
-          <div class="pts-pair">
-            <button type="button" class="c-btn plus" id="btnCompHit">🏀 ACERTÓ</button>
-            <button type="button" class="c-btn minus" id="btnCompMiss">✕ FALLÓ</button>
-          </div>
-
-          <div class="pts-pair" id="compSpecialActionRow">
-            <button type="button" class="c-btn warn" id="btnCompBonus">🔥 Balón Especial</button>
-            <button type="button" class="c-btn" id="btnCompUndo">↩ Deshacer</button>
-          </div>
-
-          <button type="button" class="c-btn gold" id="btnFinishShooterTurn">✔ Terminar Ronda y Guardar</button>
-        </div>
-
-        <div class="col-card cfg-box">
-          <div class="col-title">
-            <span>Inscritas (Orden de Inscripción)</span>
-            <span id="compWinnerText" style="font-size:0.72rem; color:#4ade80;"></span>
-          </div>
-
-          <div style="display:flex; gap:6px; flex-wrap:wrap;">
-            <input type="text" id="newShooterName" placeholder="Nombre jugadora..." style="flex:1; min-width:130px;">
-            <input type="text" id="newShooterTeam" placeholder="Equipo..." style="width:110px;">
-            <input type="file" id="newShooterLogo" accept="image/*" style="width:105px; font-size:0.68rem; color:var(--muted);">
-            <button type="button" class="c-btn plus" id="addShooterBtn" style="padding:6px 10px; font-size:0.74rem;">+ Sumar</button>
-          </div>
-
-          <div class="shooter-list" id="shooterList"></div>
-        </div>
-      </div>
-    </section>
+        <div class="sp-list" id="spShootersList"></div>
+      </section>
+    </div>
   </main>
 
   <script type="module">
     import { db, DB_PATH, ref, update, onValue, requireSession } from "./js/firebase.js";
 
-    const SESSION_ID = `op_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-    let operatorName = "Operador";
-    let hasControlLock = true;
-
-    let modState = {
-      enabled: true,
+    let marcMod = {
       on: false,
-      config: {},
-      feeds: {
-        manual: { points_1: 0, points_2: 0, timer: "10:00", period: 1, fouls_1: 0, fouls_2: 0 },
-        scoresight: {},
-        flexyscore: {}
-      }
+      config: { name1: "LOCAL", name2: "VISITA" },
+      feeds: { manual: { points_1: 0, points_2: 0, fouls_1: 0, fouls_2: 0, timer: "10:00", period: 1 } }
     };
 
-    let specialsConfig = { enabled: false, modules: ["triples", "tiros_libres"] };
-    let especialesLive = {
-      active: false,
-      compType: "triples",
-      instanceId: "inst_1",
-      bannerTs: 0,
-      bannerTitle: "",
-      instances: {
-        triples: {
-          inst_1: {
-            id: "inst_1",
-            name: "Partido 1 — Ronda Clasificatoria",
-            closed: false,
-            winnerId: null,
-            rules: { shotsCount: 6, ptsPerHit: 1, moneyPts: 3, timeSec: 0 },
-            activeShooterId: null,
-            turnShots: [],
-            shooters: [
-              { id: "t1", name: "Jugadora 1", team: "EQUIPO A", logo: "", score: null },
-              { id: "t2", name: "Jugadora 2", team: "EQUIPO B", logo: "", score: null }
-            ]
-          }
-        },
-        tiros_libres: {
-          inst_1: {
-            id: "inst_1",
-            name: "Partido 1 — Tiros Libres",
-            closed: false,
-            winnerId: null,
-            tiebreakMode: "desempate",
-            rules: { shotsCount: 10, ptsPerHit: 1, timeSec: 0 },
-            activeShooterId: null,
-            turnShots: [],
-            shooters: [
-              { id: "f1", name: "Jugadora 1", team: "EQUIPO A", logo: "", score: null },
-              { id: "f2", name: "Jugadora 2", team: "EQUIPO B", logo: "", score: null }
-            ]
-          }
+    let espMod = {
+      enabled: false,
+      config: {
+        modules: ["triples", "tiros_libres"],
+        rules: {
+          triples: "5 racks de triples + balón dinero en cada rack. Máximo puntaje define el avance de ronda.",
+          tiros_libres: "Turnos de tiros libres desde la línea. Mayor efectividad o desempate súbito define al ganador."
         }
+      },
+      live: {
+        active: false,
+        compType: "triples",
+        shooters: [],
+        activeId: null,
+        turnShots: [],
+        closed: false,
+        winnerId: null,
+        rulesText: "",
+        bannerTitle: "",
+        bannerTs: 0
       }
     };
 
-    let timerRunning = false;
-    let remainingTenths = 6000;
-    let quarterBaseTenths = 6000;
-    let lastTickMs = 0;
-    let lastFirebasePushMs = 0;
-    let timerRafId = null;
-
-    function formatClockFromTenths(tenths) {
-      const t = Math.max(0, Math.floor(tenths));
-      const totalSec = Math.floor(t / 10);
-      const dec = t % 10;
-      const mm = String(Math.floor(totalSec / 60)).padStart(2, "0");
-      const ss = String(totalSec % 60).padStart(2, "0");
-      return t < 100 ? `${mm}:${ss}:${dec}` : `${mm}:${ss}`;
+    function getManual() {
+      return {
+        points_1: 0,
+        points_2: 0,
+        fouls_1: 0,
+        fouls_2: 0,
+        timer: "10:00",
+        period: 1,
+        ...(marcMod.feeds?.manual || {})
+      };
     }
 
-    function parseTimerToTenths(val) {
-      if (typeof val === "number" && !isNaN(val)) return Math.max(0, Math.round(val * 10));
-      const parts = String(val || "10:00").trim().split(":");
-      if (parts.length === 3) {
-        const m = parseInt(parts[0], 10) || 0;
-        const s = parseInt(parts[1], 10) || 0;
-        const d = parseInt(String(parts[2] || "0").replace(/[^0-9]/g, "").slice(0, 1) || "0", 10) || 0;
-        return Math.max(0, (m * 60 + s) * 10 + d);
+    function renderMarcadorUI() {
+      const m = getManual();
+      const n1 = marcMod.config?.name1 || "LOCAL";
+      const n2 = marcMod.config?.name2 || "VISITA";
+
+      document.getElementById("labelTeam1").textContent = n1;
+      document.getElementById("labelTeam2").textContent = n2;
+      document.getElementById("matchTitle").textContent = `${n1} vs ${n2}`;
+      document.getElementById("valPts1").textContent = m.points_1;
+      document.getElementById("valPts2").textContent = m.points_2;
+      document.getElementById("labelFouls1").textContent = `Faltas: ${m.fouls_1}`;
+      document.getElementById("labelFouls2").textContent = `Faltas: ${m.fouls_2}`;
+      document.getElementById("inTimer").value = m.timer || "10:00";
+      document.getElementById("selPeriod").value = String(m.period || 1);
+
+      const btn = document.getElementById("toggleMarcadorBtn");
+      btn.textContent = marcMod.on ? "Marcador: ON AIR" : "Marcador: OFF";
+      btn.classList.toggle("btn-on", Boolean(marcMod.on));
+    }
+
+    function renderEspecialesUI() {
+      document.getElementById("cardEspeciales").classList.toggle("hidden", !espMod.enabled);
+      const live = espMod.live || {};
+      const tBtn = document.getElementById("toggleEspecialBtn");
+      tBtn.textContent = live.active ? "Ocultar en Live" : "Lanzar en Live";
+      tBtn.classList.toggle("btn-on", Boolean(live.active));
+
+      const shooters = live.shooters || [];
+      const activeId = live.activeId;
+      const listEl = document.getElementById("spShootersList");
+
+      if (!shooters.length) {
+        listEl.innerHTML = `<div style="color:var(--muted); font-size:0.8rem;">Agrega tiradores para iniciar la ronda.</div>`;
+        return;
       }
-      if (parts.length === 2) {
-        return Math.max(0, ((parseInt(parts[0], 10) || 0) * 60 + (parseInt(parts[1], 10) || 0)) * 10);
-      }
-      return 6000;
-    }
 
-    function syncTimeInputsFromTenths(tenths) {
-      const t = Math.max(0, Math.floor(tenths));
-      const totalSec = Math.floor(t / 10);
-      document.getElementById("editMin").value = Math.floor(totalSec / 60);
-      document.getElementById("editSec").value = totalSec % 60;
-      document.getElementById("editDec").value = t % 10;
-    }
+      listEl.innerHTML = shooters.map((s) => `
+        <div class="sp-item ${s.id === activeId ? "is-active" : ""}">
+          <div>
+            <strong>${s.name}</strong>
+            <span style="color:var(--accent); font-weight:800; margin-left:8px;">${s.score ?? 0} pts</span>
+            ${live.winnerId === s.id ? `<span style="color:#4ade80; font-weight:800; margin-left:6px;">GANADOR</span>` : ""}
+          </div>
+          <button type="button" class="btn btn-ghost btn-sm" data-pick="${s.id}">Turno</button>
+        </div>
+      `).join("");
 
-    function formatPeriodFiba(p) {
-      const n = parseInt(String(p ?? "1").replace(/[^0-9]/g, ""), 10) || 1;
-      return n <= 4 ? `Q${n}` : `OT${n - 4}`;
-    }
-
-    function getSourceFor(field) { return modState.config?.sources?.[field] || "manual"; }
-
-    function readEffectiveValue(field, altKeys = []) {
-      const src = getSourceFor(field);
-      const bucket = modState.feeds?.[src] || {};
-      for (const k of [field, ...altKeys]) {
-        if (bucket[k] !== undefined && bucket[k] !== null && bucket[k] !== "") return bucket[k];
-      }
-      return modState.feeds?.manual?.[field];
-    }
-
-    function updateConditionalVisibility() {
-      const p1Manual = getSourceFor("points_1") === "manual";
-      const p2Manual = getSourceFor("points_2") === "manual";
-      const f1Manual = getSourceFor("fouls_1") === "manual";
-      const f2Manual = getSourceFor("fouls_2") === "manual";
-      const tManual = getSourceFor("timer") === "manual";
-      const qManual = getSourceFor("period") === "manual";
-
-      document.getElementById("localPointsBox").classList.toggle("hidden", !p1Manual);
-      document.getElementById("localFoulsBox").classList.toggle("hidden", !f1Manual);
-      const showLocal = p1Manual || f1Manual;
-      document.getElementById("colLocal").classList.toggle("hidden", !showLocal);
-
-      document.getElementById("visitaPointsBox").classList.toggle("hidden", !p2Manual);
-      document.getElementById("visitaFoulsBox").classList.toggle("hidden", !f2Manual);
-      const showVisita = p2Manual || f2Manual;
-      document.getElementById("colVisita").classList.toggle("hidden", !showVisita);
-
-      document.getElementById("manualTimerBox").classList.toggle("hidden", !tManual);
-      document.getElementById("manualPeriodBox").classList.toggle("hidden", !qManual);
-
-      const parallel = document.getElementById("teamsParallel");
-      const anyTeam = showLocal || showVisita;
-      parallel.classList.toggle("hidden", !anyTeam);
-      parallel.classList.toggle("single-col", (showLocal && !showVisita) || (!showLocal && showVisita));
-      document.getElementById("controlLayout").classList.toggle("general-only", !anyTeam && (tManual || qManual));
-    }
-
-    function renderMonitor() {
-      const cfg = modState.config || {};
-      const n1 = cfg.name1 || "LOCAL";
-      const n2 = cfg.name2 || "VISITA";
-      document.getElementById("monName1").textContent = n1;
-      document.getElementById("monName2").textContent = n2;
-      document.getElementById("titleLocal").textContent = n1;
-      document.getElementById("titleVisita").textContent = n2;
-
-      document.getElementById("monPts1").textContent = parseInt(readEffectiveValue("points_1", ["points1", "score_1"]) ?? 0, 10) || 0;
-      document.getElementById("monPts2").textContent = parseInt(readEffectiveValue("points_2", ["points2", "score_2"]) ?? 0, 10) || 0;
-      document.getElementById("monFouls1").textContent = parseInt(readEffectiveValue("fouls_1", ["fouls1"]) ?? 0, 10) || 0;
-      document.getElementById("monFouls2").textContent = parseInt(readEffectiveValue("fouls_2", ["fouls2"]) ?? 0, 10) || 0;
-
-      const tmr = readEffectiveValue("timer") ?? "10:00";
-      const monTimerEl = document.getElementById("monTimer");
-      monTimerEl.textContent = tmr;
-      monTimerEl.classList.toggle("clutch", parseTimerToTenths(tmr) < 100);
-
-      const per = readEffectiveValue("period", ["moment"]) ?? 1;
-      document.getElementById("monPeriod").textContent = formatPeriodFiba(per);
-      document.getElementById("ctrlPeriodLabel").textContent = formatPeriodFiba(per);
-
-      const liveOn = Boolean(modState.on) && !Boolean(especialesLive.active);
-      document.getElementById("matchLiveSwitch").checked = liveOn;
-      document.getElementById("matchSwitchLabel").textContent = liveOn ? "ON AIR" : "OFF AIR";
-      document.getElementById("matchSwitchLabel").style.color = liveOn ? "#4ade80" : "var(--muted)";
-
-      updateConditionalVisibility();
-    }
-
-    async function writeManual(patch) {
-      modState.feeds.manual = { ...(modState.feeds?.manual || {}), ...patch };
-      renderMonitor();
-      await update(ref(db, `${DB_PATH}/modules/marcadores/feeds/manual`), patch);
-    }
-
-    document.getElementById("matchLiveSwitch").addEventListener("change", async (e) => {
-      const turnOn = e.target.checked;
-      await update(ref(db, `${DB_PATH}/modules/marcadores`), { enabled: true, on: turnOn });
-      if (turnOn && especialesLive.active) {
-        await update(ref(db, `${DB_PATH}/modules/especiales/live`), { active: false });
-      }
-    });
-
-    document.getElementById("compLiveSwitch").addEventListener("change", async (e) => {
-      const turnOn = e.target.checked;
-      const titleBanner = especialesLive.compType === "tiros_libres"
-        ? "COMPETENCIA DE TIROS LIBRES"
-        : "COMPETENCIA DE TRIPLES";
-      await update(ref(db, `${DB_PATH}/modules/especiales/live`), {
-        active: turnOn,
-        compType: especialesLive.compType,
-        instanceId: especialesLive.instanceId,
-        bannerTs: turnOn ? Date.now() : 0,
-        bannerTitle: titleBanner
+      listEl.querySelectorAll("[data-pick]").forEach((b) => {
+        b.addEventListener("click", async () => {
+          await update(ref(db, `${DB_PATH}/modules/especiales/live`), {
+            activeId: b.dataset.pick,
+            turnShots: []
+          });
+        });
       });
-      if (turnOn) {
-        await update(ref(db, `${DB_PATH}/modules/marcadores`), { on: false });
-      }
+    }
+
+    document.getElementById("toggleMarcadorBtn").addEventListener("click", async () => {
+      await update(ref(db, `${DB_PATH}/modules/marcadores`), { on: !marcMod.on });
     });
 
     document.querySelectorAll("[data-pts]").forEach((btn) => {
       btn.addEventListener("click", async () => {
-        const key = btn.dataset.pts === "1" ? "points_1" : "points_2";
-        const cur = parseInt(modState.feeds?.manual?.[key] ?? 0, 10) || 0;
-        await writeManual({ [key]: Math.max(0, cur + parseInt(btn.dataset.delta, 10)) });
+        const [team, deltaStr] = btn.dataset.pts.split(":");
+        const delta = parseInt(deltaStr, 10);
+        const m = getManual();
+        const key = team === "1" ? "points_1" : "points_2";
+        const nextVal = Math.max(0, (parseInt(m[key], 10) || 0) + delta);
+        await update(ref(db, `${DB_PATH}/modules/marcadores/feeds/manual`), { [key]: nextVal });
       });
     });
 
     document.querySelectorAll("[data-foul]").forEach((btn) => {
       btn.addEventListener("click", async () => {
-        const key = btn.dataset.foul === "1" ? "fouls_1" : "fouls_2";
-        if (btn.dataset.delta === "reset") { await writeManual({ [key]: 0 }); return; }
-        const cur = parseInt(modState.feeds?.manual?.[key] ?? 0, 10) || 0;
-        await writeManual({ [key]: Math.max(0, Math.min(5, cur + parseInt(btn.dataset.delta, 10))) });
+        const [team, deltaStr] = btn.dataset.foul.split(":");
+        const delta = parseInt(deltaStr, 10);
+        const m = getManual();
+        const key = team === "1" ? "fouls_1" : "fouls_2";
+        const nextVal = Math.max(0, Math.min(5, (parseInt(m[key], 10) || 0) + delta));
+        await update(ref(db, `${DB_PATH}/modules/marcadores/feeds/manual`), { [key]: nextVal });
       });
     });
 
-    async function applyPeriodTransition(nextPeriod) {
-      stopTimerLoop();
-      const isOvertime = nextPeriod > 4;
-      const targetTenths = isOvertime ? 3000 : quarterBaseTenths;
-      remainingTenths = targetTenths;
-      syncTimeInputsFromTenths(targetTenths);
-      const patch = { period: nextPeriod, timer: formatClockFromTenths(targetTenths) };
-      if (!isOvertime) { patch.fouls_1 = 0; patch.fouls_2 = 0; }
-      await writeManual(patch);
-    }
-
-    document.getElementById("periodMinusBtn").addEventListener("click", async () => {
-      const cur = parseInt(String(modState.feeds?.manual?.period ?? "1").replace(/[^0-9]/g, ""), 10) || 1;
-      await applyPeriodTransition(Math.max(1, cur - 1));
+    document.getElementById("resetFoulsBtn").addEventListener("click", async () => {
+      await update(ref(db, `${DB_PATH}/modules/marcadores/feeds/manual`), { fouls_1: 0, fouls_2: 0 });
     });
 
-    document.getElementById("periodPlusBtn").addEventListener("click", async () => {
-      const cur = parseInt(String(modState.feeds?.manual?.period ?? "1").replace(/[^0-9]/g, ""), 10) || 1;
-      await applyPeriodTransition(cur + 1);
+    document.getElementById("applyTimerBtn").addEventListener("click", async () => {
+      const val = document.getElementById("inTimer").value.trim() || "10:00";
+      await update(ref(db, `${DB_PATH}/modules/marcadores/feeds/manual`), { timer: val });
     });
 
-    const startStopBtn = document.getElementById("timerStartStopBtn");
-    function stopTimerLoop() {
-      timerRunning = false;
-      if (timerRafId) cancelAnimationFrame(timerRafId);
-      timerRafId = null;
-      startStopBtn.textContent = "▶ Iniciar Tiempo";
-      startStopBtn.classList.remove("running");
-      startStopBtn.classList.add("plus");
-    }
-
-    function tickClock(now) {
-      if (!timerRunning) return;
-      const elapsedTenths = Math.floor((now - lastTickMs) / 100);
-      if (elapsedTenths >= 1) {
-        lastTickMs += elapsedTenths * 100;
-        remainingTenths = Math.max(0, remainingTenths - elapsedTenths);
-        const formatted = formatClockFromTenths(remainingTenths);
-        modState.feeds.manual.timer = formatted;
-        syncTimeInputsFromTenths(remainingTenths);
-        renderMonitor();
-        const pushInterval = remainingTenths < 100 ? 120 : 950;
-        if (remainingTenths === 0 || (now - lastFirebasePushMs) >= pushInterval) {
-          lastFirebasePushMs = now;
-          update(ref(db, `${DB_PATH}/modules/marcadores/feeds/manual`), { timer: formatted });
-        }
-        if (remainingTenths <= 0) { stopTimerLoop(); return; }
-      }
-      timerRafId = requestAnimationFrame(tickClock);
-    }
-
-    function startTimerLoop() {
-      if (timerRunning || remainingTenths <= 0) return;
-      timerRunning = true;
-      lastTickMs = performance.now();
-      lastFirebasePushMs = 0;
-      startStopBtn.textContent = "⏸ Detener Tiempo";
-      startStopBtn.classList.remove("plus");
-      startStopBtn.classList.add("running");
-      timerRafId = requestAnimationFrame(tickClock);
-    }
-
-    startStopBtn.addEventListener("click", () => timerRunning ? stopTimerLoop() : startTimerLoop());
-
-    document.querySelectorAll("[data-preset-min]").forEach((btn) => {
-      btn.addEventListener("click", async () => {
-        stopTimerLoop();
-        const m = parseInt(btn.dataset.presetMin, 10) || 0;
-        const s = parseInt(btn.dataset.presetSec, 10) || 0;
-        const totalTenths = (m * 60 + s) * 10;
-        remainingTenths = totalTenths;
-        if (m === 10 || m === 8) quarterBaseTenths = totalTenths;
-        syncTimeInputsFromTenths(totalTenths);
-        await writeManual({ timer: formatClockFromTenths(totalTenths) });
-      });
+    document.getElementById("selPeriod").addEventListener("change", async (e) => {
+      await update(ref(db, `${DB_PATH}/modules/marcadores/feeds/manual`), { period: parseInt(e.target.value, 10) || 1 });
     });
 
-    document.getElementById("applyTimeBtn").addEventListener("click", async () => {
-      stopTimerLoop();
-      const m = Math.max(0, Math.min(59, parseInt(document.getElementById("editMin").value, 10) || 0));
-      const s = Math.max(0, Math.min(59, parseInt(document.getElementById("editSec").value, 10) || 0));
-      const d = Math.max(0, Math.min(9, parseInt(document.getElementById("editDec").value, 10) || 0));
-      remainingTenths = (m * 60 + s) * 10 + d;
-      await writeManual({ timer: formatClockFromTenths(remainingTenths) });
-    });
-
-    document.querySelectorAll("[data-social]").forEach((btn) => {
-      btn.addEventListener("click", async () => {
-        await update(ref(db, `${DB_PATH}/modules/marcadores/cmd`), {
-          action: "social_now",
-          network: btn.dataset.social,
-          ts: Date.now()
-        });
-      });
-    });
-
-    /* --- COMPETENCIAS ESPECIALES --- */
-    function getCurrentInstance() {
-      const type = especialesLive.compType || "triples";
-      const bucket = especialesLive.instances?.[type] || {};
-      const keys = Object.keys(bucket);
-      const id = bucket[especialesLive.instanceId] ? especialesLive.instanceId : (keys[0] || "inst_1");
-      if (!bucket[id]) {
-        bucket[id] = {
-          id,
-          name: "Partido 1",
-          closed: false,
-          winnerId: null,
-          rules: type === "tiros_libres"
-            ? { shotsCount: 10, ptsPerHit: 1, timeSec: 0 }
-            : { shotsCount: 6, ptsPerHit: 1, moneyPts: 3, timeSec: 0 },
-          activeShooterId: null,
-          turnShots: [],
-          shooters: []
-        };
-      }
-      return bucket[id];
-    }
-
-    function renderEspeciales() {
-      const tabBtn = document.getElementById("tabEspecialesBtn");
-      const showTab = Boolean(specialsConfig.enabled);
-      tabBtn.classList.toggle("hidden", !showTab);
-      if (!showTab && !document.getElementById("tab-especiales").classList.contains("hidden")) {
-        document.querySelector('[data-pane="tab-marcadores"]').click();
-      }
-
-      const compOn = Boolean(especialesLive.active);
-      document.getElementById("compLiveSwitch").checked = compOn;
-      document.getElementById("compSwitchLabel").textContent = compOn ? "ON AIR" : "OFF AIR";
-      document.getElementById("compSwitchLabel").style.color = compOn ? "#4ade80" : "var(--muted)";
-
-      const mods = Array.isArray(specialsConfig.modules) && specialsConfig.modules.length
-        ? specialsConfig.modules
-        : ["triples", "tiros_libres"];
-
-      document.getElementById("compChoiceRow").innerHTML = mods.map((m) => {
-        const label = m === "tiros_libres" ? "🎯 Concurso de Tiros Libres" : "🏀 Concurso de Triples";
-        const activeCls = especialesLive.compType === m ? "is-active" : "";
-        return `<button type="button" class="comp-choice-btn ${activeCls}" data-comp="${m}">${label}</button>`;
-      }).join("");
-
-      document.querySelectorAll("[data-comp]").forEach((b) => {
-        b.addEventListener("click", async () => {
-          const nextType = b.dataset.comp;
-          const bucket = especialesLive.instances?.[nextType] || {};
-          const firstId = Object.keys(bucket)[0] || "inst_1";
-          await update(ref(db, `${DB_PATH}/modules/especiales/live`), {
-            compType: nextType,
-            instanceId: firstId,
-            bannerTs: especialesLive.active ? Date.now() : 0,
-            bannerTitle: nextType === "tiros_libres" ? "COMPETENCIA DE TIROS LIBRES" : "COMPETENCIA DE TRIPLES"
-          });
-        });
-      });
-
-      const inst = getCurrentInstance();
-      const bucket = especialesLive.instances?.[especialesLive.compType] || {};
-      document.getElementById("instSelect").innerHTML = Object.values(bucket).map((it) =>
-        `<option value="${it.id}" ${it.id === inst.id ? "selected" : ""}>${it.name}${it.closed ? " (Cerrada)" : ""}</option>`
-      ).join("");
-
-      const isFt = especialesLive.compType === "tiros_libres";
-      document.getElementById("triplesRulesGrid").classList.toggle("hidden", isFt);
-      document.getElementById("ftRulesGrid").classList.toggle("hidden", !isFt);
-      document.getElementById("compSpecialActionRow").classList.toggle("hidden", isFt);
-
-      if (isFt) {
-        document.getElementById("rFtShots").value = inst.rules?.shotsCount ?? 10;
-        document.getElementById("rFtPts").value = inst.rules?.ptsPerHit ?? 1;
-        document.getElementById("rFtSec").value = inst.rules?.timeSec ?? 0;
-        document.getElementById("rFtTiebreak").value = inst.tiebreakMode || "desempate";
-      } else {
-        document.getElementById("rTriplesShots").value = inst.rules?.shotsCount ?? 6;
-        document.getElementById("rTriplesPts").value = inst.rules?.ptsPerHit ?? 1;
-        document.getElementById("rTriplesBonus").value = inst.rules?.moneyPts ?? 3;
-        document.getElementById("rTriplesSec").value = inst.rules?.timeSec ?? 0;
-      }
-
-      document.getElementById("instRoundBadge").textContent = inst.closed ? "RONDA CERRADA" : "RONDA ABIERTA";
-      const winnerObj = (inst.shooters || []).find((s) => s.id === inst.winnerId);
-      document.getElementById("compWinnerText").textContent = winnerObj ? `Ganador: ${winnerObj.name}` : "";
-
-      const shooters = inst.shooters || [];
-      const activeShooter = shooters.find((s) => s.id === inst.activeShooterId) || null;
-      const turnShots = inst.turnShots || [];
-      const maxShots = inst.rules?.shotsCount || (isFt ? 10 : 6);
-      const turnPts = turnShots.reduce((acc, item) => acc + (item.pts || 0), 0);
-
-      document.getElementById("courtShooterName").textContent = activeShooter
-        ? `${activeShooter.name}${activeShooter.team ? ` (${activeShooter.team})` : ""}`
-        : "Selecciona una jugadora";
-      document.getElementById("courtShooterPts").textContent = `${turnPts} PTS`;
-      document.getElementById("courtShotsCount").textContent = `${turnShots.length}/${maxShots}`;
-      document.getElementById("courtTimeInfo").textContent = inst.rules?.timeSec ? `${inst.rules.timeSec}s` : "Libre";
-
-      document.getElementById("courtBallsStrip").innerHTML = turnShots.map((s) => {
-        if (s.type === "bonus") return `<span class="shot-pill bonus">🏀 +${s.pts}</span>`;
-        if (s.hit) return `<span class="shot-pill hit">🏀 +${s.pts}</span>`;
-        return `<span class="shot-pill miss">✕ 0</span>`;
-      }).join("");
-
-      document.getElementById("shooterList").innerHTML = shooters.map((s, i) => {
-        const isAct = s.id === inst.activeShooterId;
-        const isWin = s.id === inst.winnerId;
-        const logoHtml = s.logo ? `<img src="${s.logo}" class="shooter-logo" alt="">` : "";
-        return `<div class="shooter-row ${isAct ? "is-active" : ""} ${isWin ? "is-winner" : ""}">
-          <div style="display:flex; align-items:center; gap:8px; min-width:0;">
-            <span style="font-size:0.7rem; color:var(--muted); font-weight:800;">#${i + 1}</span>
-            ${logoHtml}
-            <div style="min-width:0;">
-              <div style="font-size:0.82rem; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${s.name}</div>
-              <div style="font-size:0.68rem; color:var(--muted);">${s.team || ""} · Pts: <strong style="color:var(--accent);">${s.score ?? "-"}</strong></div>
-            </div>
-          </div>
-          <div style="display:flex; gap:5px; flex-shrink:0;">
-            <button type="button" class="c-btn ${isAct ? "gold" : "plus"}" style="padding:4px 8px; font-size:0.7rem;" onclick="callShooter('${s.id}')">${isAct ? "EN CANCHA" : "LLAMAR"}</button>
-            ${inst.closed ? `<button type="button" class="c-btn" style="padding:4px 7px; font-size:0.7rem;" onclick="setWinner('${s.id}')">🏆</button>` : ""}
-          </div>
-        </div>`;
-      }).join("");
-    }
-
-    async function patchInstance(patch) {
-      const inst = getCurrentInstance();
-      await update(ref(db, `${DB_PATH}/modules/especiales/live/instances/${especialesLive.compType}/${inst.id}`), {
-        ...inst,
-        ...patch
-      });
-    }
-
-    document.getElementById("instSelect").addEventListener("change", async (e) => {
-      await update(ref(db, `${DB_PATH}/modules/especiales/live`), { instanceId: e.target.value });
-    });
-
-    document.getElementById("addInstBtn").addEventListener("click", async () => {
-      const name = document.getElementById("newInstName").value.trim();
-      if (!name) return;
-      const newId = `inst_${Date.now()}`;
-      const base = getCurrentInstance();
-      const newInst = {
-        ...base,
-        id: newId,
-        name,
-        closed: false,
-        winnerId: null,
-        activeShooterId: null,
-        turnShots: [],
-        shooters: (base.shooters || []).map((s) => ({ ...s, score: null }))
-      };
-      document.getElementById("newInstName").value = "";
-      await update(ref(db, `${DB_PATH}/modules/especiales/live/instances/${especialesLive.compType}/${newId}`), newInst);
-      await update(ref(db, `${DB_PATH}/modules/especiales/live`), { instanceId: newId });
-    });
-
-    document.getElementById("saveInstRulesBtn").addEventListener("click", async () => {
-      const inst = getCurrentInstance();
-      const isFt = especialesLive.compType === "tiros_libres";
-      const rules = isFt
-        ? {
-            shotsCount: Math.max(1, parseInt(document.getElementById("rFtShots").value, 10) || 10),
-            ptsPerHit: Math.max(1, parseInt(document.getElementById("rFtPts").value, 10) || 1),
-            timeSec: Math.max(0, parseInt(document.getElementById("rFtSec").value, 10) || 0)
-          }
-        : {
-            shotsCount: Math.max(1, parseInt(document.getElementById("rTriplesShots").value, 10) || 6),
-            ptsPerHit: Math.max(1, parseInt(document.getElementById("rTriplesPts").value, 10) || 1),
-            moneyPts: Math.max(0, parseInt(document.getElementById("rTriplesBonus").value, 10) || 3),
-            timeSec: Math.max(0, parseInt(document.getElementById("rTriplesSec").value, 10) || 0)
-          };
-      const tiebreakMode = isFt ? document.getElementById("rFtTiebreak").value : inst.tiebreakMode;
-      await patchInstance({ rules, tiebreakMode });
-    });
-
-    window.callShooter = async function callShooter(id) {
-      const inst = getCurrentInstance();
-      const shooter = (inst.shooters || []).find((s) => s.id === id) || null;
-      await patchInstance({ activeShooterId: id, turnShots: [] });
-      await update(ref(db, `${DB_PATH}/modules/especiales/live`), {
-        activeShooter: shooter,
-        turnScore: 0,
-        turnShots: [],
-        ts: Date.now()
-      });
-    };
-
-    async function addCompShot(shot) {
-      const inst = getCurrentInstance();
-      if (!inst.activeShooterId) return;
-      const nextShots = [...(inst.turnShots || []), shot];
-      const nextScore = nextShots.reduce((a, b) => a + (b.pts || 0), 0);
-      const shooter = (inst.shooters || []).find((s) => s.id === inst.activeShooterId) || null;
-      await patchInstance({ turnShots: nextShots });
-      await update(ref(db, `${DB_PATH}/modules/especiales/live`), {
-        activeShooter: shooter,
-        turnScore: nextScore,
-        turnShots: nextShots,
+    async function sendSocial(network) {
+      await update(ref(db, `${DB_PATH}/modules/marcadores/cmd`), {
+        action: "social_now",
+        network,
         ts: Date.now()
       });
     }
+    document.getElementById("sendIgBtn").addEventListener("click", () => sendSocial("ig"));
+    document.getElementById("sendYtBtn").addEventListener("click", () => sendSocial("yt"));
 
-    document.getElementById("btnCompHit").addEventListener("click", () => {
-      const inst = getCurrentInstance();
-      addCompShot({ hit: true, pts: inst.rules?.ptsPerHit ?? 1, type: "hit" });
-    });
+    // Competencias Especiales — Operación rápida en vivo
+    document.getElementById("toggleEspecialBtn").addEventListener("click", async () => {
+      const live = espMod.live || {};
+      const nextActive = !live.active;
+      const compType = document.getElementById("spCompType").value || live.compType || "triples";
+      const rulesMap = espMod.config?.rules || {};
+      const bannerTitle = compType === "tiros_libres" ? "CONCURSO DE TIROS LIBRES" : "CONCURSO DE TRIPLES";
+      const rulesText = rulesMap[compType] || "";
 
-    document.getElementById("btnCompMiss").addEventListener("click", () => {
-      addCompShot({ hit: false, pts: 0, type: "miss" });
-    });
-
-    document.getElementById("btnCompBonus").addEventListener("click", () => {
-      const inst = getCurrentInstance();
-      addCompShot({ hit: true, pts: inst.rules?.moneyPts ?? 3, type: "bonus" });
-    });
-
-    document.getElementById("btnCompUndo").addEventListener("click", async () => {
-      const inst = getCurrentInstance();
-      const list = [...(inst.turnShots || [])];
-      if (!list.length) return;
-      list.pop();
-      const nextScore = list.reduce((a, b) => a + (b.pts || 0), 0);
-      await patchInstance({ turnShots: list });
-      await update(ref(db, `${DB_PATH}/modules/especiales/live`), { turnScore: nextScore, turnShots: list });
-    });
-
-    document.getElementById("btnFinishShooterTurn").addEventListener("click", async () => {
-      const inst = getCurrentInstance();
-      if (!inst.activeShooterId) return;
-      const totalPts = (inst.turnShots || []).reduce((a, b) => a + (b.pts || 0), 0);
-      const shooters = (inst.shooters || []).map((s) =>
-        s.id === inst.activeShooterId ? { ...s, score: totalPts } : s
-      );
-      await patchInstance({ shooters, activeShooterId: null, turnShots: [] });
       await update(ref(db, `${DB_PATH}/modules/especiales/live`), {
-        activeShooter: null,
-        turnScore: 0,
-        turnShots: [],
-        ts: Date.now()
+        active: nextActive,
+        compType,
+        rulesText,
+        ...(nextActive ? { bannerTitle, bannerTs: Date.now() } : {})
       });
     });
-
-    document.getElementById("closeInstRoundBtn").addEventListener("click", async () => {
-      const inst = getCurrentInstance();
-      const scored = (inst.shooters || []).filter((s) => typeof s.score === "number");
-      let winnerId = null;
-      if (scored.length) {
-        const topPts = Math.max(...scored.map((s) => s.score));
-        const top = scored.filter((s) => s.score === topPts);
-        if (top.length === 1) winnerId = top[0].id;
-      }
-      await patchInstance({ closed: true, winnerId });
-    });
-
-    document.getElementById("reopenInstRoundBtn").addEventListener("click", () => patchInstance({ closed: false }));
-    window.setWinner = async function setWinner(id) { await patchInstance({ winnerId: id }); };
 
     document.getElementById("addShooterBtn").addEventListener("click", async () => {
-      const name = document.getElementById("newShooterName").value.trim();
-      const team = document.getElementById("newShooterTeam").value.trim().toUpperCase();
-      const file = document.getElementById("newShooterLogo")?.files?.[0];
+      const inp = document.getElementById("spShooterName");
+      const name = inp.value.trim();
       if (!name) return;
-
-      const saveShooter = async (logoData) => {
-        const inst = getCurrentInstance();
-        const shooters = [...(inst.shooters || []), {
-          id: `sh_${Date.now()}`,
-          name,
-          team,
-          logo: logoData || "",
-          score: null
-        }];
-        document.getElementById("newShooterName").value = "";
-        document.getElementById("newShooterTeam").value = "";
-        if (document.getElementById("newShooterLogo")) document.getElementById("newShooterLogo").value = "";
-        await patchInstance({ shooters });
-      };
-
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (ev) => saveShooter(ev.target.result);
-        reader.readAsDataURL(file);
-      } else {
-        await saveShooter("");
-      }
+      const live = espMod.live || {};
+      const shooters = [...(live.shooters || [])];
+      const newId = `sh_${Date.now()}`;
+      shooters.push({ id: newId, name, score: 0 });
+      await update(ref(db, `${DB_PATH}/modules/especiales/live`), {
+        shooters,
+        activeId: live.activeId || newId,
+        turnShots: live.activeId ? (live.turnShots || []) : []
+      });
+      inp.value = "";
     });
 
-    document.querySelectorAll(".ctrl-tab").forEach((tab) => {
-      tab.addEventListener("click", () => {
-        document.querySelectorAll(".ctrl-tab").forEach((t) => t.classList.remove("is-active"));
-        tab.classList.add("is-active");
-        const target = tab.dataset.pane;
-        document.getElementById("tab-marcadores").classList.toggle("hidden", target !== "tab-marcadores");
-        document.getElementById("tab-especiales").classList.toggle("hidden", target !== "tab-especiales");
+    document.querySelectorAll("[data-shot]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const isHit = btn.dataset.shot === "hit";
+        const live = espMod.live || {};
+        const turnShots = [...(live.turnShots || [])];
+        const compType = live.compType || "triples";
+        const shotPts = isHit ? (compType === "triples" ? 3 : 1) : 0;
+        turnShots.push({ hit: isHit, pts: shotPts });
+        await update(ref(db, `${DB_PATH}/modules/especiales/live`), { turnShots });
       });
     });
 
-    async function claimControl() {
-      hasControlLock = true;
-      document.getElementById("multiOpAlert").classList.remove("is-active");
-      await update(ref(db, `${DB_PATH}/modules/marcadores/activeOperator`), {
-        sessionId: SESSION_ID, name: operatorName, ts: Date.now()
-      });
-    }
+    document.getElementById("finishTurnBtn").addEventListener("click", async () => {
+      const live = espMod.live || {};
+      const shooters = [...(live.shooters || [])];
+      const activeId = live.activeId;
+      const turnPts = (live.turnShots || []).reduce((acc, s) => acc + (s.hit ? (s.pts || 1) : 0), 0);
 
-    document.getElementById("takeControlBtn").addEventListener("click", claimControl);
-    setInterval(async () => {
-      if (hasControlLock) {
-        await update(ref(db, `${DB_PATH}/modules/marcadores/activeOperator`), {
-          sessionId: SESSION_ID, name: operatorName, ts: Date.now()
-        });
+      const idx = shooters.findIndex((s) => s.id === activeId);
+      if (idx >= 0) {
+        shooters[idx] = { ...shooters[idx], score: (shooters[idx].score || 0) + turnPts };
       }
-    }, 15000);
+      const nextShooter = shooters[(idx + 1) % shooters.length] || null;
 
-    requireSession(async (user) => {
-      operatorName = user?.displayName || user?.email || "Operador";
-      document.getElementById("op-badge").textContent = `Operador: ${operatorName}`;
-      await claimControl();
+      await update(ref(db, `${DB_PATH}/modules/especiales/live`), {
+        shooters,
+        activeId: nextShooter ? nextShooter.id : null,
+        turnShots: []
+      });
+    });
+
+    document.getElementById("closeRoundBtn").addEventListener("click", async () => {
+      const live = espMod.live || {};
+      const shooters = [...(live.shooters || [])];
+      let winner = null;
+      if (shooters.length) {
+        winner = [...shooters].sort((a, b) => (b.score || 0) - (a.score || 0))[0];
+      }
+      await update(ref(db, `${DB_PATH}/modules/especiales/live`), {
+        closed: true,
+        winnerId: winner ? winner.id : null
+      });
+    });
+
+    requireSession((user, role) => {
+      document.getElementById("roleBadge").textContent = `${user.email} · ${role.toUpperCase()}`;
+      if (role === "admin") {
+        document.getElementById("studioLinkBtn").classList.remove("hidden");
+      }
 
       onValue(ref(db, `${DB_PATH}/modules/marcadores`), (snap) => {
         if (!snap.exists()) return;
-        const val = snap.val();
-
-        const lock = val.activeOperator;
-        if (lock && lock.sessionId && lock.sessionId !== SESSION_ID && (Date.now() - (lock.ts || 0)) < 45000) {
-          hasControlLock = false;
-          document.getElementById("multiOpText").textContent =
-            `Aviso: "${lock.name || "Otro operador"}" está operando este marcador ahora mismo.`;
-          document.getElementById("multiOpAlert").classList.add("is-active");
-        } else {
-          document.getElementById("multiOpAlert").classList.remove("is-active");
-        }
-
-        modState = {
-          enabled: val.enabled !== false,
-          on: Boolean(val.on),
-          config: val.config || {},
-          feeds: {
-            manual: {
-              points_1: 0, points_2: 0, timer: "10:00", period: 1, fouls_1: 0, fouls_2: 0,
-              ...(val.feeds?.manual || {})
-            },
-            scoresight: { ...(val.liveData || {}), ...(val.feeds?.scoresight || {}) },
-            flexyscore: { ...(val.feeds?.flexyscore || {}) }
-          }
-        };
-
-        if (!timerRunning && modState.feeds.manual.timer) {
-          remainingTenths = parseTimerToTenths(modState.feeds.manual.timer);
-          syncTimeInputsFromTenths(remainingTenths);
-        }
-        renderMonitor();
+        marcMod = { ...marcMod, ...snap.val() };
+        renderMarcadorUI();
       });
 
       onValue(ref(db, `${DB_PATH}/modules/especiales`), (snap) => {
-        if (!snap.exists()) { renderEspeciales(); return; }
-        const val = snap.val();
-        specialsConfig = {
-          enabled: Boolean(val.enabled),
-          modules: Array.isArray(val.config?.modules) && val.config.modules.length
-            ? val.config.modules
-            : ["triples", "tiros_libres"]
-        };
-        especialesLive = {
-          ...especialesLive,
-          ...(val.live || {}),
-          instances: {
-            triples: { ...(especialesLive.instances.triples || {}), ...(val.live?.instances?.triples || {}) },
-            tiros_libres: { ...(especialesLive.instances.tiros_libres || {}), ...(val.live?.instances?.tiros_libres || {}) }
-          }
-        };
-        renderMonitor();
-        renderEspeciales();
+        if (!snap.exists()) return;
+        espMod = { ...espMod, ...snap.val() };
+        if (espMod.live?.compType) {
+          document.getElementById("spCompType").value = espMod.live.compType;
+        }
+        renderEspecialesUI();
       });
     });
   </script>
