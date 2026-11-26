@@ -153,7 +153,6 @@
     }
     .swatch-btn:hover { transform: scale(1.1); border-color: #fff; }
 
-    /* Sub-navegación independiente dentro de Competencias Especiales */
     .sp-subtabs {
       display: flex;
       gap: 8px;
@@ -214,35 +213,43 @@
       display: block;
     }
 
-    /* Canvas solo vista previa */
+    /* Lienzo 1920x1080 escalado dentro de #stage (solo vista previa) */
     #stage {
       position: relative;
       overflow: hidden;
       user-select: none;
     }
-    .preview-overlay-box {
+    .stage-virtual-1080 {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 1920px;
+      height: 1080px;
+      transform-origin: top left;
+      pointer-events: none;
+      z-index: 10;
+    }
+    .stage-item-pos {
       position: absolute;
       left: 14%;
       top: 76%;
       pointer-events: none;
-      z-index: 10;
     }
-    .preview-rules-bar {
+    .stage-rules-1080 {
       position: absolute;
-      left: 3.3%;
-      right: 3.3%;
-      bottom: 3.3%;
-      pointer-events: none;
-      z-index: 12;
+      left: 64px;
+      right: 64px;
+      bottom: 36px;
       display: none;
+      pointer-events: none;
     }
     .preview-mode-pill {
       position: absolute;
       top: 10px;
       left: 12px;
-      z-index: 20;
-      background: rgba(15, 17, 23, 0.78);
-      border: 1px solid rgba(255, 255, 255, 0.16);
+      z-index: 25;
+      background: rgba(15, 17, 23, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.2);
       color: #fff;
       font-size: 0.68rem;
       font-weight: 800;
@@ -282,10 +289,12 @@
       <div id="stage" class="stage-16x9">
         <div id="stage-grid" class="stage-grid"></div>
         <div id="previewModePill" class="preview-mode-pill">Vista Previa: Marcador</div>
-        <div id="previewBox" class="preview-overlay-box" style="left: 14%; top: 76%;">
-          <div id="studioStagePreview"></div>
+        <div id="virtualStage" class="stage-virtual-1080">
+          <div id="previewBox" class="stage-item-pos" style="left: 14%; top: 76%;">
+            <div id="studioStagePreview"></div>
+          </div>
+          <div id="studioRulesPreview" class="stage-rules-1080"></div>
         </div>
-        <div id="studioRulesPreview" class="preview-rules-bar"></div>
       </div>
     </main>
 
@@ -294,7 +303,7 @@
     <section id="dock-panel" class="dock-panel">
       <nav class="dock-tabs">
         <button class="dock-tab is-active" data-target="marcadores">Marcadores</button>
-        <button class="dock-tab" data-target="especiales">Competencias Especiales</button>
+        <button class="dock-tab" id="tabEspecialesBtn" data-target="especiales">Competencias Especiales</button>
         <button class="dock-tab" data-target="tercios">Tercios Inferiores</button>
         <button class="dock-tab" data-target="sponsors">Logos de Sponsors</button>
         <button class="dock-tab" data-target="auspiciadores">Logos de Auspiciadores</button>
@@ -603,7 +612,7 @@
           </div>
         </div>
 
-        <!-- ==================== PESTAÑA COMPETENCIAS ESPECIALES (4 PASOS INDEPENDIENTES) ==================== -->
+        <!-- ==================== PESTAÑA COMPETENCIAS ESPECIALES ==================== -->
         <div id="pane-especiales" class="tab-section">
           <div class="tab-head">
             <h3>Competencias Especiales</h3>
@@ -629,8 +638,8 @@
                 </label>
               </div>
               <div class="sp-subtabs">
-                <button type="button" class="sp-subtab is-active" data-sp-tab="sp-pane-triples" data-sp-kind="triples">Configurar Concurso de Triples</button>
-                <button type="button" class="sp-subtab" data-sp-tab="sp-pane-libres" data-sp-kind="libres">Configurar Concurso de Tiros Libres</button>
+                <button type="button" class="sp-subtab is-active" id="btnSubTriples" data-sp-tab="sp-pane-triples" data-sp-kind="triples">Configurar Concurso de Triples</button>
+                <button type="button" class="sp-subtab" id="btnSubLibres" data-sp-tab="sp-pane-libres" data-sp-kind="libres">Configurar Concurso de Tiros Libres</button>
               </div>
             </div>
 
@@ -758,7 +767,6 @@
                 </div>
               </div>
 
-              <!-- Lista de Participantes Triples -->
               <div class="box-card">
                 <div class="box-title">
                   <span>Participantes — Concurso de Triples (<span id="tr_count">0</span>)</span>
@@ -924,7 +932,6 @@
                 </div>
               </div>
 
-              <!-- Lista de Participantes Tiros Libres -->
               <div class="box-card">
                 <div class="box-title">
                   <span>Participantes — Concurso de Tiros Libres (<span id="ft_count">0</span>)</span>
@@ -993,6 +1000,7 @@
     const statusEl = document.getElementById("studio-status");
     const canvasArea = document.getElementById("canvas-area");
     const stageEl = document.getElementById("stage");
+    const virtualStage = document.getElementById("virtualStage");
     const previewBox = document.getElementById("previewBox");
     const previewMount = document.getElementById("studioStagePreview");
     const rulesPreviewMount = document.getElementById("studioRulesPreview");
@@ -1003,7 +1011,6 @@
     let activeDockTab = "marcadores";
     let activeSpecialKind = "triples";
 
-    /* ==================== ESTADO COMPETENCIAS ESPECIALES ==================== */
     const TRIPLES_PRESETS = {
       time_attack: {
         title: "TORNEO TRIPLES — TIME ATTACK",
@@ -1111,7 +1118,6 @@
       }
     };
 
-    /* ==================== UTILIDADES VISUALES ==================== */
     function hexToRgba(hex, alphaPct = 85) {
       let h = (hex || "#2b2f38").replace("#", "");
       if (h.length === 3) h = h.split("").map((c) => c + c).join("");
@@ -1157,6 +1163,10 @@
 
       stageEl.style.width = `${w}px`;
       stageEl.style.height = `${h}px`;
+
+      const vScale = w / 1920;
+      virtualStage.style.transform = `scale(${vScale})`;
+
       refreshActiveStagePreview();
     }
 
@@ -1377,9 +1387,7 @@
       previewBox.style.left = `${cfg.posX ?? 14}%`;
       previewBox.style.top = `${cfg.posY ?? 76}%`;
 
-      const stageScale = stageEl.clientWidth / 1920;
-      const s = cfg.boardScale * Math.max(0.32, stageScale * 1.15);
-
+      const s = cfg.boardScale * 1.15;
       const stripe1 = lum(cfg.bg1Color) > 0.55 ? "rgba(0,0,0,0.085)" : "rgba(255,255,255,0.05)";
       const stripe2 = lum(cfg.bg2Color) > 0.55 ? "rgba(0,0,0,0.085)" : "rgba(255,255,255,0.05)";
 
@@ -1437,7 +1445,6 @@
       `;
     }
 
-    /* ==================== VISTA PREVIA COMPETENCIAS ESPECIALES EN CANVAS ==================== */
     function renderSpecialsStagePreview(kind = activeSpecialKind) {
       readEspecialesFromForms();
       const cur = especialesState[kind] || {};
@@ -1447,10 +1454,7 @@
       previewBox.style.left = `${cur.posX ?? 3.5}%`;
       previewBox.style.top = `${cur.posY ?? 6.0}%`;
 
-      const stageScale = Math.max(0.28, stageEl.clientWidth / 1920);
       const userScale = (cur.scale ?? 100) / 100;
-      const totalScale = stageScale * userScale;
-
       const bgRgba = hexToRgba(cur.colorBg || "#2b2f38", cur.bgAlpha ?? 85);
       const accent = cur.colorAccent || "#e11d2e";
       const modeText = cur.modePreset === "femicentro"
@@ -1486,7 +1490,7 @@
       const timerSample = cur.maxShots > 0 ? `0/${cur.maxShots}` : formatClock(cur.officialSec || 60);
 
       previewMount.innerHTML = `
-        <div style="transform:scale(${totalScale});transform-origin:top left;width:520px;background:${bgRgba};border:2.5px solid ${accent};border-radius:14px;padding:20px 24px;color:#fff;font-family:'Barlow Condensed',sans-serif;box-shadow:0 14px 36px rgba(0,0,0,0.55);">
+        <div style="transform:scale(${userScale});transform-origin:top left;width:520px;background:${bgRgba};border:2.5px solid ${accent};border-radius:14px;padding:20px 24px;color:#fff;font-family:'Barlow Condensed',sans-serif;box-shadow:0 14px 36px rgba(0,0,0,0.55);">
           <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px;border-bottom:1px solid rgba(255,255,255,0.16);padding-bottom:12px;">
             ${cur.compLogo ? `<img src="${cur.compLogo}" style="height:${cur.compLogoSize || 66}px;max-width:115px;object-fit:contain;">` : ""}
             <div>
@@ -1513,12 +1517,9 @@
       `;
 
       if (cur.rulesText) {
-        const ruleFontPx = Math.max(10, Math.round(21 * stageScale));
-        const rulePadV = Math.max(4, Math.round(11 * stageScale));
-        const rulePadH = Math.max(8, Math.round(18 * stageScale));
         rulesPreviewMount.style.display = "block";
         rulesPreviewMount.innerHTML = `
-          <div style="background:${bgRgba};border-left:${Math.max(3, Math.round(6 * stageScale))}px solid ${accent};border-radius:8px;padding:${rulePadV}px ${rulePadH}px;font-size:${ruleFontPx}px;font-weight:700;color:#fff;font-family:'Barlow Condensed',sans-serif;box-shadow:0 8px 20px rgba(0,0,0,0.45);">
+          <div style="background:${bgRgba};border-left:6px solid ${accent};border-radius:10px;padding:12px 20px;font-size:22px;font-weight:700;color:#fff;font-family:'Barlow Condensed',sans-serif;box-shadow:0 10px 28px rgba(0,0,0,0.5);">
             ${cur.rulesText}
           </div>
         `;
@@ -1547,7 +1548,6 @@
       setTimeout(() => { statusEl.textContent = "Listo"; }, 1100);
     }
 
-    /* ==================== LÓGICA COMPETENCIAS ESPECIALES (PASOS 1–4) ==================== */
     function syncEspecialesEnableUI() {
       const mainEnabled = document.getElementById("modEspecialesCheck").checked;
       document.getElementById("especialesConfigBody").classList.toggle("sp-disabled-overlay", !mainEnabled);
@@ -1721,15 +1721,18 @@
       refreshActiveStagePreview();
     });
 
+    function selectSpecialSubtab(btn) {
+      document.querySelectorAll(".sp-subtab").forEach((b) => b.classList.remove("is-active"));
+      document.querySelectorAll(".sp-pane").forEach((p) => p.classList.remove("is-active"));
+      btn.classList.add("is-active");
+      document.getElementById(btn.dataset.spTab).classList.add("is-active");
+      activeSpecialKind = btn.dataset.spKind || "triples";
+      activeDockTab = "especiales";
+      renderSpecialsStagePreview(activeSpecialKind);
+    }
+
     document.querySelectorAll(".sp-subtab").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        document.querySelectorAll(".sp-subtab").forEach((b) => b.classList.remove("is-active"));
-        document.querySelectorAll(".sp-pane").forEach((p) => p.classList.remove("is-active"));
-        btn.classList.add("is-active");
-        document.getElementById(btn.dataset.spTab).classList.add("is-active");
-        activeSpecialKind = btn.dataset.spKind || "triples";
-        refreshActiveStagePreview();
-      });
+      btn.addEventListener("click", () => selectSpecialSubtab(btn));
     });
 
     let pendingLogoTarget = { kind: "triples", team: "" };
@@ -1883,13 +1886,10 @@
       });
     });
 
-    /* ==================== CENTRAR X Y CONTROLES MARCADORES ==================== */
     document.getElementById("center-x-btn").addEventListener("click", async () => {
-      const stageRect = stageEl.getBoundingClientRect();
       const firstChild = previewMount.firstElementChild;
-      const boxRect = firstChild ? firstChild.getBoundingClientRect() : previewBox.getBoundingClientRect();
-      if (!stageRect.width || !boxRect.width) return;
-      const widthPct = (boxRect.width / stageRect.width) * 100;
+      const boxW = firstChild ? firstChild.getBoundingClientRect().width / (stageEl.clientWidth / 1920) : 520;
+      const widthPct = (boxW / 1920) * 100;
       const centeredX = Number(Math.max(0, Math.min(100, 50 - widthPct / 2)).toFixed(1));
 
       if (activeDockTab === "especiales") {
