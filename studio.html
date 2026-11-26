@@ -153,7 +153,6 @@
     }
     .swatch-btn:hover { transform: scale(1.1); border-color: #fff; }
 
-    /* Sub-navegación independiente dentro de Competencias Especiales */
     .sp-subtabs {
       display: flex;
       gap: 8px;
@@ -214,18 +213,52 @@
       display: block;
     }
 
+    /* Lienzo 1920x1080 escalado dentro de #stage (solo vista previa) */
     #stage {
       position: relative;
       overflow: hidden;
-    }
-    .sb-drag-box {
-      position: absolute;
-      cursor: grab;
       user-select: none;
-      touch-action: none;
+    }
+    .stage-virtual-1080 {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 1920px;
+      height: 1080px;
+      transform-origin: top left;
+      pointer-events: none;
       z-index: 10;
     }
-    .sb-drag-box:active { cursor: grabbing; }
+    .stage-item-pos {
+      position: absolute;
+      left: 14%;
+      top: 76%;
+      pointer-events: none;
+    }
+    .stage-rules-1080 {
+      position: absolute;
+      left: 64px;
+      right: 64px;
+      bottom: 36px;
+      display: none;
+      pointer-events: none;
+    }
+    .preview-mode-pill {
+      position: absolute;
+      top: 10px;
+      left: 12px;
+      z-index: 25;
+      background: rgba(15, 17, 23, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      padding: 3px 9px;
+      border-radius: 5px;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
@@ -246,7 +279,6 @@
         </div>
 
         <button id="grid-toggle" type="button" class="btn btn-ghost" style="padding: 5px 10px; font-size: 0.72rem;">Grilla: ON</button>
-        <button id="snap-toggle" type="button" class="btn btn-ghost" style="padding: 5px 10px; font-size: 0.72rem;">Snap: ON</button>
         <button id="center-x-btn" type="button" class="btn btn-ghost" style="padding: 5px 10px; font-size: 0.72rem;">Centrar X</button>
         <button id="save-publish-btn" type="button" class="btn" style="padding: 5px 12px; font-size: 0.72rem;">Guardar y Sincronizar</button>
         <button type="button" class="btn btn-ghost" style="padding: 5px 10px; font-size: 0.72rem;" onclick="location.href='control.html'">Control</button>
@@ -256,8 +288,12 @@
     <main id="canvas-area" class="canvas-area">
       <div id="stage" class="stage-16x9">
         <div id="stage-grid" class="stage-grid"></div>
-        <div id="sbDragBox" class="sb-drag-box" style="left: 14%; top: 76%;">
-          <div id="studioSbPreview"></div>
+        <div id="previewModePill" class="preview-mode-pill">Vista Previa: Marcador</div>
+        <div id="virtualStage" class="stage-virtual-1080">
+          <div id="previewBox" class="stage-item-pos" style="left: 14%; top: 76%;">
+            <div id="studioStagePreview"></div>
+          </div>
+          <div id="studioRulesPreview" class="stage-rules-1080"></div>
         </div>
       </div>
     </main>
@@ -267,7 +303,7 @@
     <section id="dock-panel" class="dock-panel">
       <nav class="dock-tabs">
         <button class="dock-tab is-active" data-target="marcadores">Marcadores</button>
-        <button class="dock-tab" data-target="especiales">Competencias Especiales</button>
+        <button class="dock-tab" id="tabEspecialesBtn" data-target="especiales">Competencias Especiales</button>
         <button class="dock-tab" data-target="tercios">Tercios Inferiores</button>
         <button class="dock-tab" data-target="sponsors">Logos de Sponsors</button>
         <button class="dock-tab" data-target="auspiciadores">Logos de Auspiciadores</button>
@@ -277,7 +313,7 @@
       </nav>
 
       <div class="dock-body">
-        <!-- ==================== PESTAÑA MARCADORES (INTACTA) ==================== -->
+        <!-- ==================== PESTAÑA MARCADORES ==================== -->
         <div id="pane-marcadores" class="tab-section is-active">
           <div class="tab-head">
             <h3>Marcadores Broadcast (Tiempo Fuera)</h3>
@@ -388,16 +424,16 @@
           </div>
 
           <div class="box-card" style="margin-bottom: 14px;">
-            <div class="box-title">Personalización Avanzada (Posición X/Y, Tamaños, Fuente y Colores)</div>
+            <div class="box-title">Personalización Avanzada (Posición X/Y 0–100%, Tamaños, Fuente y Colores)</div>
 
             <div class="row-4">
               <div class="s-field">
                 <label>Posición Horizontal X <span class="v" id="v_posX">14.0%</span></label>
-                <input type="range" id="posX" min="0" max="80" step="0.5" value="14">
+                <input type="range" id="posX" min="0" max="100" step="0.5" value="14">
               </div>
               <div class="s-field">
                 <label>Posición Vertical Y <span class="v" id="v_posY">76.0%</span></label>
-                <input type="range" id="posY" min="0" max="90" step="0.5" value="76">
+                <input type="range" id="posY" min="0" max="100" step="0.5" value="76">
               </div>
               <div class="s-field">
                 <label>Escala Marcador <span class="v" id="v_boardScale">1.00x</span></label>
@@ -576,9 +612,8 @@
           </div>
         </div>
 
-        <!-- ==================== PESTAÑA COMPETENCIAS ESPECIALES (4 PASOS INDEPENDIENTES) ==================== -->
+        <!-- ==================== PESTAÑA COMPETENCIAS ESPECIALES ==================== -->
         <div id="pane-especiales" class="tab-section">
-          <!-- Paso 1: Habilitar Competencias Especiales -->
           <div class="tab-head">
             <h3>Competencias Especiales</h3>
             <label class="enable-check">
@@ -588,7 +623,6 @@
           </div>
 
           <div id="especialesConfigBody">
-            <!-- Paso 2: Seleccionar qué competencia especial habilitar y abrir su pestaña de configuración -->
             <div class="box-card" style="margin-bottom: 12px;">
               <div class="box-title">
                 <span>2. Seleccionar Competencia Especial Activa y Pestaña de Configuración</span>
@@ -604,8 +638,8 @@
                 </label>
               </div>
               <div class="sp-subtabs">
-                <button type="button" class="sp-subtab is-active" data-sp-tab="sp-pane-triples">Configurar Concurso de Triples</button>
-                <button type="button" class="sp-subtab" data-sp-tab="sp-pane-libres">Configurar Concurso de Tiros Libres</button>
+                <button type="button" class="sp-subtab is-active" id="btnSubTriples" data-sp-tab="sp-pane-triples" data-sp-kind="triples">Configurar Concurso de Triples</button>
+                <button type="button" class="sp-subtab" id="btnSubLibres" data-sp-tab="sp-pane-libres" data-sp-kind="libres">Configurar Concurso de Tiros Libres</button>
               </div>
             </div>
 
@@ -646,6 +680,25 @@
                   <div class="s-field">
                     <label>Categoría Jugadores</label>
                     <input type="text" id="tr_categoryLabel" value="TODO COMPETIDOR">
+                  </div>
+                </div>
+
+                <div class="row-4">
+                  <div class="s-field">
+                    <label>Posición Horizontal X <span class="v" id="v_tr_posX">3.5%</span></label>
+                    <input type="range" id="tr_posX" min="0" max="100" step="0.5" value="3.5">
+                  </div>
+                  <div class="s-field">
+                    <label>Posición Vertical Y <span class="v" id="v_tr_posY">6.0%</span></label>
+                    <input type="range" id="tr_posY" min="0" max="100" step="0.5" value="6">
+                  </div>
+                  <div class="s-field">
+                    <label>Escala Overlay <span class="v" id="v_tr_scale">100%</span></label>
+                    <input type="range" id="tr_scale" min="65" max="140" value="100">
+                  </div>
+                  <div class="s-field">
+                    <label>Opacidad Fondo <span class="v" id="v_tr_bgAlpha">85%</span></label>
+                    <input type="range" id="tr_bgAlpha" min="40" max="100" value="85">
                   </div>
                 </div>
 
@@ -699,31 +752,21 @@
                     <input type="range" id="tr_teamLogoSize" min="36" max="82" value="60">
                   </div>
                   <div class="s-field">
-                    <label>Opacidad Fondo <span class="v" id="v_tr_bgAlpha">85%</span></label>
-                    <input type="range" id="tr_bgAlpha" min="40" max="100" value="85">
+                    <label>Color Fondo Overlay</label>
+                    <input type="color" id="tr_colorBg" value="#2b2f38">
                   </div>
                   <div class="s-field">
-                    <label>Escala Overlay <span class="v" id="v_tr_scale">100%</span></label>
-                    <input type="range" id="tr_scale" min="75" max="125" value="100">
+                    <label>Color Acento Overlay</label>
+                    <input type="color" id="tr_colorAccent" value="#e11d2e">
                   </div>
                 </div>
 
-                <div class="row-2">
-                  <div class="s-field">
-                    <label>Colores Overlay (Fondo / Acento)</label>
-                    <div class="row-2">
-                      <input type="color" id="tr_colorBg" value="#2b2f38">
-                      <input type="color" id="tr_colorAccent" value="#e11d2e">
-                    </div>
-                  </div>
-                  <div class="s-field">
-                    <label>Reglas en Pantalla (Zócalo Inferior al Lanzar)</label>
-                    <textarea id="tr_rulesText">Time Attack: 1 minuto oficial para convertir la mayor cantidad de triples. Empates se definen en rondas de 30 segundos.</textarea>
-                  </div>
+                <div class="s-field">
+                  <label>Reglas en Pantalla (Zócalo Inferior al Lanzar)</label>
+                  <textarea id="tr_rulesText">Time Attack: 1 minuto oficial para convertir la mayor cantidad de triples. Empates se definen en rondas de 30 segundos.</textarea>
                 </div>
               </div>
 
-              <!-- Lista de Participantes Triples -->
               <div class="box-card">
                 <div class="box-title">
                   <span>Participantes — Concurso de Triples (<span id="tr_count">0</span>)</span>
@@ -812,6 +855,25 @@
 
                 <div class="row-4">
                   <div class="s-field">
+                    <label>Posición Horizontal X <span class="v" id="v_ft_posX">3.5%</span></label>
+                    <input type="range" id="ft_posX" min="0" max="100" step="0.5" value="3.5">
+                  </div>
+                  <div class="s-field">
+                    <label>Posición Vertical Y <span class="v" id="v_ft_posY">6.0%</span></label>
+                    <input type="range" id="ft_posY" min="0" max="100" step="0.5" value="6">
+                  </div>
+                  <div class="s-field">
+                    <label>Escala Overlay <span class="v" id="v_ft_scale">100%</span></label>
+                    <input type="range" id="ft_scale" min="65" max="140" value="100">
+                  </div>
+                  <div class="s-field">
+                    <label>Opacidad Fondo <span class="v" id="v_ft_bgAlpha">85%</span></label>
+                    <input type="range" id="ft_bgAlpha" min="40" max="100" value="85">
+                  </div>
+                </div>
+
+                <div class="row-4">
+                  <div class="s-field">
                     <label>Tiempo Ronda Oficial (seg)</label>
                     <input type="number" id="ft_officialSec" min="0" max="300" value="60">
                   </div>
@@ -862,14 +924,6 @@
                     <label>Tamaño Logo Equipo <span class="v" id="v_ft_teamLogoSize">60px</span></label>
                     <input type="range" id="ft_teamLogoSize" min="36" max="82" value="60">
                   </div>
-                  <div class="s-field">
-                    <label>Opacidad Fondo <span class="v" id="v_ft_bgAlpha">85%</span></label>
-                    <input type="range" id="ft_bgAlpha" min="40" max="100" value="85">
-                  </div>
-                  <div class="s-field">
-                    <label>Escala Overlay <span class="v" id="v_ft_scale">100%</span></label>
-                    <input type="range" id="ft_scale" min="75" max="125" value="100">
-                  </div>
                 </div>
 
                 <div class="s-field">
@@ -878,7 +932,6 @@
                 </div>
               </div>
 
-              <!-- Lista de Participantes Tiros Libres -->
               <div class="box-card">
                 <div class="box-title">
                   <span>Participantes — Concurso de Tiros Libres (<span id="ft_count">0</span>)</span>
@@ -947,13 +1000,17 @@
     const statusEl = document.getElementById("studio-status");
     const canvasArea = document.getElementById("canvas-area");
     const stageEl = document.getElementById("stage");
-    const dragBox = document.getElementById("sbDragBox");
+    const virtualStage = document.getElementById("virtualStage");
+    const previewBox = document.getElementById("previewBox");
+    const previewMount = document.getElementById("studioStagePreview");
+    const rulesPreviewMount = document.getElementById("studioRulesPreview");
+    const modePill = document.getElementById("previewModePill");
     const zoomLabel = document.getElementById("zoom-label");
 
     let zoomMode = "fit";
-    let snapActive = true;
+    let activeDockTab = "marcadores";
+    let activeSpecialKind = "triples";
 
-    /* ==================== ESTADO COMPETENCIAS ESPECIALES ==================== */
     const TRIPLES_PRESETS = {
       time_attack: {
         title: "TORNEO TRIPLES — TIME ATTACK",
@@ -1012,6 +1069,8 @@
         title: "TORNEO TRIPLES — TIME ATTACK",
         stage: "GRUPO A",
         categoryLabel: "TODO COMPETIDOR",
+        posX: 3.5,
+        posY: 6.0,
         officialSec: 60,
         tiebreakSec: 30,
         maxShots: 0,
@@ -1037,6 +1096,8 @@
         title: "TIROS LIBRES — TIME ATTACK",
         stage: "CLASIFICATORIA",
         categoryLabel: "TODO COMPETIDOR",
+        posX: 3.5,
+        posY: 6.0,
         officialSec: 60,
         tiebreakSec: 30,
         maxShots: 0,
@@ -1057,7 +1118,23 @@
       }
     };
 
-    /* ==================== LÓGICA MARCADORES (INTACTA) ==================== */
+    function hexToRgba(hex, alphaPct = 85) {
+      let h = (hex || "#2b2f38").replace("#", "");
+      if (h.length === 3) h = h.split("").map((c) => c + c).join("");
+      const r = parseInt(h.substring(0, 2), 16) || 43;
+      const g = parseInt(h.substring(2, 4), 16) || 47;
+      const b = parseInt(h.substring(4, 6), 16) || 56;
+      const a = Math.max(0, Math.min(1, (parseInt(alphaPct, 10) || 85) / 100));
+      return `rgba(${r}, ${g}, ${b}, ${a})`;
+    }
+
+    function formatClock(sec) {
+      const s = Math.max(0, parseInt(sec, 10) || 0);
+      const m = Math.floor(s / 60);
+      const r = s % 60;
+      return `${String(m).padStart(2, "0")}:${String(r).padStart(2, "0")}`;
+    }
+
     function syncTopBadgeInputs() {
       const mode = document.getElementById("topBadgeType").value;
       document.getElementById("topTextBox").style.display = mode === "text" ? "flex" : "none";
@@ -1086,7 +1163,11 @@
 
       stageEl.style.width = `${w}px`;
       stageEl.style.height = `${h}px`;
-      renderPreview(getSbConfig());
+
+      const vScale = w / 1920;
+      virtualStage.style.transform = `scale(${vScale})`;
+
+      refreshActiveStagePreview();
     }
 
     document.getElementById("zoom-out").addEventListener("click", () => {
@@ -1300,14 +1381,13 @@
       return `<div style="position:absolute;top:${yOff}px;left:50%;transform:translateX(-50%);max-width:135px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:${cfg.scoreBgColor};border:1.5px solid ${cfg.accentColor};border-radius:5px;padding:1px 9px;font-size:${fSize}px;font-weight:800;color:#fff;z-index:5;">${cfg.topTextValue}</div>`;
     }
 
-    function renderPreview(cfg) {
-      dragBox.style.left = `${cfg.posX ?? 14}%`;
-      dragBox.style.top = `${cfg.posY ?? 76}%`;
+    function renderScoreboardPreview(cfg) {
+      modePill.textContent = "Vista Previa: Marcador de Partido";
+      rulesPreviewMount.style.display = "none";
+      previewBox.style.left = `${cfg.posX ?? 14}%`;
+      previewBox.style.top = `${cfg.posY ?? 76}%`;
 
-      const mount = document.getElementById("studioSbPreview");
-      const stageScale = stageEl.clientWidth / 1920;
-      const s = cfg.boardScale * Math.max(0.32, stageScale * 1.15);
-
+      const s = cfg.boardScale * 1.15;
       const stripe1 = lum(cfg.bg1Color) > 0.55 ? "rgba(0,0,0,0.085)" : "rgba(255,255,255,0.05)";
       const stripe2 = lum(cfg.bg2Color) > 0.55 ? "rgba(0,0,0,0.085)" : "rgba(255,255,255,0.05)";
 
@@ -1323,7 +1403,7 @@
         ? `<div style="position:absolute;bottom:-14px;left:50%;transform:translateX(-50%);background:${cfg.shotBgColor};color:${cfg.shotTextColor};border:1.5px solid ${cfg.accentColor};border-radius:5px;font-size:15px;font-weight:800;padding:0 6px;">24</div>`
         : "";
 
-      mount.innerHTML = `
+      previewMount.innerHTML = `
         <style>
           .pv-wrap { transform: scale(${s}); transform-origin: top left; display: inline-flex; align-items: center; font-family: ${cfg.fontFamily}; }
           .pv-wing { position: relative; display: flex; align-items: center; height: 56px; min-width: 175px; padding: 0 12px; gap: 8px; overflow: hidden; border-top: 1.5px solid ${cfg.accentColor}; border-bottom: 2px solid ${cfg.accentColor}; box-shadow: inset 0 1px 0 rgba(255,255,255,0.22); }
@@ -1365,9 +1445,100 @@
       `;
     }
 
+    function renderSpecialsStagePreview(kind = activeSpecialKind) {
+      readEspecialesFromForms();
+      const cur = especialesState[kind] || {};
+      const labelKind = kind === "libres" ? "Concurso de Tiros Libres" : "Concurso de Triples";
+      modePill.textContent = `Vista Previa: ${labelKind}`;
+
+      previewBox.style.left = `${cur.posX ?? 3.5}%`;
+      previewBox.style.top = `${cur.posY ?? 6.0}%`;
+
+      const userScale = (cur.scale ?? 100) / 100;
+      const bgRgba = hexToRgba(cur.colorBg || "#2b2f38", cur.bgAlpha ?? 85);
+      const accent = cur.colorAccent || "#e11d2e";
+      const modeText = cur.modePreset === "femicentro"
+        ? `FEMICENTRO (${cur.maxShots || (kind === "libres" ? 10 : 6)} TIROS)`
+        : cur.modePreset === "personalizada"
+          ? "PERSONALIZADA"
+          : "TIME ATTACK";
+
+      const samplePlayers = (cur.players && cur.players.length)
+        ? [...cur.players].sort((a, b) => (b.bestScore ?? -1) - (a.bestScore ?? -1)).slice(0, 4)
+        : [
+            { name: "JUGADOR 1", team: "CLUB A", bestScore: 14 },
+            { name: "JUGADOR 2", team: "CLUB B", bestScore: 11 },
+            { name: "JUGADOR 3", team: "CLUB C", bestScore: 9 }
+          ];
+
+      const rowsHtml = samplePlayers.map((p, idx) => {
+        const tLogo = cur.teamLogos?.[p.team] || "";
+        const logoH = Math.round((cur.teamLogoSize || 60) * 0.45);
+        return `
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;background:rgba(0,0,0,0.3);border-radius:7px;padding:7px 12px;font-size:20px;font-weight:700;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="color:${accent};font-weight:800;">#${idx + 1}</span>
+              ${tLogo ? `<img src="${tLogo}" style="height:${logoH}px;width:${logoH}px;object-fit:contain;">` : ""}
+              <span>${p.name} <span style="opacity:0.75;font-size:16px;">(${p.team})</span></span>
+            </div>
+            <span style="font-weight:800;">${p.bestScore !== null && p.bestScore !== undefined ? `${p.bestScore} pts` : "-"}</span>
+          </div>
+        `;
+      }).join("");
+
+      const timerLabel = cur.maxShots > 0 ? "TIROS" : "TIEMPO";
+      const timerSample = cur.maxShots > 0 ? `0/${cur.maxShots}` : formatClock(cur.officialSec || 60);
+
+      previewMount.innerHTML = `
+        <div style="transform:scale(${userScale});transform-origin:top left;width:520px;background:${bgRgba};border:2.5px solid ${accent};border-radius:14px;padding:20px 24px;color:#fff;font-family:'Barlow Condensed',sans-serif;box-shadow:0 14px 36px rgba(0,0,0,0.55);">
+          <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px;border-bottom:1px solid rgba(255,255,255,0.16);padding-bottom:12px;">
+            ${cur.compLogo ? `<img src="${cur.compLogo}" style="height:${cur.compLogoSize || 66}px;max-width:115px;object-fit:contain;">` : ""}
+            <div>
+              <div style="font-size:28px;font-weight:800;line-height:1.05;text-transform:uppercase;">${cur.title || labelKind}</div>
+              <div style="font-size:17px;font-weight:700;opacity:0.88;margin-top:2px;">${cur.stage || ""} · ${modeText} · ${cur.categoryLabel || ""}</div>
+            </div>
+          </div>
+
+          <div style="display:flex;justify-content:space-between;gap:14px;margin-bottom:14px;">
+            <div style="flex:1;background:rgba(0,0,0,0.34);border:1px solid rgba(255,255,255,0.14);border-radius:10px;padding:10px 14px;text-align:center;">
+              <div style="font-size:14px;font-weight:700;text-transform:uppercase;opacity:0.75;">${timerLabel}</div>
+              <div style="font-size:44px;font-weight:800;line-height:1.05;">${timerSample}</div>
+            </div>
+            <div style="flex:1;background:rgba(0,0,0,0.34);border:1px solid rgba(255,255,255,0.14);border-radius:10px;padding:10px 14px;text-align:center;">
+              <div style="font-size:14px;font-weight:700;text-transform:uppercase;opacity:0.75;">PUNTAJE</div>
+              <div style="font-size:44px;font-weight:800;line-height:1.05;color:${accent};">12</div>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            ${rowsHtml}
+          </div>
+        </div>
+      `;
+
+      if (cur.rulesText) {
+        rulesPreviewMount.style.display = "block";
+        rulesPreviewMount.innerHTML = `
+          <div style="background:${bgRgba};border-left:6px solid ${accent};border-radius:10px;padding:12px 20px;font-size:22px;font-weight:700;color:#fff;font-family:'Barlow Condensed',sans-serif;box-shadow:0 10px 28px rgba(0,0,0,0.5);">
+            ${cur.rulesText}
+          </div>
+        `;
+      } else {
+        rulesPreviewMount.style.display = "none";
+      }
+    }
+
+    function refreshActiveStagePreview() {
+      if (activeDockTab === "especiales") {
+        renderSpecialsStagePreview(activeSpecialKind);
+      } else {
+        renderScoreboardPreview(getSbConfig());
+      }
+    }
+
     async function saveConfig() {
       const cfg = getSbConfig();
-      renderPreview(cfg);
+      refreshActiveStagePreview();
       await update(ref(db, `${DB_PATH}/modules/marcadores`), {
         config: cfg,
         pos: { x: cfg.posX, y: cfg.posY }
@@ -1377,18 +1548,21 @@
       setTimeout(() => { statusEl.textContent = "Listo"; }, 1100);
     }
 
-    /* ==================== LÓGICA COMPETENCIAS ESPECIALES (PASOS 1–4) ==================== */
     function syncEspecialesEnableUI() {
       const mainEnabled = document.getElementById("modEspecialesCheck").checked;
       document.getElementById("especialesConfigBody").classList.toggle("sp-disabled-overlay", !mainEnabled);
     }
 
     function updateEspecialesSliders() {
+      document.getElementById("v_tr_posX").textContent = parseFloat(document.getElementById("tr_posX").value).toFixed(1) + "%";
+      document.getElementById("v_tr_posY").textContent = parseFloat(document.getElementById("tr_posY").value).toFixed(1) + "%";
       document.getElementById("v_tr_compLogoSize").textContent = document.getElementById("tr_compLogoSize").value + "px";
       document.getElementById("v_tr_teamLogoSize").textContent = document.getElementById("tr_teamLogoSize").value + "px";
       document.getElementById("v_tr_bgAlpha").textContent = document.getElementById("tr_bgAlpha").value + "%";
       document.getElementById("v_tr_scale").textContent = document.getElementById("tr_scale").value + "%";
 
+      document.getElementById("v_ft_posX").textContent = parseFloat(document.getElementById("ft_posX").value).toFixed(1) + "%";
+      document.getElementById("v_ft_posY").textContent = parseFloat(document.getElementById("ft_posY").value).toFixed(1) + "%";
       document.getElementById("v_ft_compLogoSize").textContent = document.getElementById("ft_compLogoSize").value + "px";
       document.getElementById("v_ft_teamLogoSize").textContent = document.getElementById("ft_teamLogoSize").value + "px";
       document.getElementById("v_ft_bgAlpha").textContent = document.getElementById("ft_bgAlpha").value + "%";
@@ -1401,6 +1575,8 @@
       document.getElementById("tr_title").value = t.title || "";
       document.getElementById("tr_stage").value = t.stage || "GRUPO A";
       document.getElementById("tr_categoryLabel").value = t.categoryLabel || "TODO COMPETIDOR";
+      document.getElementById("tr_posX").value = t.posX ?? 3.5;
+      document.getElementById("tr_posY").value = t.posY ?? 6.0;
       document.getElementById("tr_officialSec").value = t.officialSec ?? 60;
       document.getElementById("tr_tiebreakSec").value = t.tiebreakSec ?? 30;
       document.getElementById("tr_maxShots").value = t.maxShots ?? 0;
@@ -1427,6 +1603,8 @@
       document.getElementById("ft_title").value = f.title || "";
       document.getElementById("ft_stage").value = f.stage || "CLASIFICATORIA";
       document.getElementById("ft_categoryLabel").value = f.categoryLabel || "TODO COMPETIDOR";
+      document.getElementById("ft_posX").value = f.posX ?? 3.5;
+      document.getElementById("ft_posY").value = f.posY ?? 6.0;
       document.getElementById("ft_officialSec").value = f.officialSec ?? 60;
       document.getElementById("ft_tiebreakSec").value = f.tiebreakSec ?? 30;
       document.getElementById("ft_maxShots").value = f.maxShots ?? 0;
@@ -1455,6 +1633,8 @@
         title: document.getElementById("tr_title").value.trim(),
         stage: document.getElementById("tr_stage").value,
         categoryLabel: document.getElementById("tr_categoryLabel").value.trim(),
+        posX: parseFloat(document.getElementById("tr_posX").value) ?? 3.5,
+        posY: parseFloat(document.getElementById("tr_posY").value) ?? 6.0,
         officialSec: parseInt(document.getElementById("tr_officialSec").value, 10) || 0,
         tiebreakSec: parseInt(document.getElementById("tr_tiebreakSec").value, 10) || 0,
         maxShots: parseInt(document.getElementById("tr_maxShots").value, 10) || 0,
@@ -1479,6 +1659,8 @@
         title: document.getElementById("ft_title").value.trim(),
         stage: document.getElementById("ft_stage").value,
         categoryLabel: document.getElementById("ft_categoryLabel").value.trim(),
+        posX: parseFloat(document.getElementById("ft_posX").value) ?? 3.5,
+        posY: parseFloat(document.getElementById("ft_posY").value) ?? 6.0,
         officialSec: parseInt(document.getElementById("ft_officialSec").value, 10) || 0,
         tiebreakSec: parseInt(document.getElementById("ft_tiebreakSec").value, 10) || 0,
         maxShots: parseInt(document.getElementById("ft_maxShots").value, 10) || 0,
@@ -1509,7 +1691,6 @@
       }
     }
 
-    // Cambio de categoría/modalidad en Triples
     document.getElementById("tr_modePreset").addEventListener("change", (e) => {
       const preset = TRIPLES_PRESETS[e.target.value];
       if (preset) {
@@ -1522,9 +1703,9 @@
       } else {
         especialesState.triples.modePreset = "personalizada";
       }
+      refreshActiveStagePreview();
     });
 
-    // Cambio de categoría/modalidad en Tiros Libres
     document.getElementById("ft_modePreset").addEventListener("change", (e) => {
       const preset = LIBRES_PRESETS[e.target.value];
       if (preset) {
@@ -1537,16 +1718,21 @@
       } else {
         especialesState.libres.modePreset = "personalizada";
       }
+      refreshActiveStagePreview();
     });
 
-    // Sub-pestañas Triples / Tiros Libres
+    function selectSpecialSubtab(btn) {
+      document.querySelectorAll(".sp-subtab").forEach((b) => b.classList.remove("is-active"));
+      document.querySelectorAll(".sp-pane").forEach((p) => p.classList.remove("is-active"));
+      btn.classList.add("is-active");
+      document.getElementById(btn.dataset.spTab).classList.add("is-active");
+      activeSpecialKind = btn.dataset.spKind || "triples";
+      activeDockTab = "especiales";
+      renderSpecialsStagePreview(activeSpecialKind);
+    }
+
     document.querySelectorAll(".sp-subtab").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        document.querySelectorAll(".sp-subtab").forEach((b) => b.classList.remove("is-active"));
-        document.querySelectorAll(".sp-pane").forEach((p) => p.classList.remove("is-active"));
-        btn.classList.add("is-active");
-        document.getElementById(btn.dataset.spTab).classList.add("is-active");
-      });
+      btn.addEventListener("click", () => selectSpecialSubtab(btn));
     });
 
     let pendingLogoTarget = { kind: "triples", team: "" };
@@ -1594,6 +1780,7 @@
           const [k, idStr] = el.dataset.delPlayer.split(":");
           especialesState[k].players = (especialesState[k].players || []).filter((x) => String(x.id) !== idStr);
           renderSpecialPlayersTable(k);
+          refreshActiveStagePreview();
           await saveEspecialesConfig(true);
         });
       });
@@ -1608,6 +1795,7 @@
         const r = new FileReader();
         r.onload = async (ev) => {
           especialesState[kind].compLogo = ev.target.result;
+          refreshActiveStagePreview();
           await saveEspecialesConfig(true);
         };
         r.readAsDataURL(file);
@@ -1623,6 +1811,7 @@
             [pendingLogoTarget.team]: ev.target.result
           };
           renderSpecialPlayersTable(pendingLogoTarget.kind);
+          refreshActiveStagePreview();
           await saveEspecialesConfig(true);
         };
         r.readAsDataURL(file);
@@ -1645,6 +1834,7 @@
           document.getElementById(`${prefix}_newCat`).value = "";
           logoIn.value = "";
           renderSpecialPlayersTable(kind);
+          refreshActiveStagePreview();
           await saveEspecialesConfig(true);
         };
 
@@ -1666,12 +1856,14 @@
       document.getElementById(`${prefix}_clearScoresBtn`).addEventListener("click", async () => {
         especialesState[kind].players = (especialesState[kind].players || []).map((p) => ({ ...p, bestScore: null }));
         renderSpecialPlayersTable(kind);
+        refreshActiveStagePreview();
         await saveEspecialesConfig(true);
       });
 
       document.getElementById(`${prefix}_clearAllBtn`).addEventListener("click", async () => {
         especialesState[kind].players = [];
         renderSpecialPlayersTable(kind);
+        refreshActiveStagePreview();
         await saveEspecialesConfig(true);
       });
     }
@@ -1682,71 +1874,39 @@
     document.getElementById("saveTriplesBtn").addEventListener("click", () => saveEspecialesConfig(true));
     document.getElementById("saveLibresBtn").addEventListener("click", () => saveEspecialesConfig(true));
 
-    document.querySelectorAll("#pane-especiales input[type='range']").forEach((r) => {
-      r.addEventListener("input", updateEspecialesSliders);
-    });
-
-    /* ==================== DRAG CANVAS MARCADOR (INTACTO) ==================== */
-    let dragging = false;
-    let startX = 0;
-    let startY = 0;
-    let origLeftPct = 14;
-    let origTopPct = 76;
-
-    dragBox.addEventListener("pointerdown", (e) => {
-      e.preventDefault();
-      dragging = true;
-      dragBox.setPointerCapture(e.pointerId);
-      startX = e.clientX;
-      startY = e.clientY;
-      origLeftPct = parseFloat(document.getElementById("posX").value) || 14;
-      origTopPct = parseFloat(document.getElementById("posY").value) || 76;
-    });
-
-    dragBox.addEventListener("pointermove", (e) => {
-      if (!dragging) return;
-      const stageRect = stageEl.getBoundingClientRect();
-      if (!stageRect.width || !stageRect.height) return;
-      const dxPct = ((e.clientX - startX) / stageRect.width) * 100;
-      const dyPct = ((e.clientY - startY) / stageRect.height) * 100;
-
-      let nx = Math.max(0, Math.min(85, origLeftPct + dxPct));
-      let ny = Math.max(0, Math.min(90, origTopPct + dyPct));
-
-      const boxRect = dragBox.getBoundingClientRect();
-      const widthPct = (boxRect.width / stageRect.width) * 100;
-      const centerPct = nx + widthPct / 2;
-      if (snapActive && Math.abs(centerPct - 50) < 1.3) {
-        nx = 50 - widthPct / 2;
-      }
-
-      nx = Number(nx.toFixed(1));
-      ny = Number(ny.toFixed(1));
-      document.getElementById("posX").value = nx;
-      document.getElementById("posY").value = ny;
-      renderPreview(getSbConfig());
-    });
-
-    dragBox.addEventListener("pointerup", async (e) => {
-      if (!dragging) return;
-      dragging = false;
-      dragBox.releasePointerCapture(e.pointerId);
-      await saveConfig();
+    document.querySelectorAll("#pane-especiales input, #pane-especiales select, #pane-especiales textarea").forEach((el) => {
+      if (el.type === "file") return;
+      el.addEventListener("input", () => {
+        updateEspecialesSliders();
+        refreshActiveStagePreview();
+      });
+      el.addEventListener("change", () => {
+        updateEspecialesSliders();
+        refreshActiveStagePreview();
+      });
     });
 
     document.getElementById("center-x-btn").addEventListener("click", async () => {
-      const stageRect = stageEl.getBoundingClientRect();
-      const boxRect = dragBox.getBoundingClientRect();
-      if (!stageRect.width || !boxRect.width) return;
-      const widthPct = (boxRect.width / stageRect.width) * 100;
-      const centeredX = Number(Math.max(0, Math.min(85, 50 - widthPct / 2)).toFixed(1));
-      document.getElementById("posX").value = centeredX;
-      await saveConfig();
+      const firstChild = previewMount.firstElementChild;
+      const boxW = firstChild ? firstChild.getBoundingClientRect().width / (stageEl.clientWidth / 1920) : 520;
+      const widthPct = (boxW / 1920) * 100;
+      const centeredX = Number(Math.max(0, Math.min(100, 50 - widthPct / 2)).toFixed(1));
+
+      if (activeDockTab === "especiales") {
+        const prefix = activeSpecialKind === "libres" ? "ft" : "tr";
+        document.getElementById(`${prefix}_posX`).value = centeredX;
+        updateEspecialesSliders();
+        refreshActiveStagePreview();
+        await saveEspecialesConfig(true);
+      } else {
+        document.getElementById("posX").value = centeredX;
+        await saveConfig();
+      }
     });
 
     document.querySelectorAll("#pane-marcadores input, #pane-marcadores select").forEach((el) => {
       if (el.type === "file" || el.id === "paletteTarget") return;
-      el.addEventListener("input", () => renderPreview(getSbConfig()));
+      el.addEventListener("input", () => refreshActiveStagePreview());
       el.addEventListener("change", saveConfig);
     });
 
@@ -1788,12 +1948,6 @@
       imgs.logo2 = l1;
 
       await saveConfig();
-    });
-
-    const snapBtn = document.getElementById("snap-toggle");
-    snapBtn.addEventListener("click", () => {
-      snapActive = !snapActive;
-      snapBtn.textContent = snapActive ? "Snap: ON" : "Snap: OFF";
     });
 
     document.getElementById("save-publish-btn").addEventListener("click", saveConfig);
@@ -1855,7 +2009,9 @@
         document.querySelectorAll(".dock-tab").forEach((t) => t.classList.remove("is-active"));
         document.querySelectorAll(".tab-section").forEach((s) => s.classList.remove("is-active"));
         tab.classList.add("is-active");
-        document.getElementById(`pane-${tab.dataset.target}`).classList.add("is-active");
+        activeDockTab = tab.dataset.target;
+        document.getElementById(`pane-${activeDockTab}`).classList.add("is-active");
+        refreshActiveStagePreview();
       });
     });
 
