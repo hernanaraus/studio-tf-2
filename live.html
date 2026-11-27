@@ -2,9 +2,9 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Live — Studio TF 2.0</title>
-  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;1,700;1,800&family=Bebas+Neue&family=Chakra+Petch:wght@600;700&family=Oswald:wght@600;700&family=Rajdhani:wght@600;700&family=Russo+One&family=Teko:wght@600;700&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=1920, height=1080">
+  <title>Live Marcador — Studio TF 2.0</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;1,700;1,800&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body {
@@ -12,438 +12,326 @@
       height: 1080px;
       overflow: hidden;
       background: transparent;
-      font-family: 'Barlow Condensed', sans-serif;
+      font-family: 'Barlow Condensed', system-ui, sans-serif;
       color: #ffffff;
     }
 
-    #liveStage {
+    .broadcast-root {
       position: relative;
       width: 1920px;
       height: 1080px;
+      opacity: 0;
+      transform: translateY(-16px);
+      transition: opacity 0.22s ease, transform 0.22s ease;
+    }
+    .broadcast-root.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Barra superior minimalista estilo broadcast */
+    .top-scoreboard-wrap {
+      position: absolute;
+      top: 32px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: stretch;
+      height: 76px;
+      border-radius: 10px;
       overflow: hidden;
-      background: transparent;
+      background: rgba(14, 16, 22, 0.94);
+      border: 2px solid rgba(255, 255, 255, 0.14);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
     }
 
-    /* Logo fijo Tiempo Fuera en Live */
-    #tfCornerLogo {
-      position: fixed;
-      top: 24px;
-      right: 28px;
-      z-index: 25;
-      padding: 6px 10px;
-      border-radius: 10px;
-      background: radial-gradient(circle, rgba(255, 255, 255, 0.65) 0%, rgba(255, 255, 255, 0.2) 65%, rgba(255, 255, 255, 0) 100%);
-      pointer-events: none;
-    }
-    #tfCornerLogo img {
-      height: 44px;
-      width: auto;
-      max-width: 130px;
-      object-fit: contain;
-      display: block;
-    }
-
-    /* Bug RRSS */
-    #socialBug {
-      position: fixed;
-      top: 26px;
-      left: 28px;
-      z-index: 30;
-      display: none;
-      align-items: center;
-      gap: 10px;
-      background: rgba(14, 16, 22, 0.88);
-      border: 1.5px solid #e11d2e;
-      border-radius: 8px;
-      padding: 6px 14px;
-      font-size: 20px;
-      font-weight: 800;
-      letter-spacing: 0.5px;
-    }
-    #socialBug.is-right {
-      left: auto;
-      right: 180px;
-    }
-
-    /* Marcador de partido */
-    #scoreboardLayer {
-      position: absolute;
-      left: 14%;
-      top: 76%;
-      z-index: 15;
-      display: none;
-      transform-origin: top left;
-    }
-
-    /* Overlay Competencias Especiales */
-    #specialsLayer {
-      position: fixed;
-      inset: 0;
-      z-index: 20;
-      display: none;
-      pointer-events: none;
-    }
-    .sp-panel {
-      position: absolute;
-      left: 64px;
-      top: 64px;
-      width: 520px;
-      border-radius: 14px;
-      padding: 20px 24px;
-      border: 2px solid #e11d2e;
-      color: #fff;
-      box-shadow: 0 14px 36px rgba(0, 0, 0, 0.55);
-    }
-    .sp-header {
+    .team-block {
       display: flex;
       align-items: center;
       gap: 14px;
-      margin-bottom: 14px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.16);
-      padding-bottom: 12px;
+      padding: 0 22px;
+      min-width: 390px;
     }
-    .sp-header img {
-      max-width: 110px;
-      object-fit: contain;
-    }
-    .sp-title {
-      font-size: 28px;
-      font-weight: 800;
-      line-height: 1.05;
-      text-transform: uppercase;
-    }
-    .sp-meta {
-      font-size: 17px;
-      font-weight: 700;
-      opacity: 0.88;
-      margin-top: 2px;
-    }
-    .sp-metrics {
-      display: flex;
+    .team-block.home {
       justify-content: space-between;
-      align-items: center;
-      gap: 14px;
-      margin-bottom: 14px;
+      border-right: 1px solid rgba(255, 255, 255, 0.12);
     }
-    .sp-metric-box {
-      flex: 1;
-      background: rgba(0, 0, 0, 0.34);
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      border-radius: 10px;
-      padding: 10px 14px;
-      text-align: center;
+    .team-block.away {
+      justify-content: space-between;
+      flex-direction: row-reverse;
+      border-left: 1px solid rgba(255, 255, 255, 0.12);
     }
-    .sp-metric-label {
-      font-size: 14px;
-      font-weight: 700;
-      text-transform: uppercase;
-      opacity: 0.75;
-    }
-    .sp-metric-val {
-      font-size: 44px;
-      font-weight: 800;
-      line-height: 1.05;
-      font-variant-numeric: tabular-nums;
-    }
-    .sp-standings {
+
+    .team-identity {
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      min-width: 0;
     }
-    .sp-row {
+    .team-block.away .team-identity {
+      align-items: flex-end;
+      text-align: right;
+    }
+
+    .team-name {
+      font-size: 32px;
+      font-weight: 800;
+      font-style: italic;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      line-height: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 220px;
+    }
+
+    .fouls-row {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      background: rgba(0, 0, 0, 0.28);
-      border-radius: 6px;
-      padding: 6px 12px;
-      font-size: 20px;
-      font-weight: 700;
+      gap: 6px;
+      margin-top: 5px;
     }
-    .sp-rules-bar {
-      position: fixed;
-      left: 64px;
-      right: 64px;
-      bottom: 36px;
-      border-radius: 10px;
-      padding: 12px 20px;
-      font-size: 22px;
+    .fouls-label {
+      font-size: 13px;
       font-weight: 700;
-      border-left: 6px solid #e11d2e;
-      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5);
+      letter-spacing: 1px;
+      color: #b5bccb;
+      text-transform: uppercase;
+    }
+    .foul-pip {
+      width: 11px;
+      height: 11px;
+      border-radius: 2px;
+      background: rgba(255, 255, 255, 0.16);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+    .foul-pip.active {
+      background: #ef4444;
+      border-color: #fca5a5;
+    }
+    .foul-pip.bonus.active {
+      background: #f59e0b;
+      border-color: #fde68a;
+    }
+
+    .team-score {
+      font-size: 54px;
+      font-weight: 800;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+      color: #ffffff;
+      min-width: 68px;
+      text-align: center;
+    }
+
+    .center-clock-block {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 0 22px;
+      background: rgba(9, 11, 15, 0.96);
+    }
+    .period-badge {
+      background: #dc2626;
+      color: #ffffff;
+      font-size: 24px;
+      font-weight: 800;
+      padding: 4px 12px;
+      border-radius: 6px;
+      letter-spacing: 0.5px;
+      line-height: 1.05;
+    }
+    .clock-display {
+      font-size: 48px;
+      font-weight: 800;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+      color: #ffffff;
+      min-width: 138px;
+      text-align: center;
+    }
+    .clock-display.clutch {
+      color: #f87171;
+    }
+
+    /* Zócalo inferior discreto de redes */
+    .social-bug {
+      position: absolute;
+      bottom: 44px;
+      left: 60px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(14, 16, 22, 0.94);
+      border-left: 5px solid #dc2626;
+      border-top: 1px solid rgba(255, 255, 255, 0.14);
+      border-right: 1px solid rgba(255, 255, 255, 0.14);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 0 8px 8px 0;
+      padding: 10px 22px;
+      opacity: 0;
+      transform: translateX(-24px);
+      transition: opacity 0.22s ease, transform 0.22s ease;
+    }
+    .social-bug.is-shown {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    .social-net {
+      font-size: 20px;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: #f87171;
+      letter-spacing: 1px;
+    }
+    .social-handle {
+      font-size: 26px;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: 0.4px;
     }
   </style>
 </head>
 <body>
-  <div id="liveStage">
-    <div id="tfCornerLogo">
-      <img src="./logotf.png" alt="Tiempo Fuera">
-    </div>
-
-    <div id="socialBug">@tiempofuera_cl</div>
-
-    <div id="scoreboardLayer"></div>
-
-    <div id="specialsLayer">
-      <div class="sp-panel" id="spPanelBox">
-        <div class="sp-header">
-          <img id="spCompLogo" src="" alt="" style="display: none;">
-          <div>
-            <div class="sp-title" id="spTitle">COMPETENCIA ESPECIAL</div>
-            <div class="sp-meta" id="spMeta"></div>
+  <div class="broadcast-root" id="broadcastRoot">
+    <div class="top-scoreboard-wrap" id="scoreboardBar">
+      <div class="team-block home" id="homeBlock">
+        <div class="team-identity">
+          <div class="team-name" id="homeName">LOCAL</div>
+          <div class="fouls-row">
+            <span class="fouls-label">Faltas</span>
+            <span class="foul-pip" data-foul-pip="1"></span>
+            <span class="foul-pip" data-foul-pip="1"></span>
+            <span class="foul-pip" data-foul-pip="1"></span>
+            <span class="foul-pip" data-foul-pip="1"></span>
+            <span class="foul-pip bonus" data-foul-pip="1"></span>
           </div>
         </div>
-
-        <div class="sp-metrics">
-          <div class="sp-metric-box">
-            <div class="sp-metric-label" id="spTimerLabel">TIEMPO</div>
-            <div class="sp-metric-val" id="spTimerVal">01:00</div>
-          </div>
-          <div class="sp-metric-box">
-            <div class="sp-metric-label">PUNTAJE</div>
-            <div class="sp-metric-val" id="spScoreVal">0</div>
-          </div>
-        </div>
-
-        <div class="sp-standings" id="spStandingsList"></div>
+        <div class="team-score" id="homeScore">0</div>
       </div>
 
-      <div class="sp-rules-bar" id="spRulesBar"></div>
+      <div class="center-clock-block">
+        <div class="period-badge" id="periodBadge">Q1</div>
+        <div class="clock-display" id="clockDisplay">10:00</div>
+      </div>
+
+      <div class="team-block away" id="awayBlock">
+        <div class="team-identity">
+          <div class="team-name" id="awayName">VISITA</div>
+          <div class="fouls-row">
+            <span class="fouls-label">Faltas</span>
+            <span class="foul-pip" data-foul-pip="2"></span>
+            <span class="foul-pip" data-foul-pip="2"></span>
+            <span class="foul-pip" data-foul-pip="2"></span>
+            <span class="foul-pip" data-foul-pip="2"></span>
+            <span class="foul-pip bonus" data-foul-pip="2"></span>
+          </div>
+        </div>
+        <div class="team-score" id="awayScore">0</div>
+      </div>
+    </div>
+
+    <div class="social-bug" id="socialBug">
+      <span class="social-net" id="socialNet">INSTAGRAM</span>
+      <span class="social-handle">@tiempofuera_cl</span>
     </div>
   </div>
 
   <script type="module">
     import { db, DB_PATH, ref, onValue } from "./js/firebase.js";
 
-    const sbLayer = document.getElementById("scoreboardLayer");
-    const socialBug = document.getElementById("socialBug");
-    const specialsLayer = document.getElementById("specialsLayer");
-
-    let sbModule = { enabled: false, config: {}, live: {} };
-    let spModule = { enabled: false, config: {}, live: {} };
     let socialTimer = null;
 
-    function hexToRgba(hex, alphaPct = 85) {
-      let h = (hex || "#2b2f38").replace("#", "");
-      if (h.length === 3) h = h.split("").map((c) => c + c).join("");
-      const r = parseInt(h.substring(0, 2), 16) || 43;
-      const g = parseInt(h.substring(2, 4), 16) || 47;
-      const b = parseInt(h.substring(4, 6), 16) || 56;
-      const a = Math.max(0, Math.min(1, (parseInt(alphaPct, 10) || 85) / 100));
-      return `rgba(${r}, ${g}, ${b}, ${a})`;
+    function formatPeriodFiba(p) {
+      const n = parseInt(String(p ?? "1").replace(/[^0-9]/g, ""), 10) || 1;
+      return n <= 4 ? `Q${n}` : `OT${n - 4}`;
     }
 
-    function shade(hex, pct) {
-      let h = (hex || "#1c1e24").replace("#", "");
-      let r = parseInt(h.substring(0, 2), 16) || 28;
-      let g = parseInt(h.substring(2, 4), 16) || 30;
-      let b = parseInt(h.substring(4, 6), 16) || 36;
-      if (pct >= 0) {
-        r = Math.min(255, Math.floor(r + (255 - r) * pct));
-        g = Math.min(255, Math.floor(g + (255 - g) * pct));
-        b = Math.min(255, Math.floor(b + (255 - b) * pct));
-      } else {
-        const f = 1 + pct;
-        r = Math.max(0, Math.floor(r * f));
-        g = Math.max(0, Math.floor(g * f));
-        b = Math.max(0, Math.floor(b * f));
+    function isClutchClock(clockStr) {
+      const str = String(clockStr || "").trim();
+      const parts = str.split(":");
+      if (parts.length === 3) return true;
+      if (parts.length === 2) {
+        const m = parseInt(parts[0], 10) || 0;
+        const s = parseFloat(parts[1]) || 0;
+        return m === 0 && s < 10;
       }
-      return `#${[r, g, b].map((x) => x.toString(16).padStart(2, "0")).join("")}`;
+      return false;
     }
 
-    function formatClock(sec) {
-      const s = Math.max(0, parseInt(sec, 10) || 0);
-      const m = Math.floor(s / 60);
-      const r = s % 60;
-      return `${String(m).padStart(2, "0")}:${String(r).padStart(2, "0")}`;
+    function renderFouls(teamNum, count) {
+      const n = Math.max(0, Math.min(5, parseInt(count, 10) || 0));
+      document.querySelectorAll(`[data-foul-pip="${teamNum}"]`).forEach((pip, idx) => {
+        pip.classList.toggle("active", idx < n);
+      });
     }
 
-    function setupSocialRotation(cfg) {
-      if (socialTimer) {
-        clearInterval(socialTimer);
-        socialTimer = null;
-      }
-      socialBug.style.display = "none";
-      socialBug.classList.toggle("is-right", cfg.socialPosition === "top-right");
-
-      if (!cfg.socialAutoEnabled) return;
-      const intervalMs = Math.max(20, parseInt(cfg.socialIntervalSec, 10) || 150) * 1000;
-      socialTimer = setInterval(() => {
-        socialBug.style.display = "flex";
-        setTimeout(() => {
-          socialBug.style.display = "none";
-        }, 7000);
-      }, intervalMs);
-    }
-
-    function renderScoreboard() {
-      const cfg = sbModule.config || {};
-      const live = sbModule.live || {};
-
-      if (!sbModule.enabled) {
-        sbLayer.style.display = "none";
-        return;
-      }
-
-      sbLayer.style.display = "block";
-      sbLayer.style.left = `${cfg.posX ?? 14}%`;
-      sbLayer.style.top = `${cfg.posY ?? 76}%`;
-
-      const fontFamily = cfg.fontFamily || "'Barlow Condensed', sans-serif";
-      const scale = cfg.boardScale || 1.0;
-      const accent = cfg.accentColor || "#e3b857";
-      const bg1 = cfg.bg1Color || "#1c1e24";
-      const bg2 = cfg.bg2Color || "#1c1e24";
-      const tx1 = cfg.text1Color || "#ffffff";
-      const tx2 = cfg.text2Color || "#ffffff";
-      const name1 = cfg.name1 || "LOCAL";
-      const name2 = cfg.name2 || "VISITA";
-      const scoreBg = cfg.scoreBgColor || "#0c0d10";
-      const scoreTx = cfg.scoreTextColor || "#e3b857";
-      const clockBg = cfg.clockBgColor || "#141519";
-      const clockTx = cfg.clockTextColor || "#ffffff";
-      const periodTx = cfg.periodTextColor || "#e3b857";
-      const foulAct = cfg.foulActiveColor || "#ffe600";
-      const foulBon = cfg.foulBonusColor || "#ff1744";
-
-      const p1 = live.points_1 ?? 0;
-      const p2 = live.points_2 ?? 0;
-      const f1 = parseInt(live.fouls_1, 10) || 0;
-      const f2 = parseInt(live.fouls_2, 10) || 0;
-      const period = live.period || "Q1";
-      const clockStr = formatClock(live.timerSec ?? 600);
-      const shotVal = live.shotclock ?? 24;
-
-      const makeFouls = (count) => {
-        const isBonus = count >= 5;
-        return Array.from({ length: 5 }, (_, i) => {
-          const active = i < count;
-          const color = active ? (isBonus ? foulBon : foulAct) : "rgba(0,0,0,0.35)";
-          return `<span style="width:20px;height:5px;border-radius:2px;display:inline-block;background:${color};border:1px solid rgba(255,255,255,0.35);"></span>`;
-        }).join("");
-      };
-
-      let topBadgeHtml = "";
-      if (cfg.topBadgeEnabled) {
-        const yOff = cfg.topBadgeOffsetY ?? -24;
-        if (cfg.topBadgeType === "image" && cfg.logoTop) {
-          topBadgeHtml = `<div style="position:absolute;top:${yOff}px;left:50%;transform:translateX(-50%);z-index:5;">
-            <img src="${cfg.logoTop}" style="max-height:${cfg.topBadgeMaxSize || 36}px;object-fit:contain;display:block;">
-          </div>`;
-        } else if (cfg.topTextValue) {
-          topBadgeHtml = `<div style="position:absolute;top:${yOff}px;left:50%;transform:translateX(-50%);background:${scoreBg};border:1.5px solid ${accent};border-radius:5px;padding:2px 10px;font-size:${cfg.topBadgeFontSize || 16}px;font-weight:800;color:#fff;white-space:nowrap;z-index:5;">${cfg.topTextValue}</div>`;
+    function readEffective(val, field, altKeys = []) {
+      const src = val.config?.sources?.[field] || "manual";
+      const bucket = val.feeds?.[src] || {};
+      for (const k of [field, ...altKeys]) {
+        if (bucket[k] !== undefined && bucket[k] !== null && bucket[k] !== "") {
+          return bucket[k];
         }
       }
-
-      const shotHtml = cfg.showShotClock !== false
-        ? `<div style="position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);background:${cfg.shotBgColor || "#141519"};color:${cfg.shotTextColor || "#ff2a2a"};border:1.5px solid ${accent};border-radius:5px;font-size:20px;font-weight:800;padding:0 8px;">${shotVal}</div>`
-        : "";
-
-      sbLayer.innerHTML = `
-        <div style="transform:scale(${scale});transform-origin:top left;display:inline-flex;align-items:center;font-family:${fontFamily};">
-          ${cfg.logoLiga ? `<img src="${cfg.logoLiga}" style="height:${cfg.ligaSize || 92}px;margin-right:10px;object-fit:contain;">` : ""}
-          <div style="display:flex;align-items:center;height:68px;min-width:210px;padding:0 14px;gap:10px;background:linear-gradient(90deg,${shade(bg1,-0.14)},${bg1} 45%,${shade(bg1,0.2)});border-top:2px solid ${accent};border-bottom:2px solid ${accent};border-left:2px solid ${accent};border-radius:10px 0 0 10px;">
-            ${cfg.logo1 ? `<img src="${cfg.logo1}" style="height:${cfg.teamLogoSize || 44}px;width:${cfg.teamLogoSize || 44}px;object-fit:contain;">` : ""}
-            <div style="display:flex;flex-direction:column;align-items:center;flex:1;">
-              <span style="font-size:${cfg.teamFontSize || 25}px;font-weight:800;color:${tx1};line-height:1;">${name1}</span>
-              <div style="display:flex;gap:4px;margin-top:6px;">${makeFouls(f1)}</div>
-            </div>
-          </div>
-          <div style="position:relative;display:flex;align-items:center;height:78px;padding:0 16px;gap:10px;background:linear-gradient(180deg,${shade(scoreBg,0.14)},${scoreBg} 55%,${shade(scoreBg,-0.18)});border:2px solid ${accent};border-radius:9px;z-index:2;">
-            ${topBadgeHtml}
-            <span style="font-size:${cfg.scoreBoxSize || 48}px;font-weight:800;color:${scoreTx};line-height:0.95;">${p1}</span>
-            <span style="font-size:${Math.round((cfg.scoreBoxSize || 48) * 0.6)}px;font-weight:800;color:${accent};">-</span>
-            <span style="font-size:${cfg.scoreBoxSize || 48}px;font-weight:800;color:${scoreTx};line-height:0.95;">${p2}</span>
-            ${shotHtml}
-          </div>
-          <div style="display:flex;flex-direction:row-reverse;align-items:center;height:68px;min-width:210px;padding:0 14px;gap:10px;background:linear-gradient(270deg,${shade(bg2,-0.14)},${bg2} 45%,${shade(bg2,0.2)});border-top:2px solid ${accent};border-bottom:2px solid ${accent};">
-            ${cfg.logo2 ? `<img src="${cfg.logo2}" style="height:${cfg.teamLogoSize || 44}px;width:${cfg.teamLogoSize || 44}px;object-fit:contain;">` : ""}
-            <div style="display:flex;flex-direction:column;align-items:center;flex:1;">
-              <span style="font-size:${cfg.teamFontSize || 25}px;font-weight:800;color:${tx2};line-height:1;">${name2}</span>
-              <div style="display:flex;gap:4px;margin-top:6px;">${makeFouls(f2)}</div>
-            </div>
-          </div>
-          <div style="display:flex;align-items:center;height:68px;padding:0 14px;gap:10px;background:linear-gradient(180deg,${shade(clockBg,0.14)},${clockBg} 55%,${shade(clockBg,-0.16)});border:2px solid ${accent};border-radius:0 10px 10px 0;">
-            <span style="font-size:${cfg.clockFontSize || 32}px;font-weight:700;color:${clockTx};">${clockStr}</span>
-            <span style="font-size:${Math.round((cfg.clockFontSize || 32) * 0.72)}px;font-weight:800;color:${periodTx};background:rgba(255,255,255,0.08);padding:3px 8px;border-radius:5px;border:1px solid rgba(255,255,255,0.2);">${period}</span>
-          </div>
-        </div>
-      `;
+      return (val.feeds?.manual || {})[field];
     }
 
-    function renderSpecials() {
-      const live = spModule.live || {};
-      if (!spModule.enabled || !live.visible) {
-        specialsLayer.style.display = "none";
-        return;
-      }
-
-      specialsLayer.style.display = "block";
-      const kind = live.kind === "libres" ? "libres" : "triples";
-      const cur = spModule.config?.[kind] || {};
-
-      const panel = document.getElementById("spPanelBox");
-      const rulesBar = document.getElementById("spRulesBar");
-      const bgRgba = hexToRgba(cur.colorBg || "#2b2f38", cur.bgAlpha ?? 85);
-      const accent = cur.colorAccent || "#e11d2e";
-      const scale = (cur.scale ?? 100) / 100;
-
-      panel.style.background = bgRgba;
-      panel.style.borderColor = accent;
-      panel.style.transform = `scale(${scale})`;
-      panel.style.transformOrigin = "top left";
-
-      rulesBar.style.background = bgRgba;
-      rulesBar.style.borderLeftColor = accent;
-
-      const compLogoEl = document.getElementById("spCompLogo");
-      if (cur.compLogo) {
-        compLogoEl.src = cur.compLogo;
-        compLogoEl.style.height = `${cur.compLogoSize || 66}px`;
-        compLogoEl.style.display = "block";
-      } else {
-        compLogoEl.style.display = "none";
-      }
-
-      document.getElementById("spTitle").textContent = cur.title || (kind === "libres" ? "TIROS LIBRES" : "CONCURSO DE TRIPLES");
-      const modeText = cur.modePreset === "femicentro"
-        ? `FEMICENTRO (${cur.maxShots || (kind === "libres" ? 10 : 6)} TIROS)`
-        : cur.modePreset === "personalizada"
-          ? "PERSONALIZADA"
-          : live.isTiebreak ? "DESEMPATE" : "TIME ATTACK";
-      document.getElementById("spMeta").textContent = `${cur.stage || ""} · ${modeText} · ${cur.categoryLabel || ""}`;
-
-      document.getElementById("spTimerLabel").textContent = cur.maxShots > 0 ? "TIROS" : (live.isTiebreak ? "DESEMPATE" : "TIEMPO");
-      document.getElementById("spTimerVal").textContent = cur.maxShots > 0
-        ? `${live.shots || 0}/${cur.maxShots}`
-        : formatClock(live.seconds ?? (cur.officialSec || 60));
-      document.getElementById("spScoreVal").textContent = live.score ?? 0;
-
-      const players = [...(cur.players || [])]
-        .sort((a, b) => (b.bestScore ?? -1) - (a.bestScore ?? -1))
-        .slice(0, 5);
-
-      document.getElementById("spStandingsList").innerHTML = players.map((p, i) => `
-        <div class="sp-row">
-          <span>${i + 1}. ${p.name} (${p.team})</span>
-          <span>${p.bestScore !== null && p.bestScore !== undefined ? `${p.bestScore} pts` : "-"}</span>
-        </div>
-      `).join("");
-
-      rulesBar.textContent = cur.rulesText || "";
+    function triggerSocial(network) {
+      const bug = document.getElementById("socialBug");
+      const netEl = document.getElementById("socialNet");
+      netEl.textContent = network === "yt" ? "YOUTUBE" : "INSTAGRAM";
+      bug.classList.add("is-shown");
+      if (socialTimer) clearTimeout(socialTimer);
+      socialTimer = setTimeout(() => {
+        bug.classList.remove("is-shown");
+      }, 6500);
     }
 
     onValue(ref(db, `${DB_PATH}/modules/marcadores`), (snap) => {
       if (!snap.exists()) return;
-      sbModule = { ...sbModule, ...snap.val() };
-      setupSocialRotation(sbModule.config || {});
-      renderScoreboard();
-    });
+      const val = snap.val();
 
-    onValue(ref(db, `${DB_PATH}/modules/especiales`), (snap) => {
-      if (!snap.exists()) return;
-      spModule = { ...spModule, ...snap.val() };
-      renderSpecials();
+      const root = document.getElementById("broadcastRoot");
+      const isVisible = val.enabled !== false && Boolean(val.on);
+      root.classList.toggle("is-visible", isVisible);
+
+      const cfg = val.config || {};
+      document.getElementById("homeName").textContent = cfg.name1 || "LOCAL";
+      document.getElementById("awayName").textContent = cfg.name2 || "VISITA";
+
+      if (cfg.color1) {
+        document.getElementById("homeBlock").style.background =
+          `linear-gradient(90deg, ${cfg.color1}44 0%, transparent 100%)`;
+      }
+      if (cfg.color2) {
+        document.getElementById("awayBlock").style.background =
+          `linear-gradient(270deg, ${cfg.color2}44 0%, transparent 100%)`;
+      }
+
+      const pts1 = parseInt(readEffective(val, "points_1", ["points1", "score_1"]) ?? 0, 10) || 0;
+      const pts2 = parseInt(readEffective(val, "points_2", ["points2", "score_2"]) ?? 0, 10) || 0;
+      const f1 = parseInt(readEffective(val, "fouls_1", ["fouls1"]) ?? 0, 10) || 0;
+      const f2 = parseInt(readEffective(val, "fouls_2", ["fouls2"]) ?? 0, 10) || 0;
+      const per = readEffective(val, "period", ["moment"]) ?? 1;
+      const clock = readEffective(val, "timer") ?? "10:00";
+
+      document.getElementById("homeScore").textContent = pts1;
+      document.getElementById("awayScore").textContent = pts2;
+      renderFouls(1, f1);
+      renderFouls(2, f2);
+
+      document.getElementById("periodBadge").textContent = formatPeriodFiba(per);
+      const clockEl = document.getElementById("clockDisplay");
+      clockEl.textContent = clock;
+      clockEl.classList.toggle("clutch", isClutchClock(clock));
+
+      if (val.cmd?.action === "social_now" && val.cmd.ts) {
+        const ageMs = Date.now() - Number(val.cmd.ts);
+        if (ageMs >= 0 && ageMs < 4000) {
+          triggerSocial(val.cmd.network);
+        }
+      }
     });
   </script>
 </body>
