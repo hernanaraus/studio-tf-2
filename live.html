@@ -331,8 +331,28 @@
 
   <script type="module">
     import { db, DB_PATH, ref, onValue } from "./js/firebase.js";
+    import mqtt from "https://esm.sh/mqtt@5.10.1";
 
+    const BROKER_URL = "wss://broker.emqx.io:8084/mqtt";
+    const CANAL_BASE = "tiempofuera/marcador/tf_canal_secreto_9981";
+
+    let scoreSightDirecto = {};
+    let latestMarcadorVal = null;
     let socialTimer = null;
+
+    const wsClient = mqtt.connect(BROKER_URL, { reconnectPeriod: 1000 });
+    wsClient.on("connect", () => {
+      wsClient.subscribe(`${CANAL_BASE}/vivo`);
+    });
+    wsClient.on("message", (topic, message) => {
+      if (topic !== `${CANAL_BASE}/vivo`) return;
+      try {
+        scoreSightDirecto = JSON.parse(message.toString());
+        if (latestMarcadorVal) {
+          renderAll(latestMarcadorVal);
+        }
+      } catch (_) {}
+    });
 
     function lum(hex) {
       hex = (hex || "#1c1e24").replace("#", "");
@@ -387,15 +407,28 @@
       });
     }
 
-    function readEffective(val, field, altKeys = []) {
-      const src = val.config?.sources?.[field] || "manual";
-      const bucket = val.feeds?.[src] || {};
+    function pickFromBucket(bucket, field, altKeys = []) {
+      if (!bucket || typeof bucket !== "object") return undefined;
       for (const k of [field, ...altKeys]) {
-        if (bucket[k] !== undefined && bucket[k] !== null && bucket[k] !== "") {
+        if (bucket[k] !== undefined && bucket[k] !== null && String(bucket[k]).trim() !== "") {
           return bucket[k];
         }
       }
-      return (val.feeds?.manual || {})[field];
+      return undefined;
+    }
+
+    function readEffective(val, field, altKeys = []) {
+      const src = val.config?.sources?.[field] || "manual";
+      if (src === "scoresight") {
+        const directVal = pickFromBucket(scoreSightDirecto, field, altKeys);
+        if (directVal !== undefined) return directVal;
+        return pickFromBucket(val.feeds?.scoresight, field, altKeys);
+      }
+      if (src === "flexyscore") {
+        const flexVal = pickFromBucket(val.feeds?.flexyscore, field, altKeys);
+        if (flexVal !== undefined) return flexVal;
+      }
+      return pickFromBucket(val.feeds?.manual, field, altKeys);
     }
 
     function applyStudioStyles(val) {
@@ -435,7 +468,6 @@
       const clockBox = document.getElementById("clockBox");
       clockBox.style.background = `linear-gradient(180deg, ${shade(clockBg, 0.14)} 0%, ${clockBg} 55%, ${shade(clockBg, -0.16)} 100%)`;
 
-      // Logo liga
       const ligaLogo = document.getElementById("sbLigaLogo");
       const ligaSize = parseInt(cfg.ligaSize, 10) || 92;
       if (cfg.logoLiga) {
@@ -446,7 +478,6 @@
         ligaLogo.classList.remove("has-img");
       }
 
-      // Escudos equipos
       const teamLogoSize = parseInt(cfg.teamLogoSize, 10) || 44;
       const homeLogo = document.getElementById("homeLogo");
       const awayLogo = document.getElementById("awayLogo");
@@ -467,7 +498,6 @@
         awayLogo.classList.remove("has-img");
       }
 
-      // Nombres y colores de texto
       const teamFontSize = parseInt(cfg.teamFontSize, 10) || 25;
       const homeName = document.getElementById("homeName");
       const awayName = document.getElementById("awayName");
@@ -478,7 +508,6 @@
       homeName.style.color = cfg.text1Color || "#ffffff";
       awayName.style.color = cfg.text2Color || "#ffffff";
 
-      // Puntos
       const scoreSize = parseInt(cfg.scoreBoxSize, 10) || 48;
       const scoreColor = cfg.scoreTextColor || accent;
       const homeScore = document.getElementById("homeScore");
@@ -491,7 +520,6 @@
       scoreSep.style.fontSize = `${Math.round(scoreSize * 0.6)}px`;
       scoreSep.style.color = accent;
 
-      // Reloj y cuarto
       const clockSize = parseInt(cfg.clockFontSize, 10) || 32;
       const clockText = document.getElementById("clockText");
       const periodPill = document.getElementById("periodPill");
@@ -500,7 +528,6 @@
       periodPill.style.fontSize = `${Math.round(clockSize * 0.72)}px`;
       periodPill.style.color = cfg.periodTextColor || accent;
 
-      // Etiqueta superior (ej. Final Liga Master)
       const topBadge = document.getElementById("topBadge");
       topBadge.className = "sb-top-badge";
       topBadge.innerHTML = "";
@@ -521,7 +548,6 @@
         }
       }
 
-      // Posición RRSS
       const bug = document.getElementById("socialBug");
       bug.style.setProperty("--sb-accent", accent);
       bug.classList.toggle("right", cfg.socialPosition === "top-right");
@@ -538,10 +564,7 @@
       }, 6500);
     }
 
-    onValue(ref(db, `${DB_PATH}/modules/marcadores`), (snap) => {
-      if (!snap.exists()) return;
-      const val = snap.val();
-
+    function renderAll(val) {
       const root = document.getElementById("broadcastRoot");
       const isVisible = val.enabled !== false && Boolean(val.on);
       root.classList.toggle("is-visible", isVisible);
@@ -570,6 +593,12 @@
           triggerSocial(val.cmd.network);
         }
       }
+    }
+
+    onValue(ref(db, `${DB_PATH}/modules/marcadores`), (snap) => {
+      if (!snap.exists()) return;
+      latestMarcadorVal = snap.val();
+      renderAll(latestMarcadorVal);
     });
   </script>
 </body>
