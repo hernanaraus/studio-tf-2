@@ -248,21 +248,16 @@
       position: relative;
       display: inline-flex;
       align-items: center;
-      gap: 10px;
+      gap: 9px;
       background: var(--rrss-bg, rgba(14, 16, 22, 0.94));
       border: 2px solid var(--rrss-accent, var(--sb-accent, #e3b857));
-      border-left: 4px solid var(--rrss-accent, var(--sb-accent, #e3b857));
-      border-radius: 0 8px 8px 0;
-      padding: 8px 18px;
+      border-radius: 10px;
+      padding: 7px 14px;
       font-family: 'Barlow Condensed', sans-serif;
+      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.55);
       opacity: 0;
-      transform: translateY(-12px);
-      transition: opacity 0.22s ease, transform 0.22s ease;
-    }
-    .social-anchor.right .social-bug {
-      border-left: 2px solid var(--rrss-accent, var(--sb-accent, #e3b857));
-      border-right: 4px solid var(--rrss-accent, var(--sb-accent, #e3b857));
-      border-radius: 8px 0 0 8px;
+      transform: translateY(-10px);
+      transition: opacity 0.35s ease, transform 0.35s ease;
     }
     .social-bug.is-shown {
       opacity: 1;
@@ -271,18 +266,18 @@
 
     .social-subscribe-pill {
       position: absolute;
-      top: -12px;
+      top: -11px;
       right: 10px;
       background: #ff0000;
       color: #ffffff;
       border: 1.5px solid var(--rrss-accent, var(--sb-accent, #e3b857));
       border-radius: 5px;
       padding: 1px 7px;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 800;
       letter-spacing: 0.8px;
       text-transform: uppercase;
-      line-height: 1.2;
+      line-height: 1.15;
       display: none;
     }
     .social-bug.is-yt .social-subscribe-pill {
@@ -303,17 +298,12 @@
       display: block;
     }
 
-    .social-net {
-      font-size: 18px;
-      font-weight: 800;
-      text-transform: uppercase;
-      color: var(--rrss-accent, var(--sb-accent, #e3b857));
-      letter-spacing: 0.8px;
-    }
     .social-handle {
-      font-size: 24px;
+      font-size: 23px;
       font-weight: 800;
       color: #ffffff;
+      line-height: 1;
+      white-space: nowrap;
     }
   </style>
 </head>
@@ -369,7 +359,6 @@
       <div class="social-bug" id="socialBug">
         <span class="social-subscribe-pill" id="socialSubBadge">SUSCRÍBETE</span>
         <span class="social-icon-wrap" id="socialIcon"></span>
-        <span class="social-net" id="socialNet">INSTAGRAM</span>
         <span class="social-handle" id="socialHandle">@tiempofuera_cl</span>
       </div>
     </div>
@@ -406,8 +395,8 @@
 
     let scoreSightDirecto = {};
     let latestMarcadorVal = null;
-    let socialTimer = null;
-    let autoCycleTimer = null;
+    let hideSocialTimer = null;
+    let nextCycleTimer = null;
     let lastCycleKey = "";
     let lastManualCmdTs = 0;
     let currentNet = "ig";
@@ -563,26 +552,39 @@
       currentNet = network === "yt" ? "yt" : "ig";
 
       const bug = document.getElementById("socialBug");
-      const netEl = document.getElementById("socialNet");
       const iconEl = document.getElementById("socialIcon");
       const subBadge = document.getElementById("socialSubBadge");
 
       if (currentNet === "yt") {
-        netEl.textContent = "YOUTUBE";
         iconEl.innerHTML = YT_SVG;
         subBadge.textContent = cfg.socialSubLabel || "SUSCRÍBETE";
         bug.classList.add("is-yt");
       } else {
-        netEl.textContent = "INSTAGRAM";
         iconEl.innerHTML = IG_SVG;
         bug.classList.remove("is-yt");
       }
 
-      bug.classList.add("is-shown");
-      if (socialTimer) clearTimeout(socialTimer);
-      socialTimer = setTimeout(() => {
+      const visibleSec = Math.max(5, Number(durationSec) || 6.5);
+
+      requestAnimationFrame(() => {
+        bug.classList.add("is-shown");
+      });
+
+      if (hideSocialTimer) clearTimeout(hideSocialTimer);
+      hideSocialTimer = setTimeout(() => {
         bug.classList.remove("is-shown");
-      }, Math.max(2, Number(durationSec) || 6.5) * 1000);
+      }, visibleSec * 1000);
+    }
+
+    function clearSocialTimers() {
+      if (hideSocialTimer) {
+        clearTimeout(hideSocialTimer);
+        hideSocialTimer = null;
+      }
+      if (nextCycleTimer) {
+        clearTimeout(nextCycleTimer);
+        nextCycleTimer = null;
+      }
     }
 
     function syncSocialAutomation(val) {
@@ -590,23 +592,27 @@
       applySocialStyles(cfg);
 
       const autoEnabled = cfg.socialAutoEnabled !== false;
-      const intervalSec = Math.max(8, Number(cfg.socialIntervalSec) || 25);
-      const durationSec = Math.max(2, Number(cfg.socialDurationSec) || 6.5);
+      const durationSec = Math.max(5, Number(cfg.socialDurationSec) || 6.5);
+      const rawIntervalSec = Number(cfg.socialIntervalSec) || 25;
+      const intervalSec = Math.max(durationSec + 2, rawIntervalSec);
       const isLiveActive = val.enabled !== false && Boolean(val.on);
 
       const cycleKey = `${isLiveActive}|${autoEnabled}|${intervalSec}|${durationSec}`;
       if (cycleKey !== lastCycleKey) {
         lastCycleKey = cycleKey;
-        if (autoCycleTimer) {
-          clearInterval(autoCycleTimer);
-          autoCycleTimer = null;
-        }
+        clearSocialTimers();
+
         if (isLiveActive && autoEnabled) {
-          triggerSocial(currentNet, cfg, durationSec);
-          autoCycleTimer = setInterval(() => {
-            currentNet = currentNet === "ig" ? "yt" : "ig";
+          const runStep = () => {
             triggerSocial(currentNet, cfg, durationSec);
-          }, intervalSec * 1000);
+            nextCycleTimer = setTimeout(() => {
+              currentNet = currentNet === "ig" ? "yt" : "ig";
+              runStep();
+            }, intervalSec * 1000);
+          };
+          runStep();
+        } else {
+          document.getElementById("socialBug").classList.remove("is-shown");
         }
       }
 
