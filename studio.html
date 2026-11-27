@@ -1,2397 +1,675 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Estudio — Studio TF 2.0</title>
-  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;1,700;1,800&family=Bebas+Neue&family=Chakra+Petch:wght@600;700&family=Oswald:wght@600;700&family=Rajdhani:wght@600;700&family=Russo+One&family=Teko:wght@600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/base.css">
-  <link rel="stylesheet" href="css/studio.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tiempo Fuera — Estudio · Competencias Especiales</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
-    .brand-link {
-      font-weight: 800;
-      letter-spacing: 1px;
-      cursor: pointer;
-      user-select: none;
-      white-space: nowrap;
+    :root {
+      --bg-app: #0c0e14;
+      --bg-panel: #141822;
+      --bg-card: #1b202d;
+      --bg-input: #10131b;
+      --accent: #e11d2e;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: rgba(255, 255, 255, 0.12);
+      --ok: #22c55e;
+      --gold: #facc15;
     }
-    .brand-link span { color: var(--accent); }
 
-    .zoom-bar {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
       background: var(--bg-app);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 2px 6px;
-      font-size: 0.72rem;
-      font-weight: 700;
-    }
-    .zoom-btn {
-      background: transparent;
-      color: var(--text);
-      border: none;
-      padding: 3px 7px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-weight: 800;
-    }
-    .zoom-btn:hover { background: var(--bg-elevated); color: var(--accent); }
-
-    /* Lienzo con scroll real sin descompaginar la interfaz */
-    #canvas-area {
-      position: relative;
-      overflow: auto;
-      display: flex;
-      align-items: flex-start;
-      justify-content: flex-start;
+      color: var(--text-main);
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
       padding: 16px;
-      background: #0b0d12;
-      min-height: 220px;
-    }
-    #stage-scroll-sizer {
-      position: relative;
-      margin: auto;
-      flex-shrink: 0;
-    }
-    #stage {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      user-select: none;
-      background:
-        radial-gradient(circle at 50% 45%, rgba(255,255,255,0.03), rgba(0,0,0,0.45)),
-        #11141c;
-      border: 1px solid rgba(255,255,255,0.14);
-      border-radius: 8px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.55);
-    }
-    .stage-virtual-1080 {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 1920px;
-      height: 1080px;
-      transform-origin: top left;
-      pointer-events: none;
-      z-index: 10;
-    }
-    .stage-item-pos {
-      position: absolute;
-      left: 14%;
-      top: 76%;
-      pointer-events: none;
-    }
-    .preview-mode-pill {
-      position: absolute;
-      top: 10px;
-      left: 12px;
-      z-index: 25;
-      background: rgba(15, 17, 23, 0.88);
-      border: 1px solid rgba(255, 255, 255, 0.22);
-      color: #fff;
-      font-size: 0.68rem;
-      font-weight: 800;
-      letter-spacing: 0.6px;
-      text-transform: uppercase;
-      padding: 3px 9px;
-      border-radius: 5px;
-      pointer-events: none;
-    }
-    .split-guide-line {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      left: 50%;
-      width: 1px;
-      border-left: 1px dashed rgba(227, 184, 87, 0.35);
-      pointer-events: none;
-      z-index: 8;
-      display: none;
     }
 
-    .base-three-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
-      gap: 12px;
-      margin-bottom: 14px;
+    .hidden {
+      display: none !important;
     }
-    .box-card {
-      background: var(--bg-app);
+
+    .studio-container {
+      max-width: 1320px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1.05fr;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--bg-panel);
       border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 12px;
+      border-radius: 12px;
+      padding: 16px;
       display: flex;
       flex-direction: column;
-      gap: 9px;
+      gap: 14px;
     }
-    .box-title {
-      font-size: 0.76rem;
-      text-transform: uppercase;
-      letter-spacing: 0.7px;
-      color: var(--accent);
-      font-weight: 800;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-      padding-bottom: 5px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .row-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-    .row-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(175px, 1fr)); gap: 10px; }
 
-    .s-field { display: flex; flex-direction: column; gap: 3px; }
-    .s-field label {
-      font-size: 0.7rem;
-      color: var(--muted);
-      font-weight: 600;
+    .panel-header {
       display: flex;
+      align-items: center;
       justify-content: space-between;
+      gap: 10px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 10px;
     }
-    .s-field label span.v { color: var(--text); font-variant-numeric: tabular-nums; }
-    .s-field input[type="text"],
-    .s-field input[type="email"],
-    .s-field input[type="number"],
-    .s-field select,
-    .s-field textarea {
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 6px 8px;
-      border-radius: 6px;
-      font-size: 0.78rem;
+
+    .panel-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 900;
+      font-size: 22px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .status-pill {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(34, 197, 94, 0.16);
+      color: #86efac;
+      text-transform: uppercase;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .field.full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    input, select, textarea {
       width: 100%;
-    }
-    .s-field textarea {
-      min-height: 50px;
-      resize: vertical;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 9px 11px;
+      color: var(--text-main);
       font-family: inherit;
+      font-size: 13px;
     }
-    .s-field input[type="color"] {
-      width: 100%;
-      height: 28px;
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background: var(--bg-card);
       border: 1px solid var(--border);
-      border-radius: 6px;
-      background: var(--bg-surface);
-      cursor: pointer;
-      padding: 2px;
+      border-radius: 9px;
+      padding: 10px 12px;
     }
-    .s-field input[type="range"] {
-      width: 100%;
+
+    .toggle-row span {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .toggle-row input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
       accent-color: var(--accent);
       cursor: pointer;
     }
-    .s-check {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      cursor: pointer;
-    }
-    .mini-file {
-      display: flex;
-      gap: 6px;
-      align-items: center;
-      background: var(--bg-surface);
-      border: 1px dashed var(--border);
-      padding: 5px;
-      border-radius: 6px;
-    }
-    .mini-file input[type="file"] { font-size: 0.68rem; color: var(--muted); width: 100%; }
 
-    .palette-box {
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 7px 9px;
-    }
-    .palette-swatches {
+    .actions-row {
       display: flex;
-      align-items: center;
-      gap: 6px;
-      margin-top: 6px;
       flex-wrap: wrap;
-    }
-    .swatch-btn {
-      width: 24px;
-      height: 24px;
-      border-radius: 5px;
-      border: 1.5px solid rgba(255,255,255,0.6);
-      cursor: pointer;
-    }
-    .swatch-btn:hover { transform: scale(1.1); border-color: #fff; }
-
-    .sp-subtabs {
-      display: flex;
       gap: 8px;
-      margin-bottom: 10px;
-      flex-wrap: wrap;
-      align-items: center;
     }
-    .sp-subtab {
-      background: var(--bg-app);
+
+    button {
       border: 1px solid var(--border);
-      color: var(--muted);
-      padding: 7px 14px;
-      border-radius: 7px;
-      font-size: 0.76rem;
-      font-weight: 800;
-      cursor: pointer;
+      background: var(--bg-card);
+      color: var(--text-main);
+      border-radius: 8px;
+      padding: 9px 14px;
+      font-size: 12px;
+      font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.04em;
+      cursor: pointer;
     }
-    .sp-subtab.is-active {
+
+    button:hover {
+      background: #242b3c;
+    }
+
+    button.primary {
       background: var(--accent);
       border-color: var(--accent);
-      color: #fff;
-    }
-    .sp-pane { display: none; }
-    .sp-pane.is-active { display: block; }
-    .sp-disabled-overlay {
-      opacity: 0.48;
-      pointer-events: none;
+      color: #ffffff;
     }
 
-    .sp-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.76rem;
-    }
-    .sp-table th {
-      text-align: left;
-      color: var(--accent);
-      border-bottom: 1px solid var(--border);
-      padding: 6px 6px;
-      font-size: 0.7rem;
-      text-transform: uppercase;
-    }
-    .sp-table td {
-      padding: 6px 6px;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-      vertical-align: middle;
-    }
-    .sp-tbl-logo {
-      width: 26px;
-      height: 26px;
-      object-fit: contain;
-      background: var(--bg-surface);
+    /* VISTA PREVIA DEL OVERLAY (MÁXIMO 720PX) */
+    .preview-stage {
+      background: repeating-conic-gradient(#171b26 0% 25%, #11151f 0% 50%) 50% / 24px 24px;
       border: 1px solid var(--border);
-      border-radius: 4px;
+      border-radius: 10px;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 360px;
+    }
+
+    .preview-box {
+      width: 100%;
+      max-width: 720px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .pv-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 8px 12px;
+      background: var(--pv-bg, rgba(14, 16, 22, 0.95));
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-left: 4px solid var(--pv-accent, #e11d2e);
+      border-radius: 9px;
+    }
+
+    .pv-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .pv-logo {
+      width: 34px;
+      height: 34px;
+      border-radius: 7px;
+      background: rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      flex-shrink: 0;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 900;
+      font-size: 14px;
+      color: var(--pv-accent, #e11d2e);
+    }
+
+    .pv-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
       padding: 2px;
-      display: block;
     }
-    .role-badge {
-      display: inline-block;
-      padding: 2px 7px;
-      border-radius: 4px;
-      font-size: 0.68rem;
+
+    .pv-title {
+      font-family: 'Barlow Condensed', sans-serif;
       font-weight: 800;
+      font-size: 18px;
       text-transform: uppercase;
-      background: rgba(255,255,255,0.08);
+      line-height: 1.05;
     }
-    .role-badge.admin { background: rgba(225,29,46,0.25); color: #ff7b86; border: 1px solid rgba(225,29,46,0.45); }
-    .role-badge.gestor { background: rgba(227,184,87,0.22); color: #f3ce73; border: 1px solid rgba(227,184,87,0.45); }
-    .role-badge.op_competencias { background: rgba(56,189,248,0.2); color: #7dd3fc; border: 1px solid rgba(56,189,248,0.4); }
-    .role-badge.op_marcador { background: rgba(74,222,128,0.2); color: #86efac; border: 1px solid rgba(74,222,128,0.4); }
+
+    .pv-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .pv-clock {
+      background: var(--pv-accent, #e11d2e);
+      color: #fff;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 900;
+      font-size: 22px;
+      padding: 4px 10px;
+      border-radius: 7px;
+    }
+
+    .pv-card {
+      background: var(--pv-bg, rgba(14, 16, 22, 0.95));
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 11px;
+      padding: 14px 16px;
+    }
+
+    .pv-idle {
+      display: grid;
+      grid-template-columns: 96px 1fr;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .pv-idle-logo {
+      width: 96px;
+      height: 82px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 900;
+      font-size: 20px;
+      color: var(--pv-accent, #e11d2e);
+    }
+
+    .pv-idle-logo img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    .pv-rules-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 800;
+      font-size: 22px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .pv-rules-body {
+      font-size: 12px;
+      line-height: 1.4;
+      color: var(--text-muted);
+      white-space: pre-line;
+    }
+
+    .pv-player {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .pv-first {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 900;
+      font-size: 32px;
+      line-height: 0.96;
+      text-transform: uppercase;
+    }
+
+    .pv-last {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 20px;
+      line-height: 1.05;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .pv-pts {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 900;
+      font-size: 42px;
+      line-height: 1;
+      color: var(--gold);
+    }
+
+    @media (max-width: 980px) {
+      .studio-container {
+        grid-template-columns: 1fr;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
 <body>
-  <div class="studio-shell">
-    <header class="studio-topbar">
-      <div class="brand-link" onclick="location.href='index.html'" title="Ir al menú principal">
-        STUDIO <span>TF 2.0</span>
+  <div class="studio-container">
+    <!-- CONFIGURACIÓN DE COMPETENCIAS ESPECIALES -->
+    <section class="panel">
+      <div class="panel-header">
+        <span class="panel-title">ESTUDIO · COMPETENCIAS ESPECIALES</span>
+        <span id="syncStatus" class="status-pill">SINCRONIZADO</span>
       </div>
 
-      <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
-        <span id="currentUserRoleBadge" class="role-badge admin" style="margin-right:4px;">ADMIN</span>
-        <span id="studio-status" style="font-size: 0.73rem; color: var(--muted); margin-right: 4px;">Listo</span>
-
-        <div class="zoom-bar">
-          <button type="button" class="zoom-btn" id="zoom-out" title="Alejar">−</button>
-          <span id="zoom-label" style="min-width: 42px; text-align: center;">FIT</span>
-          <button type="button" class="zoom-btn" id="zoom-in" title="Acercar">+</button>
-          <button type="button" class="zoom-btn" id="zoom-fit" title="Ajustar al recuadro">Ajustar</button>
+      <div class="form-grid">
+        <div class="field">
+          <label for="spDiscipline">Competencia</label>
+          <select id="spDiscipline">
+            <option value="triples">Concurso de Triples</option>
+            <option value="libres">Tiros Libres / Femicentro</option>
+          </select>
         </div>
 
-        <button id="grid-toggle" type="button" class="btn btn-ghost" style="padding: 5px 10px; font-size: 0.72rem;">Grilla: ON</button>
-        <button id="center-x-btn" type="button" class="btn btn-ghost" style="padding: 5px 10px; font-size: 0.72rem;">Centrar X</button>
-        <button id="save-publish-btn" type="button" class="btn" style="padding: 5px 12px; font-size: 0.72rem;">Guardar y Sincronizar</button>
-        <button type="button" class="btn btn-ghost" style="padding: 5px 10px; font-size: 0.72rem;" onclick="location.href='control.html'">Control</button>
+        <div class="field">
+          <label for="spModePreset">Modalidad / Formato</label>
+          <select id="spModePreset">
+            <option value="triples_timed">Triples Oficial (Con Reloj)</option>
+            <option value="triples_no_timer">Triples Sin Reloj</option>
+            <option value="femicentro">Femicentro (Sin Reloj)</option>
+            <option value="libres_timed">Tiros Libres (Con Reloj)</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="spTitle">Título en Overlay</label>
+          <input id="spTitle" type="text" value="CONCURSO DE TRIPLES" />
+        </div>
+
+        <div class="field">
+          <label for="spSubtitle">Subtítulo</label>
+          <input id="spSubtitle" type="text" value="COMPETENCIA ESPECIAL" />
+        </div>
+
+        <div class="field full">
+          <label for="spLogo">URL Logo del Torneo (vacío = hereda del marcador)</label>
+          <input id="spLogo" type="url" placeholder="https://.../logo-torneo.png" />
+        </div>
+
+        <div class="field">
+          <label for="spAccent">Color Acento (vacío = hereda del marcador)</label>
+          <input id="spAccent" type="color" value="#e11d2e" />
+        </div>
+
+        <div class="field">
+          <label for="spPreviewPlayer">Vista Previa (Jugador)</label>
+          <select id="spPreviewPlayer">
+            <option value="idle">Sin jugador (Logo + Reglas)</option>
+            <option value="sample">Con jugador (Nombre / Apellido)</option>
+          </select>
+        </div>
+
+        <div class="field full">
+          <label for="spRules">Reglas (mostradas cuando no hay jugador seleccionado)</label>
+          <textarea id="spRules" rows="3">5 carros de 5 balones en distintas zonas de la cancha.
+Balón normal = 1 pt · Balón dinero / especial = 2 pts.
+Selecciona un participante desde Control para iniciar.</textarea>
+        </div>
       </div>
-    </header>
 
-    <main id="canvas-area" class="canvas-area">
-      <div id="stage-scroll-sizer">
-        <div id="stage" class="stage-16x9">
-          <div id="stage-grid" class="stage-grid"></div>
-          <div id="splitGuideLine" class="split-guide-line" title="Guía 50% Pantalla Dividida"></div>
-          <div id="previewModePill" class="preview-mode-pill">Vista Previa: Marcador</div>
-          <div id="virtualStage" class="stage-virtual-1080">
-            <div id="previewBox" class="stage-item-pos" style="left: 14%; top: 76%;">
-              <div id="studioStagePreview"></div>
-            </div>
-          </div>
-        </div>
+      <div class="toggle-row">
+        <span>USAR CRONÓMETRO EN ESTA COMPETENCIA</span>
+        <input id="spUseTimer" type="checkbox" />
       </div>
-    </main>
 
-    <div id="dock-resizer" class="dock-resizer" title="Arrastra para ajustar el alto del panel"></div>
+      <div class="actions-row">
+        <button id="btnSyncNow" class="primary" type="button">SINCRONIZAR AHORA</button>
+      </div>
+    </section>
 
-    <section id="dock-panel" class="dock-panel">
-      <nav class="dock-tabs">
-        <button class="dock-tab is-active" data-target="marcadores">Marcadores</button>
-        <button class="dock-tab" id="tabEspecialesBtn" data-target="especiales">Competencias Especiales</button>
-        <button class="dock-tab" id="tabRolesBtn" data-target="roles">Roles y Operadores</button>
-        <button class="dock-tab" data-target="tercios">Tercios Inferiores</button>
-        <button class="dock-tab" data-target="sponsors">Logos de Sponsors</button>
-        <button class="dock-tab" data-target="auspiciadores">Logos de Auspiciadores</button>
-        <button class="dock-tab" data-target="cg">Control de CG (Scroll)</button>
-        <button class="dock-tab" data-target="equipos">Presentación de Equipos</button>
-        <button class="dock-tab" data-target="estadisticas">Estadísticas</button>
-      </nav>
+    <!-- VISTA PREVIA EN TIEMPO REAL (MÁX. 720PX) -->
+    <section class="panel">
+      <div class="panel-header">
+        <span class="panel-title">VISTA PREVIA OVERLAY (MÁX. 720PX)</span>
+        <span id="pvTimerTag" class="status-pill">SIN RELOJ</span>
+      </div>
 
-      <div class="dock-body">
-        <!-- ==================== PESTAÑA MARCADORES ==================== -->
-        <div id="pane-marcadores" class="tab-section is-active">
-          <div class="tab-head">
-            <h3>Marcadores Broadcast (Tiempo Fuera)</h3>
-            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-              <button id="swap-teams-btn" type="button" class="btn btn-ghost" style="padding: 5px 10px; font-size: 0.72rem;">⇄ Intercambiar Local/Visita</button>
-              <label class="enable-check"><input type="checkbox" class="mod-enable" data-mod="marcadores"> Habilitar en Control</label>
-            </div>
-          </div>
-
-          <div class="base-three-grid">
-            <div class="box-card">
-              <div class="box-title">1. Equipo Local</div>
-              <div class="s-field">
-                <label>Nombre / Sigla Local</label>
-                <input type="text" id="name1" value="LOCAL">
-              </div>
-              <div class="row-2">
-                <div class="s-field">
-                  <label>Color Fondo</label>
-                  <input type="color" id="bg1Color" value="#1c1e24">
-                </div>
-                <div class="s-field">
-                  <label>Color Texto</label>
-                  <input type="color" id="text1Color" value="#ffffff">
-                </div>
-              </div>
-              <div class="s-field">
-                <label>Logo Local</label>
-                <div class="mini-file">
-                  <input type="file" accept="image/*" data-img="logo1">
-                </div>
-              </div>
-            </div>
-
-            <div class="box-card">
-              <div class="box-title">2. Equipo Visita</div>
-              <div class="s-field">
-                <label>Nombre / Sigla Visita</label>
-                <input type="text" id="name2" value="VISITA">
-              </div>
-              <div class="row-2">
-                <div class="s-field">
-                  <label>Color Fondo</label>
-                  <input type="color" id="bg2Color" value="#1c1e24">
-                </div>
-                <div class="s-field">
-                  <label>Color Texto</label>
-                  <input type="color" id="text2Color" value="#ffffff">
-                </div>
-              </div>
-              <div class="s-field">
-                <label>Logo Visita</label>
-                <div class="mini-file">
-                  <input type="file" accept="image/*" data-img="logo2">
-                </div>
-              </div>
-            </div>
-
-            <div class="box-card">
-              <div class="box-title">3. Competencia / Etiqueta Superior</div>
-              <div class="s-field">
-                <label>Logo Competencia</label>
-                <div class="mini-file">
-                  <input type="file" accept="image/*" id="leagueLogoInput" data-img="logoLiga">
-                </div>
-              </div>
-
-              <div class="palette-box">
-                <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; flex-wrap:wrap;">
-                  <span style="font-size:0.68rem; color:var(--muted); font-weight:700;">Colores sugeridos del logo:</span>
-                  <select id="paletteTarget" style="width:auto; padding:2px 6px; font-size:0.7rem;">
-                    <option value="accentColor">Aplicar a: Acento/Borde</option>
-                    <option value="scoreTextColor">Aplicar a: Puntos</option>
-                    <option value="scoreBgColor">Aplicar a: Fondo Puntos</option>
-                    <option value="bg1Color">Aplicar a: Fondo Local</option>
-                    <option value="bg2Color">Aplicar a: Fondo Visita</option>
-                  </select>
-                </div>
-                <div id="league-palette" class="palette-swatches">
-                  <span style="font-size:0.7rem; color:var(--muted);">Sube un logo para detectar colores</span>
-                </div>
-              </div>
-
-              <div class="row-2">
-                <div class="s-field">
-                  <label class="s-check" style="margin-top:0;"><input type="checkbox" id="topBadgeEnabled"> Etiqueta Superior</label>
-                  <select id="topBadgeType">
-                    <option value="text">Modo: Texto</option>
-                    <option value="image">Modo: Imagen</option>
-                  </select>
-                </div>
-                <div class="s-field" id="topTextBox">
-                  <label>Texto Etiqueta</label>
-                  <input type="text" id="topTextValue" placeholder="GRAN FINAL">
-                </div>
-                <div class="s-field" id="topImageBox" style="display:none;">
-                  <label>Imagen Etiqueta</label>
-                  <div class="mini-file">
-                    <input type="file" accept="image/*" data-img="logoTop">
-                  </div>
-                </div>
-              </div>
-
-              <div class="s-field">
-                <label class="s-check" style="margin-top:0;"><input type="checkbox" id="socialAutoEnabled" checked> Auto-rotación RRSS (@tiempofuera_cl)</label>
-              </div>
-            </div>
-          </div>
-
-          <div class="box-card" style="margin-bottom: 14px;">
-            <div class="box-title">Personalización Avanzada (Posición X/Y 0–100%, Tamaños, Fuente y Colores)</div>
-
-            <div class="row-4">
-              <div class="s-field">
-                <label>Posición Horizontal X <span class="v" id="v_posX">14.0%</span></label>
-                <input type="range" id="posX" min="0" max="100" step="0.5" value="14">
-              </div>
-              <div class="s-field">
-                <label>Posición Vertical Y <span class="v" id="v_posY">76.0%</span></label>
-                <input type="range" id="posY" min="0" max="100" step="0.5" value="76">
-              </div>
-              <div class="s-field">
-                <label>Escala Marcador <span class="v" id="v_boardScale">1.00x</span></label>
-                <input type="range" id="boardScale" min="0.65" max="1.65" step="0.05" value="1.0">
-              </div>
-              <div class="s-field">
-                <label>Fuente Tipográfica</label>
-                <select id="fontFamily">
-                  <option value="'Barlow Condensed', sans-serif">Barlow Condensed</option>
-                  <option value="'Bebas Neue', sans-serif">Bebas Neue</option>
-                  <option value="'Oswald', sans-serif">Oswald</option>
-                  <option value="'Teko', sans-serif">Teko</option>
-                  <option value="'Rajdhani', sans-serif">Rajdhani</option>
-                  <option value="'Chakra Petch', sans-serif">Chakra Petch</option>
-                  <option value="'Russo One', sans-serif">Russo One</option>
-                  <option value="'Anton', sans-serif">Anton</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="row-4">
-              <div class="s-field">
-                <label>Altura Etiqueta Sup. <span class="v" id="v_topBadgeOffsetY">-24px</span></label>
-                <input type="range" id="topBadgeOffsetY" min="-55" max="10" value="-24">
-              </div>
-              <div class="s-field">
-                <label>Tamaño Texto Etiqueta <span class="v" id="v_topBadgeFontSize">16px</span></label>
-                <input type="range" id="topBadgeFontSize" min="11" max="26" value="16">
-              </div>
-              <div class="s-field">
-                <label>Tamaño Imagen Etiqueta <span class="v" id="v_topBadgeMaxSize">36px</span></label>
-                <input type="range" id="topBadgeMaxSize" min="16" max="56" value="36">
-              </div>
-              <div class="s-field">
-                <label>Tamaño Logo Liga <span class="v" id="v_ligaSize">92px</span></label>
-                <input type="range" id="ligaSize" min="60" max="150" value="92">
-              </div>
-            </div>
-
-            <div class="row-4">
-              <div class="s-field">
-                <label>Tamaño Escudos <span class="v" id="v_teamLogoSize">44px</span></label>
-                <input type="range" id="teamLogoSize" min="28" max="62" value="44">
-              </div>
-              <div class="s-field">
-                <label>Texto Equipos <span class="v" id="v_teamFontSize">25px</span></label>
-                <input type="range" id="teamFontSize" min="16" max="36" value="25">
-              </div>
-              <div class="s-field">
-                <label>Tamaño Puntos <span class="v" id="v_scoreBoxSize">48px</span></label>
-                <input type="range" id="scoreBoxSize" min="34" max="68" value="48">
-              </div>
-              <div class="s-field">
-                <label>Tamaño Reloj <span class="v" id="v_clockFontSize">32px</span></label>
-                <input type="range" id="clockFontSize" min="22" max="44" value="32">
-              </div>
-            </div>
-
-            <div class="row-4">
-              <div class="s-field">
-                <label>Posición / Frecuencia RRSS (s)</label>
-                <div class="row-2">
-                  <select id="socialPosition">
-                    <option value="top-left">Arriba Izq</option>
-                    <option value="top-right">Arriba Der</option>
-                  </select>
-                  <input type="number" id="socialIntervalSec" min="20" max="600" value="150">
-                </div>
-              </div>
-              <div class="s-field">
-                <label>Acento / Fondo Pts / Pts</label>
-                <div class="row-3">
-                  <input type="color" id="accentColor" value="#e3b857" title="Acento">
-                  <input type="color" id="scoreBgColor" value="#0c0d10" title="Fondo Puntos">
-                  <input type="color" id="scoreTextColor" value="#e3b857" title="Texto Puntos">
-                </div>
-              </div>
-              <div class="s-field">
-                <label>Fondo Reloj / Reloj / Cuarto</label>
-                <div class="row-3">
-                  <input type="color" id="clockBgColor" value="#141519" title="Fondo Reloj">
-                  <input type="color" id="clockTextColor" value="#ffffff" title="Texto Reloj">
-                  <input type="color" id="periodTextColor" value="#e3b857" title="Cuarto">
-                </div>
-              </div>
-              <div class="s-field">
-                <label>Falta Normal / Bonus (5ta)</label>
-                <div class="row-2">
-                  <input type="color" id="foulActiveColor" value="#ffe600" title="Falta Normal">
-                  <input type="color" id="foulBonusColor" value="#ff1744" title="Bonus 5ta">
-                </div>
-              </div>
-            </div>
-
-            <div class="row-4">
-              <div class="s-field">
-                <label>Reloj 24s + Colores</label>
-                <label class="s-check"><input type="checkbox" id="showShotClock" checked> Mostrar 24s</label>
-                <div class="row-2">
-                  <input type="color" id="shotBgColor" value="#141519" title="Fondo 24s">
-                  <input type="color" id="shotTextColor" value="#ff2a2a" title="Texto 24s">
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="box-card">
-            <div class="box-title">
-              <span>Origen de Datos por Campo</span>
-              <span style="font-size:0.68rem; color:var(--muted); text-transform:none;">Recomendado: Manual en Puntos</span>
-            </div>
-            <div class="row-4">
-              <div class="s-field">
-                <label>API Token (liveid) Flexyscore</label>
-                <input type="text" id="flexyLiveId" placeholder="Opcional si envías a Flexyscore">
-              </div>
-              <div class="s-field">
-                <label>Puntos Local (points_1)</label>
-                <select id="src_points_1">
-                  <option value="manual" selected>Manual (Control)</option>
-                  <option value="scoresight">ScoreSight</option>
-                  <option value="flexyscore">Flexyscore</option>
-                </select>
-              </div>
-              <div class="s-field">
-                <label>Puntos Visita (points_2)</label>
-                <select id="src_points_2">
-                  <option value="manual" selected>Manual (Control)</option>
-                  <option value="scoresight">ScoreSight</option>
-                  <option value="flexyscore">Flexyscore</option>
-                </select>
-              </div>
-              <div class="s-field">
-                <label>Reloj Partido (timer)</label>
-                <select id="src_timer">
-                  <option value="scoresight" selected>ScoreSight</option>
-                  <option value="manual">Manual (Control)</option>
-                  <option value="flexyscore">Flexyscore</option>
-                </select>
-              </div>
-            </div>
-            <div class="row-4">
-              <div class="s-field">
-                <label>Cuarto / Período (moment)</label>
-                <select id="src_period">
-                  <option value="scoresight" selected>ScoreSight</option>
-                  <option value="manual">Manual (Control)</option>
-                  <option value="flexyscore">Flexyscore</option>
-                </select>
-              </div>
-              <div class="s-field">
-                <label>Faltas Local (fouls_1)</label>
-                <select id="src_fouls_1">
-                  <option value="scoresight" selected>ScoreSight</option>
-                  <option value="manual">Manual (Control)</option>
-                  <option value="flexyscore">Flexyscore</option>
-                </select>
-              </div>
-              <div class="s-field">
-                <label>Faltas Visita (fouls_2)</label>
-                <select id="src_fouls_2">
-                  <option value="scoresight" selected>ScoreSight</option>
-                  <option value="manual">Manual (Control)</option>
-                  <option value="flexyscore">Flexyscore</option>
-                </select>
-              </div>
-              <div class="s-field">
-                <label>Reloj 24s (shotclock)</label>
-                <select id="src_shotclock">
-                  <option value="scoresight" selected>ScoreSight</option>
-                  <option value="manual">Manual (Control)</option>
-                  <option value="flexyscore">Flexyscore</option>
-                </select>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ==================== PESTAÑA COMPETENCIAS ESPECIALES ==================== -->
-        <div id="pane-especiales" class="tab-section">
-          <div class="tab-head">
-            <h3>Competencias Especiales (Escenas Independientes: live-triples.html / live-libres.html)</h3>
-            <label class="enable-check">
-              <input type="checkbox" class="mod-enable" id="modEspecialesCheck" data-mod="especiales">
-              <span>1. Habilitar Competencias Especiales en Control</span>
-            </label>
-          </div>
-
-          <div id="especialesConfigBody">
-            <div class="box-card" style="margin-bottom: 12px;">
-              <div class="box-title">
-                <span>2. Competencias Activas y Vista Previa en Lienzo (Máx. 50% ancho para pantalla dividida)</span>
-                <span style="font-size:0.68rem; color:var(--muted); text-transform:none;">Salidas OBS: live-triples.html y live-libres.html</span>
-              </div>
-              <div style="display:flex; gap:18px; align-items:center; flex-wrap:wrap; margin-bottom:8px;">
-                <label class="s-check">
-                  <input type="checkbox" id="spEnableTriples" checked>
-                  <span>Habilitar Concurso de Triples (live-triples.html)</span>
-                </label>
-                <label class="s-check">
-                  <input type="checkbox" id="spEnableLibres">
-                  <span>Habilitar Concurso de Tiros Libres (live-libres.html)</span>
-                </label>
-              </div>
-              <div class="sp-subtabs">
-                <button type="button" class="sp-subtab is-active" id="btnSubTriples" data-sp-tab="sp-pane-triples" data-sp-kind="triples">Configurar Concurso de Triples</button>
-                <button type="button" class="sp-subtab" id="btnSubLibres" data-sp-tab="sp-pane-libres" data-sp-kind="libres">Configurar Concurso de Tiros Libres</button>
-              </div>
-            </div>
-
-            <!-- Paso 3: Configuración Independiente — TRIPLES -->
-            <div id="sp-pane-triples" class="sp-pane is-active">
-              <div class="box-card" style="margin-bottom: 12px;">
-                <div class="box-title">
-                  <span>3. Categoría / Modalidad — Concurso de Triples</span>
-                  <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                    <button type="button" id="tr_inheritStyleBtn" class="btn btn-ghost" style="padding: 4px 10px; font-size: 0.7rem;">Copiar Colores Marcador Oficial</button>
-                    <button type="button" id="saveTriplesBtn" class="btn" style="padding: 4px 10px; font-size: 0.7rem;">Guardar Config. Triples</button>
-                  </div>
-                </div>
-
-                <div class="row-4">
-                  <div class="s-field">
-                    <label>Categoría / Modalidad de Triples</label>
-                    <select id="tr_modePreset">
-                      <option value="time_attack">Time Attack (1:00 Oficial + 0:30 Desempate)</option>
-                      <option value="femicentro">Femicentro (6 Triples — Sin Reloj)</option>
-                      <option value="personalizada">Personalizada</option>
-                    </select>
-                  </div>
-                  <div class="s-field">
-                    <label>Título del Torneo</label>
-                    <input type="text" id="tr_title" value="TORNEO TRIPLES CLAUSURA 2026">
-                  </div>
-                  <div class="s-field">
-                    <label>Instancia / Fase</label>
-                    <select id="tr_stage">
-                      <option value="GRUPO A">GRUPO A (Clasificatoria)</option>
-                      <option value="GRUPO B">GRUPO B (Clasificatoria)</option>
-                      <option value="GRUPO C">GRUPO C (Clasificatoria)</option>
-                      <option value="GRUPO D">GRUPO D (Clasificatoria)</option>
-                      <option value="SEMIFINAL 1">SEMIFINAL 1 (1° vs 4°)</option>
-                      <option value="SEMIFINAL 2">SEMIFINAL 2 (2° vs 3°)</option>
-                      <option value="GRAN FINAL">GRAN FINAL</option>
-                      <option value="DESEMPATE">DESEMPATE</option>
-                    </select>
-                  </div>
-                  <div class="s-field">
-                    <label>Categoría Jugadores</label>
-                    <input type="text" id="tr_categoryLabel" value="CATEGORÍA +35">
-                  </div>
-                </div>
-
-                <div class="row-4">
-                  <div class="s-field">
-                    <label>Posición Horizontal X <span class="v" id="v_tr_posX">3.0%</span></label>
-                    <input type="range" id="tr_posX" min="0" max="52" step="0.5" value="3">
-                  </div>
-                  <div class="s-field">
-                    <label>Posición Vertical Y <span class="v" id="v_tr_posY">78.0%</span></label>
-                    <input type="range" id="tr_posY" min="0" max="92" step="0.5" value="78">
-                  </div>
-                  <div class="s-field">
-                    <label>Escala Overlay (Máx. 50% pantalla) <span class="v" id="v_tr_scale">100%</span></label>
-                    <input type="range" id="tr_scale" min="65" max="100" value="100">
-                  </div>
-                  <div class="s-field">
-                    <label>Opacidad Fondo <span class="v" id="v_tr_bgAlpha">92%</span></label>
-                    <input type="range" id="tr_bgAlpha" min="50" max="100" value="92">
-                  </div>
-                </div>
-
-                <div class="row-4">
-                  <div class="s-field">
-                    <label class="s-check"><input type="checkbox" id="tr_useTimer" checked> Usar Cronómetro en Pantalla</label>
-                    <input type="number" id="tr_officialSec" min="0" max="300" value="60" title="Segundos ronda oficial">
-                  </div>
-                  <div class="s-field">
-                    <label>Tiempo Desempate (seg)</label>
-                    <input type="number" id="tr_tiebreakSec" min="0" max="180" value="30">
-                  </div>
-                  <div class="s-field">
-                    <label>Límite de Tiros (0 = ilimitado por tiempo)</label>
-                    <input type="number" id="tr_maxShots" min="0" max="50" value="0">
-                  </div>
-                  <div class="s-field">
-                    <label>Puntos Triple Normal</label>
-                    <input type="number" id="tr_ptsNormal" min="1" max="10" value="1">
-                  </div>
-                </div>
-
-                <div class="row-4">
-                  <div class="s-field">
-                    <label class="s-check"><input type="checkbox" id="tr_moneyEnabled" checked> Balón Especial (+Pts)</label>
-                    <input type="number" id="tr_ptsMoney" min="1" max="10" value="3">
-                  </div>
-                  <div class="s-field">
-                    <label class="s-check"><input type="checkbox" id="tr_halfEnabled" checked> Tiro Media Cancha (+Pts)</label>
-                    <input type="number" id="tr_ptsHalf" min="1" max="10" value="3">
-                  </div>
-                  <div class="s-field">
-                    <label>Puntaje a Superar (0 = Auto)</label>
-                    <input type="number" id="tr_targetOverride" min="0" value="0">
-                  </div>
-                  <div class="s-field">
-                    <label>Sombra Superior (Marca / Título)</label>
-                    <input type="text" id="tr_topShadowText" value="TIEMPO FUERA · TRANSMISIÓN OFICIAL">
-                  </div>
-                </div>
-
-                <div class="row-4">
-                  <div class="s-field">
-                    <label>Logo Competencia (Opcional, usa oficial si vacío)</label>
-                    <div class="mini-file">
-                      <input type="file" id="tr_compLogoIn" accept="image/*">
-                    </div>
-                  </div>
-                  <div class="s-field">
-                    <label>Tamaño Logo Comp. <span class="v" id="v_tr_compLogoSize">62px</span></label>
-                    <input type="range" id="tr_compLogoSize" min="36" max="90" value="62">
-                  </div>
-                  <div class="s-field">
-                    <label>Tamaño Escudo Jugador <span class="v" id="v_tr_teamLogoSize">48px</span></label>
-                    <input type="range" id="tr_teamLogoSize" min="30" max="72" value="48">
-                  </div>
-                  <div class="s-field">
-                    <label>Colores (Fondo / Acento / Puntos)</label>
-                    <div class="row-3">
-                      <input type="color" id="tr_colorBg" value="#14171f" title="Fondo">
-                      <input type="color" id="tr_colorAccent" value="#e3b857" title="Acento">
-                      <input type="color" id="tr_colorScore" value="#e3b857" title="Puntos">
-                    </div>
-                  </div>
-                </div>
-
-                <div class="s-field">
-                  <label>Reglas en Pantalla (Barra Semitransparente Debajo del Marcador)</label>
-                  <textarea id="tr_rulesText">Time Attack: 1 minuto oficial para convertir la mayor cantidad de triples. Balón especial y media cancha suman +3 pts. Empates se definen en 30 segundos.</textarea>
-                </div>
-              </div>
-
-              <div class="box-card">
-                <div class="box-title">
-                  <span>Participantes — Concurso de Triples (<span id="tr_count">0</span>)</span>
-                  <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                    <button type="button" id="tr_clearScoresBtn" class="btn btn-ghost" style="padding:4px 8px; font-size:0.68rem;">Limpiar Puntajes</button>
-                    <button type="button" id="tr_clearAllBtn" class="btn btn-ghost" style="padding:4px 8px; font-size:0.68rem;">Vaciar Lista</button>
-                  </div>
-                </div>
-                <div class="row-4" style="margin-bottom:6px;">
-                  <div class="s-field">
-                    <label>Nombre Jugador</label>
-                    <input type="text" id="tr_newName" placeholder="Ej. Andrés Tapia">
-                  </div>
-                  <div class="s-field">
-                    <label>Equipo</label>
-                    <input type="text" id="tr_newTeam" placeholder="Ej. ARABE UNIDO">
-                  </div>
-                  <div class="s-field">
-                    <label>Categoría</label>
-                    <input type="text" id="tr_newCat" placeholder="+35 / +40 / Fem">
-                  </div>
-                  <div class="s-field">
-                    <label>Posición / Rol (Opcional)</label>
-                    <input type="text" id="tr_newPos" placeholder="Ej. Base / Alero">
-                  </div>
-                </div>
-                <div class="row-2" style="margin-bottom:8px; align-items:end;">
-                  <div class="s-field">
-                    <label>Escudo Equipo (Opcional)</label>
-                    <div class="mini-file">
-                      <input type="file" id="tr_newLogoIn" accept="image/*">
-                    </div>
-                  </div>
-                  <div>
-                    <button type="button" id="tr_addPlayerBtn" class="btn" style="padding:6px 14px; font-size:0.74rem;">+ Agregar Participante Triples</button>
-                  </div>
-                </div>
-                <input type="file" id="tr_rowLogoPicker" accept="image/*" style="display:none;">
-                <table class="sp-table">
-                  <thead>
-                    <tr>
-                      <th>Escudo</th>
-                      <th>Jugador</th>
-                      <th>Equipo</th>
-                      <th>Cat.</th>
-                      <th>Rol</th>
-                      <th>Mejor Pts</th>
-                      <th>Acción</th>
-                    </tr>
-                  </thead>
-                  <tbody id="tr_playersBody"></tbody>
-                </table>
-              </div>
-            </div>
-
-            <!-- Paso 4: Configuración Independiente — TIROS LIBRES -->
-            <div id="sp-pane-libres" class="sp-pane">
-              <div class="box-card" style="margin-bottom: 12px;">
-                <div class="box-title">
-                  <span>4. Categoría / Modalidad — Concurso de Tiros Libres</span>
-                  <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                    <button type="button" id="ft_inheritStyleBtn" class="btn btn-ghost" style="padding: 4px 10px; font-size: 0.7rem;">Copiar Colores Marcador Oficial</button>
-                    <button type="button" id="saveLibresBtn" class="btn" style="padding: 4px 10px; font-size: 0.7rem;">Guardar Config. Tiros Libres</button>
-                  </div>
-                </div>
-
-                <div class="row-4">
-                  <div class="s-field">
-                    <label>Categoría / Modalidad de Tiros Libres</label>
-                    <select id="ft_modePreset">
-                      <option value="time_attack">Time Attack (1:00 Oficial + 0:30 Desempate)</option>
-                      <option value="femicentro">Femicentro (10 Tiros Libres — Sin Reloj)</option>
-                      <option value="personalizada">Personalizada</option>
-                    </select>
-                  </div>
-                  <div class="s-field">
-                    <label>Título del Torneo</label>
-                    <input type="text" id="ft_title" value="CONCURSO DE TIROS LIBRES 2026">
-                  </div>
-                  <div class="s-field">
-                    <label>Instancia / Fase</label>
-                    <select id="ft_stage">
-                      <option value="CLASIFICATORIA">CLASIFICATORIA</option>
-                      <option value="GRUPO A">GRUPO A</option>
-                      <option value="GRUPO B">GRUPO B</option>
-                      <option value="SEMIFINAL">SEMIFINAL</option>
-                      <option value="GRAN FINAL">GRAN FINAL</option>
-                      <option value="DESEMPATE">DESEMPATE</option>
-                    </select>
-                  </div>
-                  <div class="s-field">
-                    <label>Categoría Jugadores</label>
-                    <input type="text" id="ft_categoryLabel" value="TODO COMPETIDOR">
-                  </div>
-                </div>
-
-                <div class="row-4">
-                  <div class="s-field">
-                    <label>Posición Horizontal X <span class="v" id="v_ft_posX">50.0%</span></label>
-                    <input type="range" id="ft_posX" min="0" max="52" step="0.5" value="50">
-                  </div>
-                  <div class="s-field">
-                    <label>Posición Vertical Y <span class="v" id="v_ft_posY">78.0%</span></label>
-                    <input type="range" id="ft_posY" min="0" max="92" step="0.5" value="78">
-                  </div>
-                  <div class="s-field">
-                    <label>Escala Overlay (Máx. 50% pantalla) <span class="v" id="v_ft_scale">100%</span></label>
-                    <input type="range" id="ft_scale" min="65" max="100" value="100">
-                  </div>
-                  <div class="s-field">
-                    <label>Opacidad Fondo <span class="v" id="v_ft_bgAlpha">92%</span></label>
-                    <input type="range" id="ft_bgAlpha" min="50" max="100" value="92">
-                  </div>
-                </div>
-
-                <div class="row-4">
-                  <div class="s-field">
-                    <label class="s-check"><input type="checkbox" id="ft_useTimer" checked> Usar Cronómetro en Pantalla</label>
-                    <input type="number" id="ft_officialSec" min="0" max="300" value="60">
-                  </div>
-                  <div class="s-field">
-                    <label>Tiempo Desempate (seg)</label>
-                    <input type="number" id="ft_tiebreakSec" min="0" max="180" value="30">
-                  </div>
-                  <div class="s-field">
-                    <label>Cantidad de Tiros (0 = ilimitado por tiempo)</label>
-                    <input type="number" id="ft_maxShots" min="0" max="50" value="0">
-                  </div>
-                  <div class="s-field">
-                    <label>Puntos por Acierto</label>
-                    <input type="number" id="ft_ptsNormal" min="1" max="10" value="1">
-                  </div>
-                </div>
-
-                <div class="row-4">
-                  <div class="s-field">
-                    <label class="s-check"><input type="checkbox" id="ft_moneyEnabled"> Balón Especial (+Pts)</label>
-                    <input type="number" id="ft_ptsMoney" min="1" max="10" value="2">
-                  </div>
-                  <div class="s-field">
-                    <label class="s-check"><input type="checkbox" id="ft_halfEnabled"> Tiro Bonus Extra (+Pts)</label>
-                    <input type="number" id="ft_ptsHalf" min="1" max="10" value="3">
-                  </div>
-                  <div class="s-field">
-                    <label>Puntaje a Superar (0 = Auto)</label>
-                    <input type="number" id="ft_targetOverride" min="0" value="0">
-                  </div>
-                  <div class="s-field">
-                    <label>Sombra Superior (Marca / Título)</label>
-                    <input type="text" id="ft_topShadowText" value="TIEMPO FUERA · TRANSMISIÓN OFICIAL">
-                  </div>
-                </div>
-
-                <div class="row-4">
-                  <div class="s-field">
-                    <label>Logo Competencia (Opcional, usa oficial si vacío)</label>
-                    <div class="mini-file">
-                      <input type="file" id="ft_compLogoIn" accept="image/*">
-                    </div>
-                  </div>
-                  <div class="s-field">
-                    <label>Tamaño Logo Comp. <span class="v" id="v_ft_compLogoSize">62px</span></label>
-                    <input type="range" id="ft_compLogoSize" min="36" max="90" value="62">
-                  </div>
-                  <div class="s-field">
-                    <label>Tamaño Escudo Jugador <span class="v" id="v_ft_teamLogoSize">48px</span></label>
-                    <input type="range" id="ft_teamLogoSize" min="30" max="72" value="48">
-                  </div>
-                  <div class="s-field">
-                    <label>Colores (Fondo / Acento / Puntos)</label>
-                    <div class="row-3">
-                      <input type="color" id="ft_colorBg" value="#14171f" title="Fondo">
-                      <input type="color" id="ft_colorAccent" value="#e3b857" title="Acento">
-                      <input type="color" id="ft_colorScore" value="#e3b857" title="Puntos">
-                    </div>
-                  </div>
-                </div>
-
-                <div class="s-field">
-                  <label>Reglas en Pantalla (Barra Semitransparente Debajo del Marcador)</label>
-                  <textarea id="ft_rulesText">Time Attack: 1 minuto para encestar la mayor cantidad de tiros libres desde la línea. Empates se definen en 30 segundos.</textarea>
-                </div>
-              </div>
-
-              <div class="box-card">
-                <div class="box-title">
-                  <span>Participantes — Concurso de Tiros Libres (<span id="ft_count">0</span>)</span>
-                  <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                    <button type="button" id="ft_clearScoresBtn" class="btn btn-ghost" style="padding:4px 8px; font-size:0.68rem;">Limpiar Puntajes</button>
-                    <button type="button" id="ft_clearAllBtn" class="btn btn-ghost" style="padding:4px 8px; font-size:0.68rem;">Vaciar Lista</button>
-                  </div>
-                </div>
-                <div class="row-4" style="margin-bottom:6px;">
-                  <div class="s-field">
-                    <label>Nombre Jugador</label>
-                    <input type="text" id="ft_newName" placeholder="Ej. Jugador(a)">
-                  </div>
-                  <div class="s-field">
-                    <label>Equipo</label>
-                    <input type="text" id="ft_newTeam" placeholder="Ej. CLUB">
-                  </div>
-                  <div class="s-field">
-                    <label>Categoría</label>
-                    <input type="text" id="ft_newCat" placeholder="Femicentro / Libre">
-                  </div>
-                  <div class="s-field">
-                    <label>Posición / Rol (Opcional)</label>
-                    <input type="text" id="ft_newPos" placeholder="Ej. Escolta">
-                  </div>
-                </div>
-                <div class="row-2" style="margin-bottom:8px; align-items:end;">
-                  <div class="s-field">
-                    <label>Escudo Equipo (Opcional)</label>
-                    <div class="mini-file">
-                      <input type="file" id="ft_newLogoIn" accept="image/*">
-                    </div>
-                  </div>
-                  <div>
-                    <button type="button" id="ft_addPlayerBtn" class="btn" style="padding:6px 14px; font-size:0.74rem;">+ Agregar Participante Tiros Libres</button>
-                  </div>
-                </div>
-                <input type="file" id="ft_rowLogoPicker" accept="image/*" style="display:none;">
-                <table class="sp-table">
-                  <thead>
-                    <tr>
-                      <th>Escudo</th>
-                      <th>Jugador</th>
-                      <th>Equipo</th>
-                      <th>Cat.</th>
-                      <th>Rol</th>
-                      <th>Mejor Pts</th>
-                      <th>Acción</th>
-                    </tr>
-                  </thead>
-                  <tbody id="ft_playersBody"></tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ==================== PESTAÑA ROLES Y OPERADORES ==================== -->
-        <div id="pane-roles" class="tab-section">
-          <div class="tab-head">
-            <h3>Control Dual, Roles por Correo y Bloqueo de Competencias</h3>
-            <span style="font-size:0.72rem; color:var(--muted);">Admin opera todo · Operadores toman y bloquean 1 competencia a la vez</span>
-          </div>
-
-          <div class="box-card" style="margin-bottom:12px;">
-            <div class="box-title">Asignar Rol a Correo Electrónico</div>
-            <div class="row-4" style="align-items:end;">
-              <div class="s-field">
-                <label>Correo del Usuario</label>
-                <input type="email" id="roleEmailInput" placeholder="operador@tiempofuera.cl">
-              </div>
-              <div class="s-field">
-                <label>Rol en la Plataforma</label>
-                <select id="roleSelectInput">
-                  <option value="op_competencias">Operador de Competencias</option>
-                  <option value="op_marcador">Operador de Marcador</option>
-                  <option value="gestor">Gestor de Competencia (Edita Estudio)</option>
-                  <option value="admin">Administrador (Control Total)</option>
-                </select>
-              </div>
-              <div class="s-field">
-                <label>Competencia Asignada (Operador Comp.)</label>
-                <select id="roleScopeInput">
-                  <option value="ambas">Cualquiera Disponible (Triples o Tiros Libres)</option>
-                  <option value="triples">Solo Concurso de Triples</option>
-                  <option value="libres">Solo Concurso de Tiros Libres</option>
-                </select>
-              </div>
+      <div class="preview-stage">
+        <div id="previewBox" class="preview-box">
+          <div class="pv-top">
+            <div class="pv-brand">
+              <div id="pvTopLogo" class="pv-logo">TF</div>
               <div>
-                <button type="button" id="addRoleBtn" class="btn" style="padding:7px 14px; font-size:0.74rem; width:100%;">Guardar / Vincular Correo</button>
+                <div id="pvTitle" class="pv-title">CONCURSO DE TRIPLES</div>
+                <div id="pvSubtitle" class="pv-sub">COMPETENCIA ESPECIAL</div>
               </div>
             </div>
+            <div id="pvClock" class="pv-clock hidden">01:00</div>
           </div>
 
-          <div class="box-card" style="margin-bottom:12px;">
-            <div class="box-title">
-              <span>Usuarios y Roles Vinculados</span>
+          <div id="pvIdleCard" class="pv-card pv-idle">
+            <div id="pvIdleLogo" class="pv-idle-logo">TORNEO</div>
+            <div>
+              <div class="pv-rules-title">REGLAS DEL CONCURSO</div>
+              <div id="pvRules" class="pv-rules-body"></div>
             </div>
-            <table class="sp-table">
-              <thead>
-                <tr>
-                  <th>Correo</th>
-                  <th>Rol</th>
-                  <th>Asignación</th>
-                  <th>Acción</th>
-                </tr>
-              </thead>
-              <tbody id="rolesTableBody"></tbody>
-            </table>
           </div>
 
-          <div class="box-card">
-            <div class="box-title">
-              <span>Estado de Bloqueos Activos en Control Dual</span>
-              <button type="button" id="releaseAllLocksBtn" class="btn btn-ghost" style="padding:4px 10px; font-size:0.7rem;">Liberar Todos los Bloqueos</button>
+          <div id="pvPlayerCard" class="pv-card pv-player hidden">
+            <div>
+              <div class="pv-first">CAMILA</div>
+              <div class="pv-last">ROJAS</div>
             </div>
-            <div id="activeLocksStatus" style="font-size:0.76rem; color:var(--muted);">Sin bloqueos activos en este momento.</div>
+            <div class="pv-pts">14</div>
           </div>
         </div>
-
-        <div id="pane-tercios" class="tab-section"><div class="tab-head"><h3>Tercios Inferiores</h3><label class="enable-check"><input type="checkbox" class="mod-enable" data-mod="tercios"> Habilitar en Control</label></div></div>
-        <div id="pane-sponsors" class="tab-section"><div class="tab-head"><h3>Logos de Sponsors</h3><label class="enable-check"><input type="checkbox" class="mod-enable" data-mod="sponsors"> Habilitar en Control</label></div></div>
-        <div id="pane-auspiciadores" class="tab-section"><div class="tab-head"><h3>Logos de Auspiciadores</h3><label class="enable-check"><input type="checkbox" class="mod-enable" data-mod="auspiciadores"> Habilitar en Control</label></div></div>
-        <div id="pane-cg" class="tab-section"><div class="tab-head"><h3>Control de CG (Scroll)</h3><label class="enable-check"><input type="checkbox" class="mod-enable" data-mod="cg"> Habilitar en Control</label></div></div>
-        <div id="pane-equipos" class="tab-section"><div class="tab-head"><h3>Presentación de Equipos</h3><label class="enable-check"><input type="checkbox" class="mod-enable" data-mod="equipos"> Habilitar en Control</label></div></div>
-        <div id="pane-estadisticas" class="tab-section"><div class="tab-head"><h3>Estadísticas</h3><label class="enable-check"><input type="checkbox" class="mod-enable" data-mod="estadisticas"> Habilitar en Control</label></div></div>
       </div>
     </section>
   </div>
 
-  <script type="module">
-    import { db, DB_PATH, ref, update, get, onValue, requireSession } from "./js/firebase.js";
+  <!-- Firebase Compat (opcional si existe configuración global o ?dbUrl=) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
-    const SOURCE_FIELDS = ["points_1", "points_2", "timer", "period", "fouls_1", "fouls_2", "shotclock"];
-    const imgs = { logoLiga: "", logo1: "", logo2: "", logoTop: "" };
-    const statusEl = document.getElementById("studio-status");
-    const canvasArea = document.getElementById("canvas-area");
-    const stageSizer = document.getElementById("stage-scroll-sizer");
-    const stageEl = document.getElementById("stage");
-    const virtualStage = document.getElementById("virtualStage");
-    const previewBox = document.getElementById("previewBox");
-    const previewMount = document.getElementById("studioStagePreview");
-    const modePill = document.getElementById("previewModePill");
-    const splitGuideLine = document.getElementById("splitGuideLine");
-    const zoomLabel = document.getElementById("zoom-label");
-
-    let zoomMode = "fit";
-    let activeDockTab = "marcadores";
-    let activeSpecialKind = "triples";
-    let currentUserEmail = "";
-    let currentUserRole = "admin";
-    let rolesMap = {};
-
-    const TRIPLES_PRESETS = {
-      time_attack: {
-        title: "TORNEO TRIPLES CLAUSURA 2026",
-        useTimer: true,
-        officialSec: 60,
-        tiebreakSec: 30,
-        maxShots: 0,
-        ptsNormal: 1,
-        moneyEnabled: true,
-        ptsMoney: 3,
-        halfEnabled: true,
-        ptsHalf: 3,
-        rulesText: "Time Attack: 1 minuto oficial para convertir la mayor cantidad de triples. Balón especial y media cancha suman +3 pts. Empates se definen en 30 segundos."
-      },
-      femicentro: {
-        title: "CONCURSO DE TRIPLES — FEMICENTRO",
-        useTimer: false,
-        officialSec: 0,
-        tiebreakSec: 0,
-        maxShots: 6,
-        ptsNormal: 1,
-        moneyEnabled: false,
-        ptsMoney: 3,
-        halfEnabled: false,
-        ptsHalf: 3,
-        rulesText: "Modalidad Femicentro: 6 lanzamientos de triple por participante. Gana quien convierta la mayor cantidad de aciertos."
-      }
-    };
-
-    const LIBRES_PRESETS = {
-      time_attack: {
-        title: "TIROS LIBRES — TIME ATTACK",
-        useTimer: true,
-        officialSec: 60,
-        tiebreakSec: 30,
-        maxShots: 0,
-        ptsNormal: 1,
-        moneyEnabled: false,
-        ptsMoney: 2,
-        halfEnabled: false,
-        ptsHalf: 3,
-        rulesText: "Time Attack: 1 minuto para encestar la mayor cantidad de tiros libres desde la línea. Empates se definen en 30 segundos."
-      },
-      femicentro: {
-        title: "TIROS LIBRES — FEMICENTRO",
-        useTimer: false,
-        officialSec: 0,
-        tiebreakSec: 0,
-        maxShots: 10,
-        ptsNormal: 1,
-        moneyEnabled: false,
-        ptsMoney: 2,
-        halfEnabled: false,
-        ptsHalf: 3,
-        rulesText: "Modalidad Femicentro: 10 lanzamientos desde la línea de tiros libres. Gana quien convierta la mayor cantidad de aciertos."
-      }
-    };
-
-    let especialesState = {
-      enabledTriples: true,
-      enabledLibres: false,
-      triples: {
-        modePreset: "time_attack",
-        title: "TORNEO TRIPLES CLAUSURA 2026",
-        stage: "GRUPO A",
-        categoryLabel: "CATEGORÍA +35",
-        topShadowText: "TIEMPO FUERA · TRANSMISIÓN OFICIAL",
-        posX: 3.0,
-        posY: 78.0,
-        useTimer: true,
-        officialSec: 60,
-        tiebreakSec: 30,
-        maxShots: 0,
-        ptsNormal: 1,
-        moneyEnabled: true,
-        ptsMoney: 3,
-        halfEnabled: true,
-        ptsHalf: 3,
-        targetOverride: 0,
-        compLogo: "",
-        compLogoSize: 62,
-        teamLogoSize: 48,
-        bgAlpha: 92,
-        scale: 100,
-        colorBg: "#14171f",
-        colorAccent: "#e3b857",
-        colorScore: "#e3b857",
-        rulesText: TRIPLES_PRESETS.time_attack.rulesText,
-        teamLogos: {},
-        players: []
-      },
-      libres: {
-        modePreset: "time_attack",
-        title: "CONCURSO DE TIROS LIBRES 2026",
-        stage: "CLASIFICATORIA",
-        categoryLabel: "TODO COMPETIDOR",
-        topShadowText: "TIEMPO FUERA · TRANSMISIÓN OFICIAL",
-        posX: 50.0,
-        posY: 78.0,
-        useTimer: true,
-        officialSec: 60,
-        tiebreakSec: 30,
-        maxShots: 0,
-        ptsNormal: 1,
-        moneyEnabled: false,
-        ptsMoney: 2,
-        halfEnabled: false,
-        ptsHalf: 3,
-        targetOverride: 0,
-        compLogo: "",
-        compLogoSize: 62,
-        teamLogoSize: 48,
-        bgAlpha: 92,
-        scale: 100,
-        colorBg: "#14171f",
-        colorAccent: "#e3b857",
-        colorScore: "#e3b857",
-        rulesText: LIBRES_PRESETS.time_attack.rulesText,
-        teamLogos: {},
-        players: []
-      }
-    };
-
-    function sanitizeEmailKey(email) {
-      return (email || "").trim().toLowerCase().replace(/\./g, "_");
-    }
-
-    function hexToRgba(hex, alphaPct = 92) {
-      let h = (hex || "#14171f").replace("#", "");
-      if (h.length === 3) h = h.split("").map((c) => c + c).join("");
-      const r = parseInt(h.substring(0, 2), 16) || 20;
-      const g = parseInt(h.substring(2, 4), 16) || 23;
-      const b = parseInt(h.substring(4, 6), 16) || 31;
-      const a = Math.max(0, Math.min(1, (parseInt(alphaPct, 10) || 92) / 100));
-      return `rgba(${r}, ${g}, ${b}, ${a})`;
-    }
-
-    function lum(hex) {
-      hex = (hex || "#1c1e24").replace("#", "");
-      if (hex.length === 3) hex = hex.split("").map((c) => c + c).join("");
-      const r = parseInt(hex.substring(0, 2), 16) || 0;
-      const g = parseInt(hex.substring(2, 4), 16) || 0;
-      const b = parseInt(hex.substring(4, 6), 16) || 0;
-      return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-    }
-
-    function shade(hex, pct) {
-      hex = (hex || "#1c1e24").replace("#", "");
-      let r = parseInt(hex.substring(0, 2), 16) || 0;
-      let g = parseInt(hex.substring(2, 4), 16) || 0;
-      let b = parseInt(hex.substring(4, 6), 16) || 0;
-      if (pct >= 0) {
-        r = Math.min(255, Math.floor(r + (255 - r) * pct));
-        g = Math.min(255, Math.floor(g + (255 - g) * pct));
-        b = Math.min(255, Math.floor(b + (255 - b) * pct));
-      } else {
-        const f = 1 + pct;
-        r = Math.max(0, Math.floor(r * f));
-        g = Math.max(0, Math.floor(g * f));
-        b = Math.max(0, Math.floor(b * f));
-      }
-      return "#" + [r, g, b].map((x) => x.toString(16).padStart(2, "0")).join("");
-    }
-
-    function formatClockTenth(sec) {
-      const s = Math.max(0, Number(sec) || 0);
-      const m = Math.floor(s / 60);
-      const r = (s % 60).toFixed(1).padStart(4, "0");
-      return `${m}:${r}`;
-    }
-
-    function syncTopBadgeInputs() {
-      const mode = document.getElementById("topBadgeType").value;
-      document.getElementById("topTextBox").style.display = mode === "text" ? "flex" : "none";
-      document.getElementById("topImageBox").style.display = mode === "image" ? "flex" : "none";
-    }
-    document.getElementById("topBadgeType").addEventListener("change", syncTopBadgeInputs);
-
-    /* Zoom limpio con barras de desplazamiento sin desarmar el layout */
-    function applyStageFit() {
-      const pad = 32;
-      const availW = Math.max(260, canvasArea.clientWidth - pad);
-      const availH = Math.max(150, canvasArea.clientHeight - pad);
-
-      let fitW = availW;
-      let fitH = Math.round((fitW * 9) / 16);
-      if (fitH > availH) {
-        fitH = availH;
-        fitW = Math.round((fitH * 16) / 9);
-      }
-
-      let w = fitW;
-      let h = fitH;
-      if (zoomMode !== "fit") {
-        w = Math.round(1920 * zoomMode);
-        h = Math.round(1080 * zoomMode);
-        zoomLabel.textContent = `${Math.round(zoomMode * 100)}%`;
-      } else {
-        zoomLabel.textContent = "FIT";
-      }
-
-      stageSizer.style.width = `${w}px`;
-      stageSizer.style.height = `${h}px`;
-
-      const vScale = w / 1920;
-      virtualStage.style.transform = `scale(${vScale})`;
-
-      refreshActiveStagePreview();
-    }
-
-    document.getElementById("zoom-out").addEventListener("click", () => {
-      const currentRatio = zoomMode === "fit" ? (stageSizer.clientWidth / 1920) : zoomMode;
-      zoomMode = Number(Math.max(0.25, currentRatio - 0.15).toFixed(2));
-      applyStageFit();
-    });
-    document.getElementById("zoom-in").addEventListener("click", () => {
-      const currentRatio = zoomMode === "fit" ? (stageSizer.clientWidth / 1920) : zoomMode;
-      zoomMode = Number(Math.min(1.5, currentRatio + 0.15).toFixed(2));
-      applyStageFit();
-    });
-    document.getElementById("zoom-fit").addEventListener("click", () => {
-      zoomMode = "fit";
-      applyStageFit();
-    });
-    window.addEventListener("resize", applyStageFit);
-
-    const resizer = document.getElementById("dock-resizer");
-    const dockPanel = document.getElementById("dock-panel");
-    let isResizing = false;
-
-    resizer.addEventListener("mousedown", (e) => {
-      e.preventDefault();
-      isResizing = true;
-    });
-    window.addEventListener("mousemove", (e) => {
-      if (!isResizing) return;
-      const totalH = window.innerHeight;
-      const newDockH = Math.max(170, Math.min(totalH - 180, totalH - e.clientY));
-      dockPanel.style.height = `${newDockH}px`;
-      applyStageFit();
-    });
-    window.addEventListener("mouseup", () => {
-      isResizing = false;
-    });
-
-    function extractStrongColors(imgEl) {
-      const c = document.createElement("canvas");
-      c.width = 48;
-      c.height = 48;
-      const ctx = c.getContext("2d");
-      ctx.drawImage(imgEl, 0, 0, 48, 48);
-      const { data } = ctx.getImageData(0, 0, 48, 48);
-      const buckets = new Map();
-
-      for (let i = 0; i < data.length; i += 4) {
-        const a = data[i + 3];
-        if (a < 140) continue;
-        const r = data[i];
-        const g = data[i + 1];
-        const b = data[i + 2];
-        const maxC = Math.max(r, g, b);
-        const minC = Math.min(r, g, b);
-        const sat = maxC === 0 ? 0 : (maxC - minC) / maxC;
-        if (sat < 0.22 && maxC > 220) continue;
-
-        const qr = Math.round(r / 32) * 32;
-        const qg = Math.round(g / 32) * 32;
-        const qb = Math.round(b / 32) * 32;
-        const hex = "#" + [
-          Math.min(255, qr),
-          Math.min(255, qg),
-          Math.min(255, qb)
-        ].map((x) => x.toString(16).padStart(2, "0")).join("");
-
-        buckets.set(hex, (buckets.get(hex) || 0) + (1 + sat * 2.5));
-      }
-
-      return [...buckets.entries()]
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 6)
-        .map(([hex]) => hex);
-    }
-
-    function renderPalette(colors) {
-      const wrap = document.getElementById("league-palette");
-      wrap.innerHTML = "";
-      if (!colors.length) {
-        wrap.innerHTML = `<span style="font-size:0.7rem; color:var(--muted);">Sin colores destacados</span>`;
-        return;
-      }
-      colors.forEach((hex) => {
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "swatch-btn";
-        btn.style.backgroundColor = hex;
-        btn.title = `Aplicar ${hex}`;
-        btn.addEventListener("click", async () => {
-          const targetId = document.getElementById("paletteTarget").value;
-          const targetInput = document.getElementById(targetId);
-          if (targetInput) {
-            targetInput.value = hex;
-            await saveConfig();
-          }
-        });
-        wrap.appendChild(btn);
-      });
-    }
-
-    function updateRangeLabels() {
-      const n = (id) => parseFloat(document.getElementById(id).value);
-      document.getElementById("v_posX").textContent = n("posX").toFixed(1) + "%";
-      document.getElementById("v_posY").textContent = n("posY").toFixed(1) + "%";
-      document.getElementById("v_topBadgeOffsetY").textContent = n("topBadgeOffsetY") + "px";
-      document.getElementById("v_topBadgeFontSize").textContent = n("topBadgeFontSize") + "px";
-      document.getElementById("v_topBadgeMaxSize").textContent = n("topBadgeMaxSize") + "px";
-      document.getElementById("v_boardScale").textContent = n("boardScale").toFixed(2) + "x";
-      document.getElementById("v_ligaSize").textContent = n("ligaSize") + "px";
-      document.getElementById("v_teamLogoSize").textContent = n("teamLogoSize") + "px";
-      document.getElementById("v_teamFontSize").textContent = n("teamFontSize") + "px";
-      document.getElementById("v_scoreBoxSize").textContent = n("scoreBoxSize") + "px";
-      document.getElementById("v_clockFontSize").textContent = n("clockFontSize") + "px";
-    }
-
-    function getSources() {
-      const map = {};
-      SOURCE_FIELDS.forEach((f) => {
-        const el = document.getElementById(`src_${f}`);
-        map[f] = el ? el.value : "manual";
-      });
-      return map;
-    }
-
-    function getSbConfig() {
-      updateRangeLabels();
-      return {
-        flexyBoardId: "20152",
-        flexyLiveId: document.getElementById("flexyLiveId").value.trim(),
-        sources: getSources(),
-        posX: parseFloat(document.getElementById("posX").value) ?? 14,
-        posY: parseFloat(document.getElementById("posY").value) ?? 76,
-        fontFamily: document.getElementById("fontFamily").value,
-        boardScale: parseFloat(document.getElementById("boardScale").value) || 1.0,
-        ligaSize: parseInt(document.getElementById("ligaSize").value, 10) || 92,
-        teamLogoSize: parseInt(document.getElementById("teamLogoSize").value, 10) || 44,
-        teamFontSize: parseInt(document.getElementById("teamFontSize").value, 10) || 25,
-        scoreBoxSize: parseInt(document.getElementById("scoreBoxSize").value, 10) || 48,
-        clockFontSize: parseInt(document.getElementById("clockFontSize").value, 10) || 32,
-        name1: (document.getElementById("name1").value || "LOCAL").trim(),
-        bg1Color: document.getElementById("bg1Color").value,
-        text1Color: document.getElementById("text1Color").value,
-        name2: (document.getElementById("name2").value || "VISITA").trim(),
-        bg2Color: document.getElementById("bg2Color").value,
-        text2Color: document.getElementById("text2Color").value,
-        accentColor: document.getElementById("accentColor").value,
-        scoreBgColor: document.getElementById("scoreBgColor").value,
-        scoreTextColor: document.getElementById("scoreTextColor").value,
-        clockBgColor: document.getElementById("clockBgColor").value,
-        clockTextColor: document.getElementById("clockTextColor").value,
-        periodTextColor: document.getElementById("periodTextColor").value,
-        foulActiveColor: document.getElementById("foulActiveColor").value,
-        foulBonusColor: document.getElementById("foulBonusColor").value,
-        showShotClock: document.getElementById("showShotClock").checked,
-        shotBgColor: document.getElementById("shotBgColor").value,
-        shotTextColor: document.getElementById("shotTextColor").value,
-        topBadgeEnabled: document.getElementById("topBadgeEnabled").checked,
-        topBadgeType: document.getElementById("topBadgeType").value,
-        topTextValue: document.getElementById("topTextValue").value.trim(),
-        topBadgeOffsetY: parseInt(document.getElementById("topBadgeOffsetY").value, 10) || -24,
-        topBadgeFontSize: parseInt(document.getElementById("topBadgeFontSize").value, 10) || 16,
-        topBadgeMaxSize: parseInt(document.getElementById("topBadgeMaxSize").value, 10) || 36,
-        socialAutoEnabled: document.getElementById("socialAutoEnabled").checked,
-        socialPosition: document.getElementById("socialPosition").value,
-        socialIntervalSec: Math.max(20, parseInt(document.getElementById("socialIntervalSec").value, 10) || 150),
-        logoLiga: imgs.logoLiga,
-        logo1: imgs.logo1,
-        logo2: imgs.logo2,
-        logoTop: imgs.logoTop
-      };
-    }
-
-    function buildTopBadgePreview(cfg) {
-      if (!cfg.topBadgeEnabled) return "";
-      const yOff = cfg.topBadgeOffsetY ?? -24;
-      if (cfg.topBadgeType === "image" && cfg.logoTop) {
-        const maxH = Math.max(12, Math.round((cfg.topBadgeMaxSize || 36) * 0.72));
-        return `<div style="position:absolute;top:${yOff}px;left:50%;transform:translateX(-50%);max-width:130px;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:5;">
-          <img src="${cfg.logoTop}" style="max-height:${maxH}px;max-width:126px;object-fit:contain;display:block;">
-        </div>`;
-      }
-      if (!cfg.topTextValue) return "";
-      const fSize = Math.max(10, Math.round((cfg.topBadgeFontSize || 16) * 0.82));
-      return `<div style="position:absolute;top:${yOff}px;left:50%;transform:translateX(-50%);max-width:135px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:${cfg.scoreBgColor};border:1.5px solid ${cfg.accentColor};border-radius:5px;padding:1px 9px;font-size:${fSize}px;font-weight:800;color:#fff;z-index:5;">${cfg.topTextValue}</div>`;
-    }
-
-    function renderScoreboardPreview(cfg) {
-      modePill.textContent = "Vista Previa: Marcador Oficial";
-      splitGuideLine.style.display = "none";
-      previewBox.style.left = `${cfg.posX ?? 14}%`;
-      previewBox.style.top = `${cfg.posY ?? 76}%`;
-
-      const s = cfg.boardScale * 1.15;
-      const stripe1 = lum(cfg.bg1Color) > 0.55 ? "rgba(0,0,0,0.085)" : "rgba(255,255,255,0.05)";
-      const stripe2 = lum(cfg.bg2Color) > 0.55 ? "rgba(0,0,0,0.085)" : "rgba(255,255,255,0.05)";
-
-      const foulsHtml = Array.from({ length: 5 }, (_, i) => {
-        const bg = i < 2 ? cfg.foulActiveColor : "rgba(0,0,0,0.35)";
-        const brd = i < 2 ? "1px solid #111" : "1px solid rgba(255,255,255,0.45)";
-        return `<span style="width:16px;height:4px;border-radius:2px;display:inline-block;background:${bg};border:${brd};"></span>`;
-      }).join("");
-
-      const topHtml = buildTopBadgePreview(cfg);
-      const shotHtml = cfg.showShotClock
-        ? `<div style="position:absolute;bottom:-14px;left:50%;transform:translateX(-50%);background:${cfg.shotBgColor};color:${cfg.shotTextColor};border:1.5px solid ${cfg.accentColor};border-radius:5px;font-size:15px;font-weight:800;padding:0 6px;">24</div>`
-        : "";
-
-      previewMount.innerHTML = `
-        <style>
-          .pv-wrap { transform: scale(${s}); transform-origin: top left; display: inline-flex; align-items: center; font-family: ${cfg.fontFamily}; }
-          .pv-wing { position: relative; display: flex; align-items: center; height: 56px; min-width: 175px; padding: 0 12px; gap: 8px; overflow: hidden; border-top: 1.5px solid ${cfg.accentColor}; border-bottom: 2px solid ${cfg.accentColor}; box-shadow: inset 0 1px 0 rgba(255,255,255,0.22); }
-          .pv-wing.l { background: linear-gradient(90deg, ${shade(cfg.bg1Color, -0.14)} 0%, ${cfg.bg1Color} 45%, ${shade(cfg.bg1Color, 0.2)} 100%); border-left: 1.5px solid ${cfg.accentColor}; border-radius: 9px 0 0 9px; }
-          .pv-wing.l::before { content: ''; position: absolute; inset: 0; background-image: repeating-linear-gradient(-45deg, ${stripe1} 0px, ${stripe1} 2px, transparent 2px, transparent 6px); pointer-events: none; }
-          .pv-wing.r { flex-direction: row-reverse; background: linear-gradient(270deg, ${shade(cfg.bg2Color, -0.14)} 0%, ${cfg.bg2Color} 45%, ${shade(cfg.bg2Color, 0.2)} 100%); border-radius: 0; }
-          .pv-wing.r::before { content: ''; position: absolute; inset: 0; background-image: repeating-linear-gradient(45deg, ${stripe2} 0px, ${stripe2} 2px, transparent 2px, transparent 6px); pointer-events: none; }
-          .pv-scores { position: relative; display: flex; align-items: center; height: 64px; padding: 0 12px; gap: 6px; background: linear-gradient(180deg, ${shade(cfg.scoreBgColor, 0.14)} 0%, ${cfg.scoreBgColor} 55%, ${shade(cfg.scoreBgColor, -0.18)} 100%); border: 2px solid ${cfg.accentColor}; border-radius: 8px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.22); z-index: 2; }
-          .pv-clock { display: flex; align-items: center; height: 56px; padding: 0 12px; gap: 8px; background: linear-gradient(180deg, ${shade(cfg.clockBgColor, 0.14)} 0%, ${cfg.clockBgColor} 55%, ${shade(cfg.clockBgColor, -0.16)} 100%); border: 1.5px solid ${cfg.accentColor}; border-radius: 0 9px 9px 0; box-shadow: inset 0 1px 0 rgba(255,255,255,0.2); }
-        </style>
-        <div class="pv-wrap">
-          ${cfg.logoLiga ? `<img src="${cfg.logoLiga}" style="height:${Math.round(cfg.ligaSize * 0.8)}px;margin-right:8px;object-fit:contain;">` : ""}
-          <div class="pv-wing l">
-            ${cfg.logo1 ? `<img src="${cfg.logo1}" style="height:${Math.round(cfg.teamLogoSize * 0.85)}px;width:${Math.round(cfg.teamLogoSize * 0.85)}px;object-fit:contain;position:relative;z-index:2;">` : ""}
-            <div style="display:flex;flex-direction:column;align-items:center;flex:1;position:relative;z-index:2;">
-              <span style="font-size:${cfg.teamFontSize}px;font-weight:800;color:${cfg.text1Color};line-height:1;">${cfg.name1}</span>
-              <div style="display:flex;gap:4px;margin-top:5px;">${foulsHtml}</div>
-            </div>
-          </div>
-          <div class="pv-scores">
-            ${topHtml}
-            <span style="font-size:${cfg.scoreBoxSize}px;font-weight:800;color:${cfg.scoreTextColor};line-height:0.95;">64</span>
-            <span style="font-size:${Math.round(cfg.scoreBoxSize * 0.6)}px;font-weight:800;color:${cfg.accentColor};">-</span>
-            <span style="font-size:${cfg.scoreBoxSize}px;font-weight:800;color:${cfg.scoreTextColor};line-height:0.95;">58</span>
-            ${shotHtml}
-          </div>
-          <div class="pv-wing r">
-            ${cfg.logo2 ? `<img src="${cfg.logo2}" style="height:${Math.round(cfg.teamLogoSize * 0.85)}px;width:${Math.round(cfg.teamLogoSize * 0.85)}px;object-fit:contain;position:relative;z-index:2;">` : ""}
-            <div style="display:flex;flex-direction:column;align-items:center;flex:1;position:relative;z-index:2;">
-              <span style="font-size:${cfg.teamFontSize}px;font-weight:800;color:${cfg.text2Color};line-height:1;">${cfg.name2}</span>
-              <div style="display:flex;gap:4px;margin-top:5px;">${foulsHtml}</div>
-            </div>
-          </div>
-          <div class="pv-clock">
-            <span style="font-size:${cfg.clockFontSize}px;font-weight:700;color:${cfg.clockTextColor};">04:32</span>
-            <span style="font-size:${Math.round(cfg.clockFontSize * 0.72)}px;font-weight:800;color:${cfg.periodTextColor};background:rgba(255,255,255,0.08);padding:3px 7px;border-radius:5px;border:1px solid rgba(255,255,255,0.2);">Q4</span>
-          </div>
-        </div>
-      `;
-    }
-
-    /* Vista previa de Competencias Especiales estilo Imagen 2 (máx. 50% de 1920px = 960px) */
-    function renderSpecialsStagePreview(kind = activeSpecialKind) {
-      readEspecialesFromForms();
-      const sbCfg = getSbConfig();
-      const cur = especialesState[kind] || {};
-      const labelKind = kind === "libres" ? "Concurso de Tiros Libres" : "Concurso de Triples";
-      modePill.textContent = `Vista Previa: ${labelKind} (Escena Independiente — Máx. 50% Pantalla)`;
-      splitGuideLine.style.display = "block";
-
-      previewBox.style.left = `${cur.posX ?? 3.0}%`;
-      previewBox.style.top = `${cur.posY ?? 78.0}%`;
-
-      const maxHalfScale = Math.min(1.0, (cur.scale ?? 100) / 100);
-      const bgBase = cur.colorBg || sbCfg.clockBgColor || "#14171f";
-      const bgRgba = hexToRgba(bgBase, cur.bgAlpha ?? 92);
-      const bgDark = hexToRgba(shade(bgBase, -0.22), Math.min(100, (cur.bgAlpha ?? 92) + 4));
-      const accent = cur.colorAccent || sbCfg.accentColor || "#e3b857";
-      const scoreColor = cur.colorScore || sbCfg.scoreTextColor || "#e3b857";
-      const fontFamily = sbCfg.fontFamily || "'Barlow Condensed', sans-serif";
-      const compLogo = cur.compLogo || sbCfg.logoLiga || "";
-
-      const samplePlayer = (cur.players && cur.players[0]) || {
-        name: "ANDRÉS TAPIA",
-        team: "ARABE UNIDO",
-        cat: cur.categoryLabel || "CATEGORÍA +35",
-        pos: "BASE",
-        bestScore: 0
-      };
-      const teamLogo = cur.teamLogos?.[samplePlayer.team] || sbCfg.logo1 || "";
-      const targetPts = cur.targetOverride > 0
-        ? cur.targetOverride
-        : Math.max(0, ...(cur.players || []).map((p) => Number(p.bestScore) || 0));
-
-      /* Iconos de lanzamientos: balón normal, X fallo, punto dorado especial, balón con halo dorado media cancha */
-      const ballNormal = `<span title="Convertido" style="width:18px;height:18px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ff9f43,#d35400 72%);border:1.5px solid #1a0d00;display:inline-flex;align-items:center;justify-content:center;font-size:10px;color:#1a0d00;font-weight:900;box-shadow:0 1px 3px rgba(0,0,0,0.5);">🏀</span>`;
-      const ballMiss = `<span title="Fallado" style="width:18px;height:18px;border-radius:50%;background:rgba(255,255,255,0.08);border:1.5px solid rgba(255,90,90,0.75);display:inline-flex;align-items:center;justify-content:center;font-size:11px;color:#ff5a5a;font-weight:900;">✕</span>`;
-      const ballSpecial = cur.moneyEnabled
-        ? `<span title="Balón Especial" style="width:19px;height:19px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff3a1,#e3b857 65%,#9c6f14);border:1.5px solid #fff;display:inline-flex;align-items:center;justify-content:center;font-size:10px;color:#111;font-weight:900;box-shadow:0 0 8px rgba(227,184,87,0.85);">${cur.ptsMoney || 3}</span>`
-        : "";
-      const ballHalf = cur.halfEnabled
-        ? `<span title="Media Cancha" style="width:20px;height:20px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ff9f43,#c0392b 75%);border:2px solid #ffe066;box-shadow:0 0 0 2px rgba(255,224,102,0.55),0 0 10px #ffd43b;display:inline-flex;align-items:center;justify-content:center;font-size:10px;color:#fff;font-weight:900;">${cur.ptsHalf || 3}</span>`
-        : "";
-
-      const timeBlockHtml = cur.useTimer
-        ? `<div style="padding:0 16px;border-left:1px solid rgba(255,255,255,0.12);display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:132px;">
-            <span style="font-size:12px;font-weight:800;letter-spacing:0.8px;color:rgba(255,255,255,0.72);">TIEMPO</span>
-            <span style="font-size:42px;font-weight:800;line-height:0.95;color:#ffffff;font-variant-numeric:tabular-nums;">${formatClockTenth(cur.officialSec || 60)}</span>
-          </div>`
-        : (cur.maxShots > 0
-            ? `<div style="padding:0 14px;border-left:1px solid rgba(255,255,255,0.12);display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:105px;">
-                <span style="font-size:12px;font-weight:800;letter-spacing:0.8px;color:rgba(255,255,255,0.72);">TIROS</span>
-                <span style="font-size:38px;font-weight:800;line-height:0.95;color:#ffffff;">0/${cur.maxShots}</span>
-              </div>`
-            : "");
-
-      const bonusBadgesHtml = (cur.moneyEnabled || cur.halfEnabled)
-        ? `<div style="padding:8px 14px;border-left:1px solid rgba(255,255,255,0.12);display:flex;flex-direction:column;gap:5px;justify-content:center;">
-            ${cur.moneyEnabled ? `<div style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.16);border-radius:6px;padding:3px 9px;font-size:12px;font-weight:800;color:rgba(255,255,255,0.85);white-space:nowrap;">
-              <span style="width:9px;height:9px;border-radius:50%;background:${accent};display:inline-block;"></span> BALÓN ESPECIAL (+${cur.ptsMoney || 3})
-            </div>` : ""}
-            ${cur.halfEnabled ? `<div style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.16);border-radius:6px;padding:3px 9px;font-size:12px;font-weight:800;color:rgba(255,255,255,0.85);white-space:nowrap;">
-              <span style="width:9px;height:9px;border-radius:50%;background:#ffd43b;box-shadow:0 0 6px #ffd43b;display:inline-block;"></span> MEDIA CANCHA (+${cur.ptsHalf || 3})
-            </div>` : ""}
-          </div>`
-        : "";
-
-      previewMount.innerHTML = `
-        <div style="transform:scale(${maxHalfScale});transform-origin:top left;width:930px;font-family:${fontFamily};display:flex;flex-direction:column;gap:5px;">
-          <!-- Sombra superior sutil -->
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:0 10px;">
-            <span style="font-size:13px;font-weight:800;letter-spacing:1.1px;color:rgba(255,255,255,0.75);text-shadow:0 2px 6px rgba(0,0,0,0.9);text-transform:uppercase;">
-              ${cur.topShadowText || "TIEMPO FUERA · TRANSMISIÓN OFICIAL"}
-            </span>
-          </div>
-
-          <!-- Marcador compacto horizontal (máx. 50% de 1920px = 930px) -->
-          <div style="position:relative;display:flex;align-items:stretch;min-height:94px;background:linear-gradient(180deg,${bgRgba} 0%,${bgDark} 100%);border:2px solid ${accent};border-radius:12px;box-shadow:0 12px 28px rgba(0,0,0,0.65),inset 0 1px 0 rgba(255,255,255,0.18);overflow:hidden;">
-            <div style="position:absolute;inset:0;background-image:repeating-linear-gradient(-45deg,rgba(255,255,255,0.03) 0px,rgba(255,255,255,0.03) 2px,transparent 2px,transparent 7px);pointer-events:none;"></div>
-
-            <!-- Bloque Izquierdo: Logo + Título + Fase + A Superar -->
-            <div style="position:relative;z-index:2;display:flex;align-items:center;gap:12px;padding:10px 14px;border-right:1px solid rgba(255,255,255,0.12);min-width:255px;">
-              ${compLogo ? `<img src="${compLogo}" style="height:${cur.compLogoSize || 62}px;width:auto;max-width:74px;object-fit:contain;flex-shrink:0;">` : ""}
-              <div style="display:flex;flex-direction:column;gap:2px;">
-                <span style="font-size:18px;font-weight:800;color:${accent};line-height:1.02;text-transform:uppercase;">${cur.title || labelKind}</span>
-                <span style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.8);text-transform:uppercase;">${cur.stage || ""}</span>
-                <div style="margin-top:3px;display:inline-flex;align-items:center;gap:5px;background:rgba(0,0,0,0.45);border:1px solid rgba(255,255,255,0.18);border-radius:5px;padding:2px 8px;width:fit-content;">
-                  <span style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.7);">A SUPERAR:</span>
-                  <span style="font-size:13px;font-weight:800;color:#ffffff;">${targetPts} PTS</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Bloque Central: Jugador en Cancha + Secuencia visual de tiros -->
-            <div style="position:relative;z-index:2;flex:1;display:flex;align-items:center;gap:12px;padding:10px 14px;min-width:0;">
-              ${teamLogo ? `<img src="${teamLogo}" style="height:${cur.teamLogoSize || 48}px;width:${cur.teamLogoSize || 48}px;object-fit:contain;flex-shrink:0;">` : ""}
-              <div style="display:flex;flex-direction:column;gap:3px;min-width:0;flex:1;">
-                <span style="display:inline-block;width:fit-content;background:${accent};color:#111;font-size:11px;font-weight:800;padding:1px 7px;border-radius:4px;text-transform:uppercase;">
-                  ${samplePlayer.cat || cur.categoryLabel || "COMPETIDOR"}
-                </span>
-                <span style="font-size:28px;font-weight:800;color:#ffffff;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-transform:uppercase;">
-                  ${samplePlayer.name}
-                </span>
-                <span style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.75);text-transform:uppercase;">
-                  ${samplePlayer.team}${samplePlayer.pos ? ` · ${samplePlayer.pos}` : ""}
-                </span>
-                <!-- Secuencia visual de tiros debajo del participante -->
-                <div style="display:flex;align-items:center;gap:5px;margin-top:3px;flex-wrap:wrap;">
-                  ${ballNormal}${ballNormal}${ballMiss}${ballSpecial}${ballHalf}
-                </div>
-              </div>
-            </div>
-
-            <!-- Bloque Puntos -->
-            <div style="position:relative;z-index:2;padding:0 16px;background:rgba(0,0,0,0.28);border-left:1px solid rgba(255,255,255,0.12);display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:96px;">
-              <span style="font-size:12px;font-weight:800;letter-spacing:0.8px;color:rgba(255,255,255,0.72);">PUNTOS</span>
-              <span style="font-size:44px;font-weight:800;line-height:0.95;color:${scoreColor};font-variant-numeric:tabular-nums;">8</span>
-            </div>
-
-            <!-- Bloque Tiempo Condicional -->
-            <div style="position:relative;z-index:2;display:flex;">${timeBlockHtml}</div>
-
-            <!-- Indicadores Especiales Condicionales -->
-            <div style="position:relative;z-index:2;display:flex;">${bonusBadgesHtml}</div>
-          </div>
-
-          <!-- Barra discreta de reglas debajo del marcador -->
-          ${cur.rulesText ? `
-            <div style="background:rgba(12,15,22,0.74);border-left:3px solid ${accent};border-radius:7px;padding:5px 12px;font-size:14px;font-weight:600;color:rgba(255,255,255,0.86);backdrop-filter:blur(4px);">
-              ${cur.rulesText}
-            </div>
-          ` : ""}
-        </div>
-      `;
-    }
-
-    function refreshActiveStagePreview() {
-      if (activeDockTab === "especiales") {
-        renderSpecialsStagePreview(activeSpecialKind);
-      } else {
-        renderScoreboardPreview(getSbConfig());
-      }
-    }
-
-    async function saveConfig() {
-      const cfg = getSbConfig();
-      refreshActiveStagePreview();
-      await update(ref(db, `${DB_PATH}/modules/marcadores`), {
-        config: cfg,
-        pos: { x: cfg.posX, y: cfg.posY }
-      });
-      await saveEspecialesConfig(false);
-      statusEl.textContent = "Sincronizado";
-      setTimeout(() => { statusEl.textContent = "Listo"; }, 1100);
-    }
-
-    function syncEspecialesEnableUI() {
-      const mainEnabled = document.getElementById("modEspecialesCheck").checked;
-      document.getElementById("especialesConfigBody").classList.toggle("sp-disabled-overlay", !mainEnabled);
-    }
-
-    function updateEspecialesSliders() {
-      document.getElementById("v_tr_posX").textContent = parseFloat(document.getElementById("tr_posX").value).toFixed(1) + "%";
-      document.getElementById("v_tr_posY").textContent = parseFloat(document.getElementById("tr_posY").value).toFixed(1) + "%";
-      document.getElementById("v_tr_compLogoSize").textContent = document.getElementById("tr_compLogoSize").value + "px";
-      document.getElementById("v_tr_teamLogoSize").textContent = document.getElementById("tr_teamLogoSize").value + "px";
-      document.getElementById("v_tr_bgAlpha").textContent = document.getElementById("tr_bgAlpha").value + "%";
-      document.getElementById("v_tr_scale").textContent = document.getElementById("tr_scale").value + "%";
-
-      document.getElementById("v_ft_posX").textContent = parseFloat(document.getElementById("ft_posX").value).toFixed(1) + "%";
-      document.getElementById("v_ft_posY").textContent = parseFloat(document.getElementById("ft_posY").value).toFixed(1) + "%";
-      document.getElementById("v_ft_compLogoSize").textContent = document.getElementById("ft_compLogoSize").value + "px";
-      document.getElementById("v_ft_teamLogoSize").textContent = document.getElementById("ft_teamLogoSize").value + "px";
-      document.getElementById("v_ft_bgAlpha").textContent = document.getElementById("ft_bgAlpha").value + "%";
-      document.getElementById("v_ft_scale").textContent = document.getElementById("ft_scale").value + "%";
-    }
-
-    function syncTriplesFormFromState() {
-      const t = especialesState.triples;
-      document.getElementById("tr_modePreset").value = t.modePreset || "time_attack";
-      document.getElementById("tr_title").value = t.title || "";
-      document.getElementById("tr_stage").value = t.stage || "GRUPO A";
-      document.getElementById("tr_categoryLabel").value = t.categoryLabel || "CATEGORÍA +35";
-      document.getElementById("tr_topShadowText").value = t.topShadowText || "TIEMPO FUERA · TRANSMISIÓN OFICIAL";
-      document.getElementById("tr_posX").value = t.posX ?? 3.0;
-      document.getElementById("tr_posY").value = t.posY ?? 78.0;
-      document.getElementById("tr_useTimer").checked = t.useTimer !== false;
-      document.getElementById("tr_officialSec").value = t.officialSec ?? 60;
-      document.getElementById("tr_tiebreakSec").value = t.tiebreakSec ?? 30;
-      document.getElementById("tr_maxShots").value = t.maxShots ?? 0;
-      document.getElementById("tr_ptsNormal").value = t.ptsNormal ?? 1;
-      document.getElementById("tr_moneyEnabled").checked = Boolean(t.moneyEnabled);
-      document.getElementById("tr_ptsMoney").value = t.ptsMoney ?? 3;
-      document.getElementById("tr_halfEnabled").checked = Boolean(t.halfEnabled);
-      document.getElementById("tr_ptsHalf").value = t.ptsHalf ?? 3;
-      document.getElementById("tr_targetOverride").value = t.targetOverride ?? 0;
-      document.getElementById("tr_compLogoSize").value = t.compLogoSize ?? 62;
-      document.getElementById("tr_teamLogoSize").value = t.teamLogoSize ?? 48;
-      document.getElementById("tr_bgAlpha").value = t.bgAlpha ?? 92;
-      document.getElementById("tr_scale").value = Math.min(100, t.scale ?? 100);
-      document.getElementById("tr_colorBg").value = t.colorBg || "#14171f";
-      document.getElementById("tr_colorAccent").value = t.colorAccent || "#e3b857";
-      document.getElementById("tr_colorScore").value = t.colorScore || "#e3b857";
-      document.getElementById("tr_rulesText").value = t.rulesText || "";
-      updateEspecialesSliders();
-      renderSpecialPlayersTable("triples");
-    }
-
-    function syncLibresFormFromState() {
-      const f = especialesState.libres;
-      document.getElementById("ft_modePreset").value = f.modePreset || "time_attack";
-      document.getElementById("ft_title").value = f.title || "";
-      document.getElementById("ft_stage").value = f.stage || "CLASIFICATORIA";
-      document.getElementById("ft_categoryLabel").value = f.categoryLabel || "TODO COMPETIDOR";
-      document.getElementById("ft_topShadowText").value = f.topShadowText || "TIEMPO FUERA · TRANSMISIÓN OFICIAL";
-      document.getElementById("ft_posX").value = f.posX ?? 50.0;
-      document.getElementById("ft_posY").value = f.posY ?? 78.0;
-      document.getElementById("ft_useTimer").checked = f.useTimer !== false;
-      document.getElementById("ft_officialSec").value = f.officialSec ?? 60;
-      document.getElementById("ft_tiebreakSec").value = f.tiebreakSec ?? 30;
-      document.getElementById("ft_maxShots").value = f.maxShots ?? 0;
-      document.getElementById("ft_ptsNormal").value = f.ptsNormal ?? 1;
-      document.getElementById("ft_moneyEnabled").checked = Boolean(f.moneyEnabled);
-      document.getElementById("ft_ptsMoney").value = f.ptsMoney ?? 2;
-      document.getElementById("ft_halfEnabled").checked = Boolean(f.halfEnabled);
-      document.getElementById("ft_ptsHalf").value = f.ptsHalf ?? 3;
-      document.getElementById("ft_targetOverride").value = f.targetOverride ?? 0;
-      document.getElementById("ft_compLogoSize").value = f.compLogoSize ?? 62;
-      document.getElementById("ft_teamLogoSize").value = f.teamLogoSize ?? 48;
-      document.getElementById("ft_bgAlpha").value = f.bgAlpha ?? 92;
-      document.getElementById("ft_scale").value = Math.min(100, f.scale ?? 100);
-      document.getElementById("ft_colorBg").value = f.colorBg || "#14171f";
-      document.getElementById("ft_colorAccent").value = f.colorAccent || "#e3b857";
-      document.getElementById("ft_colorScore").value = f.colorScore || "#e3b857";
-      document.getElementById("ft_rulesText").value = f.rulesText || "";
-      updateEspecialesSliders();
-      renderSpecialPlayersTable("libres");
-    }
-
-    function readEspecialesFromForms() {
-      especialesState.enabledTriples = document.getElementById("spEnableTriples").checked;
-      especialesState.enabledLibres = document.getElementById("spEnableLibres").checked;
-
-      especialesState.triples = {
-        ...especialesState.triples,
-        modePreset: document.getElementById("tr_modePreset").value,
-        title: document.getElementById("tr_title").value.trim(),
-        stage: document.getElementById("tr_stage").value,
-        categoryLabel: document.getElementById("tr_categoryLabel").value.trim(),
-        topShadowText: document.getElementById("tr_topShadowText").value.trim(),
-        posX: parseFloat(document.getElementById("tr_posX").value) ?? 3.0,
-        posY: parseFloat(document.getElementById("tr_posY").value) ?? 78.0,
-        useTimer: document.getElementById("tr_useTimer").checked,
-        officialSec: parseInt(document.getElementById("tr_officialSec").value, 10) || 0,
-        tiebreakSec: parseInt(document.getElementById("tr_tiebreakSec").value, 10) || 0,
-        maxShots: parseInt(document.getElementById("tr_maxShots").value, 10) || 0,
-        ptsNormal: parseInt(document.getElementById("tr_ptsNormal").value, 10) || 1,
-        moneyEnabled: document.getElementById("tr_moneyEnabled").checked,
-        ptsMoney: parseInt(document.getElementById("tr_ptsMoney").value, 10) || 3,
-        halfEnabled: document.getElementById("tr_halfEnabled").checked,
-        ptsHalf: parseInt(document.getElementById("tr_ptsHalf").value, 10) || 3,
-        targetOverride: parseInt(document.getElementById("tr_targetOverride").value, 10) || 0,
-        compLogoSize: parseInt(document.getElementById("tr_compLogoSize").value, 10) || 62,
-        teamLogoSize: parseInt(document.getElementById("tr_teamLogoSize").value, 10) || 48,
-        bgAlpha: parseInt(document.getElementById("tr_bgAlpha").value, 10) || 92,
-        scale: Math.min(100, parseInt(document.getElementById("tr_scale").value, 10) || 100),
-        colorBg: document.getElementById("tr_colorBg").value,
-        colorAccent: document.getElementById("tr_colorAccent").value,
-        colorScore: document.getElementById("tr_colorScore").value,
-        rulesText: document.getElementById("tr_rulesText").value.trim()
+  <script>
+    (function () {
+      const els = {
+        spDiscipline: document.getElementById('spDiscipline'),
+        spModePreset: document.getElementById('spModePreset'),
+        spTitle: document.getElementById('spTitle'),
+        spSubtitle: document.getElementById('spSubtitle'),
+        spLogo: document.getElementById('spLogo'),
+        spAccent: document.getElementById('spAccent'),
+        spPreviewPlayer: document.getElementById('spPreviewPlayer'),
+        spRules: document.getElementById('spRules'),
+        spUseTimer: document.getElementById('spUseTimer'),
+        btnSyncNow: document.getElementById('btnSyncNow'),
+        syncStatus: document.getElementById('syncStatus'),
+        pvTimerTag: document.getElementById('pvTimerTag'),
+        previewBox: document.getElementById('previewBox'),
+        pvTopLogo: document.getElementById('pvTopLogo'),
+        pvTitle: document.getElementById('pvTitle'),
+        pvSubtitle: document.getElementById('pvSubtitle'),
+        pvClock: document.getElementById('pvClock'),
+        pvIdleCard: document.getElementById('pvIdleCard'),
+        pvIdleLogo: document.getElementById('pvIdleLogo'),
+        pvRules: document.getElementById('pvRules'),
+        pvPlayerCard: document.getElementById('pvPlayerCard')
       };
 
-      especialesState.libres = {
-        ...especialesState.libres,
-        modePreset: document.getElementById("ft_modePreset").value,
-        title: document.getElementById("ft_title").value.trim(),
-        stage: document.getElementById("ft_stage").value,
-        categoryLabel: document.getElementById("ft_categoryLabel").value.trim(),
-        topShadowText: document.getElementById("ft_topShadowText").value.trim(),
-        posX: parseFloat(document.getElementById("ft_posX").value) ?? 50.0,
-        posY: parseFloat(document.getElementById("ft_posY").value) ?? 78.0,
-        useTimer: document.getElementById("ft_useTimer").checked,
-        officialSec: parseInt(document.getElementById("ft_officialSec").value, 10) || 0,
-        tiebreakSec: parseInt(document.getElementById("ft_tiebreakSec").value, 10) || 0,
-        maxShots: parseInt(document.getElementById("ft_maxShots").value, 10) || 0,
-        ptsNormal: parseInt(document.getElementById("ft_ptsNormal").value, 10) || 1,
-        moneyEnabled: document.getElementById("ft_moneyEnabled").checked,
-        ptsMoney: parseInt(document.getElementById("ft_ptsMoney").value, 10) || 2,
-        halfEnabled: document.getElementById("ft_halfEnabled").checked,
-        ptsHalf: parseInt(document.getElementById("ft_ptsHalf").value, 10) || 3,
-        targetOverride: parseInt(document.getElementById("ft_targetOverride").value, 10) || 0,
-        compLogoSize: parseInt(document.getElementById("ft_compLogoSize").value, 10) || 62,
-        teamLogoSize: parseInt(document.getElementById("ft_teamLogoSize").value, 10) || 48,
-        bgAlpha: parseInt(document.getElementById("ft_bgAlpha").value, 10) || 92,
-        scale: Math.min(100, parseInt(document.getElementById("ft_scale").value, 10) || 100),
-        colorBg: document.getElementById("ft_colorBg").value,
-        colorAccent: document.getElementById("ft_colorAccent").value,
-        colorScore: document.getElementById("ft_colorScore").value,
-        rulesText: document.getElementById("ft_rulesText").value.trim()
-      };
-    }
+      const bcTriples = ('BroadcastChannel' in window)
+        ? new BroadcastChannel('tiempofuera_especiales_triples')
+        : null;
+      const bcLibres = ('BroadcastChannel' in window)
+        ? new BroadcastChannel('tiempofuera_especiales_libres')
+        : null;
 
-    async function saveEspecialesConfig(notify = true) {
-      readEspecialesFromForms();
-      const enabled = document.getElementById("modEspecialesCheck").checked;
-      await update(ref(db, `${DB_PATH}/modules/especiales`), {
-        enabled,
-        config: especialesState
-      });
-      if (notify) {
-        statusEl.textContent = "Configuración Especiales Guardada";
-        setTimeout(() => { statusEl.textContent = "Listo"; }, 1200);
-      }
-    }
+      let inheritedLogo = '';
+      let inheritedAccent = '#e11d2e';
+      let db = null;
 
-    function inheritOfficialStyle(kind) {
-      const sb = getSbConfig();
-      especialesState[kind] = {
-        ...especialesState[kind],
-        colorBg: sb.clockBgColor || "#14171f",
-        colorAccent: sb.accentColor || "#e3b857",
-        colorScore: sb.scoreTextColor || "#e3b857",
-        compLogo: sb.logoLiga || especialesState[kind].compLogo || ""
-      };
-      if (kind === "triples") syncTriplesFormFromState();
-      else syncLibresFormFromState();
-      refreshActiveStagePreview();
-      saveEspecialesConfig(true);
-    }
+      const params = new URLSearchParams(window.location.search);
+      const dbUrl = params.get('dbUrl') || window.TF_FIREBASE_DB_URL || '';
 
-    document.getElementById("tr_inheritStyleBtn").addEventListener("click", () => inheritOfficialStyle("triples"));
-    document.getElementById("ft_inheritStyleBtn").addEventListener("click", () => inheritOfficialStyle("libres"));
-
-    document.getElementById("tr_modePreset").addEventListener("change", (e) => {
-      const preset = TRIPLES_PRESETS[e.target.value];
-      if (preset) {
-        especialesState.triples = { ...especialesState.triples, modePreset: e.target.value, ...preset };
-        syncTriplesFormFromState();
-      } else {
-        especialesState.triples.modePreset = "personalizada";
-      }
-      refreshActiveStagePreview();
-    });
-
-    document.getElementById("ft_modePreset").addEventListener("change", (e) => {
-      const preset = LIBRES_PRESETS[e.target.value];
-      if (preset) {
-        especialesState.libres = { ...especialesState.libres, modePreset: e.target.value, ...preset };
-        syncLibresFormFromState();
-      } else {
-        especialesState.libres.modePreset = "personalizada";
-      }
-      refreshActiveStagePreview();
-    });
-
-    function selectSpecialSubtab(btn) {
-      document.querySelectorAll(".sp-subtab").forEach((b) => b.classList.remove("is-active"));
-      document.querySelectorAll(".sp-pane").forEach((p) => p.classList.remove("is-active"));
-      btn.classList.add("is-active");
-      document.getElementById(btn.dataset.spTab).classList.add("is-active");
-      activeSpecialKind = btn.dataset.spKind || "triples";
-      activeDockTab = "especiales";
-      renderSpecialsStagePreview(activeSpecialKind);
-    }
-
-    document.querySelectorAll(".sp-subtab").forEach((btn) => {
-      btn.addEventListener("click", () => selectSpecialSubtab(btn));
-    });
-
-    let pendingLogoTarget = { kind: "triples", team: "" };
-
-    function renderSpecialPlayersTable(kind) {
-      const prefix = kind === "triples" ? "tr" : "ft";
-      const bucket = especialesState[kind];
-      const list = bucket.players || [];
-      document.getElementById(`${prefix}_count`).textContent = list.length;
-      const tbody = document.getElementById(`${prefix}_playersBody`);
-
-      if (!list.length) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--muted); padding:14px;">Sin participantes cargados aún.</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = list.map((p) => {
-        const logo = bucket.teamLogos?.[p.team] || "";
-        const logoCell = logo
-          ? `<img src="${logo}" class="sp-tbl-logo" style="cursor:pointer;" data-pick-logo="${kind}:${p.team}">`
-          : `<button type="button" class="btn btn-ghost" style="padding:2px 6px; font-size:0.65rem;" data-pick-logo="${kind}:${p.team}">+ Logo</button>`;
-
-        return `<tr>
-          <td>${logoCell}</td>
-          <td><strong>${p.name}</strong></td>
-          <td>${p.team}</td>
-          <td>${p.cat || "-"}</td>
-          <td>${p.pos || "-"}</td>
-          <td style="font-weight:800;">${p.bestScore !== null && p.bestScore !== undefined ? p.bestScore : "-"}</td>
-          <td><button type="button" class="btn btn-ghost" style="padding:2px 7px; font-size:0.68rem;" data-del-player="${kind}:${p.id}">✕</button></td>
-        </tr>`;
-      }).join("");
-
-      tbody.querySelectorAll("[data-pick-logo]").forEach((el) => {
-        el.addEventListener("click", () => {
-          const [k, team] = el.dataset.pickLogo.split(":");
-          pendingLogoTarget = { kind: k, team };
-          const picker = document.getElementById(k === "triples" ? "tr_rowLogoPicker" : "ft_rowLogoPicker");
-          picker.value = "";
-          picker.click();
-        });
-      });
-
-      tbody.querySelectorAll("[data-del-player]").forEach((el) => {
-        el.addEventListener("click", async () => {
-          const [k, idStr] = el.dataset.delPlayer.split(":");
-          especialesState[k].players = (especialesState[k].players || []).filter((x) => String(x.id) !== idStr);
-          renderSpecialPlayersTable(k);
-          refreshActiveStagePreview();
-          await saveEspecialesConfig(true);
-        });
-      });
-    }
-
-    function bindSpecialListEvents(kind) {
-      const prefix = kind === "triples" ? "tr" : "ft";
-
-      document.getElementById(`${prefix}_compLogoIn`).addEventListener("change", (e) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-        const r = new FileReader();
-        r.onload = async (ev) => {
-          especialesState[kind].compLogo = ev.target.result;
-          refreshActiveStagePreview();
-          await saveEspecialesConfig(true);
-        };
-        r.readAsDataURL(file);
-      });
-
-      document.getElementById(`${prefix}_rowLogoPicker`).addEventListener("change", (e) => {
-        const file = e.target.files?.[0];
-        if (!file || !pendingLogoTarget.team) return;
-        const r = new FileReader();
-        r.onload = async (ev) => {
-          especialesState[pendingLogoTarget.kind].teamLogos = {
-            ...(especialesState[pendingLogoTarget.kind].teamLogos || {}),
-            [pendingLogoTarget.team]: ev.target.result
-          };
-          renderSpecialPlayersTable(pendingLogoTarget.kind);
-          refreshActiveStagePreview();
-          await saveEspecialesConfig(true);
-        };
-        r.readAsDataURL(file);
-      });
-
-      document.getElementById(`${prefix}_addPlayerBtn`).addEventListener("click", async () => {
-        const name = document.getElementById(`${prefix}_newName`).value.trim();
-        const team = document.getElementById(`${prefix}_newTeam`).value.trim().toUpperCase() || "SIN EQUIPO";
-        const cat = document.getElementById(`${prefix}_newCat`).value.trim() || "GENERAL";
-        const pos = document.getElementById(`${prefix}_newPos`).value.trim() || "";
-        const logoIn = document.getElementById(`${prefix}_newLogoIn`);
-        if (!name) return;
-
-        const finish = async () => {
-          especialesState[kind].players = [
-            ...(especialesState[kind].players || []),
-            { id: Date.now(), name, team, cat, pos, bestScore: null }
-          ];
-          document.getElementById(`${prefix}_newName`).value = "";
-          document.getElementById(`${prefix}_newTeam`).value = "";
-          document.getElementById(`${prefix}_newCat`).value = "";
-          document.getElementById(`${prefix}_newPos`).value = "";
-          logoIn.value = "";
-          renderSpecialPlayersTable(kind);
-          refreshActiveStagePreview();
-          await saveEspecialesConfig(true);
-        };
-
-        if (logoIn.files?.[0]) {
-          const r = new FileReader();
-          r.onload = async (ev) => {
-            especialesState[kind].teamLogos = {
-              ...(especialesState[kind].teamLogos || {}),
-              [team]: ev.target.result
-            };
-            await finish();
-          };
-          r.readAsDataURL(logoIn.files[0]);
-        } else {
-          await finish();
-        }
-      });
-
-      document.getElementById(`${prefix}_clearScoresBtn`).addEventListener("click", async () => {
-        especialesState[kind].players = (especialesState[kind].players || []).map((p) => ({ ...p, bestScore: null }));
-        renderSpecialPlayersTable(kind);
-        refreshActiveStagePreview();
-        await saveEspecialesConfig(true);
-      });
-
-      document.getElementById(`${prefix}_clearAllBtn`).addEventListener("click", async () => {
-        especialesState[kind].players = [];
-        renderSpecialPlayersTable(kind);
-        refreshActiveStagePreview();
-        await saveEspecialesConfig(true);
-      });
-    }
-
-    bindSpecialListEvents("triples");
-    bindSpecialListEvents("libres");
-
-    document.getElementById("saveTriplesBtn").addEventListener("click", () => saveEspecialesConfig(true));
-    document.getElementById("saveLibresBtn").addEventListener("click", () => saveEspecialesConfig(true));
-
-    document.querySelectorAll("#pane-especiales input, #pane-especiales select, #pane-especiales textarea").forEach((el) => {
-      if (el.type === "file") return;
-      el.addEventListener("input", () => {
-        updateEspecialesSliders();
-        refreshActiveStagePreview();
-      });
-      el.addEventListener("change", () => {
-        updateEspecialesSliders();
-        refreshActiveStagePreview();
-      });
-    });
-
-    /* Gestión de Roles por Correo y Bloqueos Duales */
-    function renderRolesTable() {
-      const tbody = document.getElementById("rolesTableBody");
-      const entries = Object.entries(rolesMap || {});
-      if (!entries.length) {
-        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:12px;">No hay operadores adicionales vinculados aún.</td></tr>`;
-        return;
-      }
-      const roleNames = {
-        admin: "Administrador",
-        gestor: "Gestor Competencia",
-        op_competencias: "Op. Competencias",
-        op_marcador: "Op. Marcador"
-      };
-      const scopeNames = {
-        ambas: "Triples o Tiros Libres (1 a la vez)",
-        triples: "Solo Triples",
-        libres: "Solo Tiros Libres"
-      };
-      tbody.innerHTML = entries.map(([key, info]) => {
-        const r = info.role || "op_competencias";
-        const sc = r === "op_competencias" ? (scopeNames[info.scope] || info.scope || "ambas") : "Acceso según rol";
-        return `<tr>
-          <td><strong>${info.email || key}</strong></td>
-          <td><span class="role-badge ${r}">${roleNames[r] || r}</span></td>
-          <td>${sc}</td>
-          <td><button type="button" class="btn btn-ghost" style="padding:2px 8px;font-size:0.68rem;" data-del-role="${key}">Quitar</button></td>
-        </tr>`;
-      }).join("");
-
-      tbody.querySelectorAll("[data-del-role]").forEach((btn) => {
-        btn.addEventListener("click", async () => {
-          const k = btn.dataset.delRole;
-          await update(ref(db, `${DB_PATH}/roles`), { [k]: null });
-        });
-      });
-    }
-
-    document.getElementById("addRoleBtn").addEventListener("click", async () => {
-      const email = document.getElementById("roleEmailInput").value.trim().toLowerCase();
-      const role = document.getElementById("roleSelectInput").value;
-      const scope = document.getElementById("roleScopeInput").value;
-      if (!email || !email.includes("@")) return;
-      const key = sanitizeEmailKey(email);
-      await update(ref(db, `${DB_PATH}/roles/${key}`), {
-        email,
-        role,
-        scope: role === "op_competencias" ? scope : "all",
-        updatedAt: Date.now()
-      });
-      document.getElementById("roleEmailInput").value = "";
-      statusEl.textContent = "Rol vinculado";
-      setTimeout(() => { statusEl.textContent = "Listo"; }, 1100);
-    });
-
-    document.getElementById("releaseAllLocksBtn").addEventListener("click", async () => {
-      await update(ref(db, `${DB_PATH}/locks`), {
-        triples: null,
-        libres: null,
-        marcadores: null
-      });
-      statusEl.textContent = "Bloqueos liberados";
-      setTimeout(() => { statusEl.textContent = "Listo"; }, 1100);
-    });
-
-    function applyStudioRolePermissions(role) {
-      currentUserRole = role || "admin";
-      const badge = document.getElementById("currentUserRoleBadge");
-      badge.className = `role-badge ${currentUserRole}`;
-      badge.textContent = currentUserRole.toUpperCase();
-
-      if (currentUserRole === "gestor") {
-        document.getElementById("tabRolesBtn").style.display = "none";
-      } else if (currentUserRole === "op_marcador" || currentUserRole === "op_competencias") {
-        alert("Tu rol es de Operador en vivo. Redirigiendo a Control...");
-        location.href = "control.html";
-      }
-    }
-
-    document.getElementById("center-x-btn").addEventListener("click", async () => {
-      const firstChild = previewMount.firstElementChild;
-      const boxW = firstChild ? firstChild.offsetWidth : 520;
-      const widthPct = (boxW / 1920) * 100;
-
-      if (activeDockTab === "especiales") {
-        const prefix = activeSpecialKind === "libres" ? "ft" : "tr";
-        const centeredX = Number(Math.max(0, Math.min(52, 25 - widthPct / 2)).toFixed(1));
-        document.getElementById(`${prefix}_posX`).value = centeredX;
-        updateEspecialesSliders();
-        refreshActiveStagePreview();
-        await saveEspecialesConfig(true);
-      } else {
-        const centeredX = Number(Math.max(0, Math.min(100, 50 - widthPct / 2)).toFixed(1));
-        document.getElementById("posX").value = centeredX;
-        await saveConfig();
-      }
-    });
-
-    document.querySelectorAll("#pane-marcadores input, #pane-marcadores select").forEach((el) => {
-      if (el.type === "file" || el.id === "paletteTarget") return;
-      el.addEventListener("input", () => refreshActiveStagePreview());
-      el.addEventListener("change", saveConfig);
-    });
-
-    document.querySelectorAll("input[type='file'][data-img]").forEach((input) => {
-      input.addEventListener("change", (e) => {
-        const file = e.target.files[0];
-        const key = e.target.dataset.img;
-        if (!file || !key) return;
-        const reader = new FileReader();
-        reader.onload = () => {
-          const img = new Image();
-          img.onload = async () => {
-            imgs[key] = reader.result;
-            if (key === "logoLiga") {
-              renderPalette(extractStrongColors(img));
-            }
-            await saveConfig();
-          };
-          img.src = reader.result;
-        };
-        reader.readAsDataURL(file);
-      });
-    });
-
-    document.getElementById("swap-teams-btn").addEventListener("click", async () => {
-      const n1 = document.getElementById("name1").value;
-      const bg1 = document.getElementById("bg1Color").value;
-      const tx1 = document.getElementById("text1Color").value;
-      const l1 = imgs.logo1;
-
-      document.getElementById("name1").value = document.getElementById("name2").value;
-      document.getElementById("bg1Color").value = document.getElementById("bg2Color").value;
-      document.getElementById("text1Color").value = document.getElementById("text2Color").value;
-      imgs.logo1 = imgs.logo2;
-
-      document.getElementById("name2").value = n1;
-      document.getElementById("bg2Color").value = bg1;
-      document.getElementById("text2Color").value = tx1;
-      imgs.logo2 = l1;
-
-      await saveConfig();
-    });
-
-    document.getElementById("save-publish-btn").addEventListener("click", saveConfig);
-
-    requireSession(async (user) => {
-      currentUserEmail = (user?.email || "").toLowerCase();
-      const roleKey = sanitizeEmailKey(currentUserEmail);
-
-      const rolesSnap = await get(ref(db, `${DB_PATH}/roles`));
-      if (rolesSnap.exists()) {
-        rolesMap = rolesSnap.val() || {};
-        const myEntry = rolesMap[roleKey];
-        if (myEntry?.role) {
-          applyStudioRolePermissions(myEntry.role);
-        }
-      }
-      renderRolesTable();
-
-      onValue(ref(db, `${DB_PATH}/roles`), (s) => {
-        rolesMap = s.exists() ? (s.val() || {}) : {};
-        renderRolesTable();
-      });
-
-      onValue(ref(db, `${DB_PATH}/locks`), (s) => {
-        const locks = s.exists() ? (s.val() || {}) : {};
-        const lines = [];
-        if (locks.triples?.email) lines.push(`Triples tomado por: ${locks.triples.email}`);
-        if (locks.libres?.email) lines.push(`Tiros Libres tomado por: ${locks.libres.email}`);
-        if (locks.marcadores?.email) lines.push(`Marcador tomado por: ${locks.marcadores.email}`);
-        document.getElementById("activeLocksStatus").textContent = lines.length
-          ? lines.join(" | ")
-          : "Sin bloqueos activos en este momento.";
-      });
-
-      const snap = await get(ref(db, `${DB_PATH}/modules`));
-      if (snap.exists()) {
-        const mods = snap.val();
-        document.querySelectorAll(".mod-enable").forEach((chk) => {
-          chk.checked = Boolean(mods[chk.dataset.mod]?.enabled);
-        });
-        const cfg = mods.marcadores?.config;
-        if (cfg) {
-          Object.entries(cfg).forEach(([k, v]) => {
-            if (k in imgs) imgs[k] = v || "";
-            const el = document.getElementById(k);
-            if (!el) return;
-            if (el.type === "checkbox") el.checked = Boolean(v);
-            else el.value = v;
-          });
-          if (mods.marcadores?.pos) {
-            if (mods.marcadores.pos.x !== undefined) document.getElementById("posX").value = mods.marcadores.pos.x;
-            if (mods.marcadores.pos.y !== undefined) document.getElementById("posY").value = mods.marcadores.pos.y;
-          }
-          syncTopBadgeInputs();
-          if (cfg.sources) {
-            SOURCE_FIELDS.forEach((f) => {
-              const sel = document.getElementById(`src_${f}`);
-              if (sel && cfg.sources[f]) sel.value = cfg.sources[f];
+      if (dbUrl && window.firebase) {
+        try {
+          if (!firebase.apps.length) {
+            firebase.initializeApp({
+              databaseURL: dbUrl,
+              ...(window.TF_FIREBASE_CONFIG || {})
             });
           }
-          if (imgs.logoLiga) {
-            const tempImg = new Image();
-            tempImg.onload = () => renderPalette(extractStrongColors(tempImg));
-            tempImg.src = imgs.logoLiga;
-          }
-        }
-
-        if (mods.especiales?.config) {
-          especialesState = {
-            ...especialesState,
-            ...mods.especiales.config,
-            triples: { ...especialesState.triples, ...(mods.especiales.config.triples || {}) },
-            libres: { ...especialesState.libres, ...(mods.especiales.config.libres || {}) }
-          };
-          document.getElementById("spEnableTriples").checked = especialesState.enabledTriples !== false;
-          document.getElementById("spEnableLibres").checked = Boolean(especialesState.enabledLibres);
+          db = firebase.database();
+          db.ref('marcadores/config').on('value', (snap) => {
+            if (!snap.exists()) return;
+            const mCfg = snap.val() || {};
+            if (mCfg.logoLiga) inheritedLogo = String(mCfg.logoLiga).trim();
+            if (mCfg.accentColor) inheritedAccent = String(mCfg.accentColor).trim();
+            syncSpecialConfigNow();
+          });
+        } catch (err) {
+          console.warn('Firebase studio sync warning:', err);
         }
       }
 
-      syncEspecialesEnableUI();
-      syncTriplesFormFromState();
-      syncLibresFormFromState();
-      applyStageFit();
-    }, { requireAdmin: false });
-
-    document.querySelectorAll(".dock-tab").forEach((tab) => {
-      tab.addEventListener("click", () => {
-        document.querySelectorAll(".dock-tab").forEach((t) => t.classList.remove("is-active"));
-        document.querySelectorAll(".tab-section").forEach((s) => s.classList.remove("is-active"));
-        tab.classList.add("is-active");
-        activeDockTab = tab.dataset.target;
-        document.getElementById(`pane-${activeDockTab}`).classList.add("is-active");
-        refreshActiveStagePreview();
-      });
-    });
-
-    const gridBtn = document.getElementById("grid-toggle");
-    const gridEl = document.getElementById("stage-grid");
-    gridBtn.addEventListener("click", () => {
-      gridEl.classList.toggle("is-off");
-      gridBtn.textContent = gridEl.classList.contains("is-off") ? "Grilla: OFF" : "Grilla: ON";
-    });
-
-    document.querySelectorAll(".mod-enable").forEach((chk) => {
-      chk.addEventListener("change", async (e) => {
-        if (e.target.dataset.mod === "especiales") {
-          syncEspecialesEnableUI();
-          await saveEspecialesConfig(true);
-          return;
+      function applyPresetSideEffects(preset) {
+        if (preset === 'femicentro' || preset === 'triples_no_timer') {
+          els.spUseTimer.checked = false;
+        } else if (preset === 'triples_timed' || preset === 'libres_timed') {
+          els.spUseTimer.checked = true;
         }
-        await update(ref(db, `${DB_PATH}/modules/${e.target.dataset.mod}`), {
-          enabled: e.target.checked
-        });
+
+        if (preset === 'femicentro') {
+          els.spDiscipline.value = 'libres';
+          if (!els.spTitle.value.trim() || els.spTitle.value === 'CONCURSO DE TRIPLES') {
+            els.spTitle.value = 'FEMICENTRO';
+          }
+        } else if (preset === 'libres_timed') {
+          els.spDiscipline.value = 'libres';
+        } else if (preset === 'triples_timed' || preset === 'triples_no_timer') {
+          els.spDiscipline.value = 'triples';
+        }
+      }
+
+      function getEffectiveLogo() {
+        return els.spLogo.value.trim() || inheritedLogo || '';
+      }
+
+      function getEffectiveAccent() {
+        return els.spAccent.value.trim() || inheritedAccent || '#e11d2e';
+      }
+
+      function renderPreview() {
+        const useTimer = Boolean(els.spUseTimer.checked);
+        const accent = getEffectiveAccent();
+        const logo = getEffectiveLogo();
+        const title = els.spTitle.value.trim() || 'COMPETENCIA ESPECIAL';
+        const subtitle = els.spSubtitle.value.trim() || 'TIEMPO FUERA';
+        const rules = els.spRules.value.trim() || 'Sin reglas definidas.';
+        const showSamplePlayer = els.spPreviewPlayer.value === 'sample';
+
+        els.previewBox.style.setProperty('--pv-accent', accent);
+        els.pvTitle.textContent = title;
+        els.pvSubtitle.textContent = subtitle;
+        els.pvRules.textContent = rules;
+
+        els.pvClock.classList.toggle('hidden', !useTimer);
+        els.pvTimerTag.textContent = useTimer ? 'CON RELOJ' : 'SIN RELOJ';
+
+        if (logo) {
+          els.pvTopLogo.innerHTML = `<img src="${logo}" alt="Logo" onerror="this.parentElement.textContent='TF'" />`;
+          els.pvIdleLogo.innerHTML = `<img src="${logo}" alt="Logo" onerror="this.parentElement.textContent='TORNEO'" />`;
+        } else {
+          els.pvTopLogo.textContent = 'TF';
+          els.pvIdleLogo.textContent = 'TORNEO';
+        }
+
+        els.pvIdleCard.classList.toggle('hidden', showSamplePlayer);
+        els.pvPlayerCard.classList.toggle('hidden', !showSamplePlayer);
+      }
+
+      function syncSpecialConfigNow() {
+        renderPreview();
+
+        const discipline = els.spDiscipline.value;
+        const useTimer = Boolean(els.spUseTimer.checked);
+        const configPayload = {
+          title: els.spTitle.value.trim() || 'COMPETENCIA ESPECIAL',
+          subtitle: els.spSubtitle.value.trim() || 'TIEMPO FUERA',
+          tournamentLogo: getEffectiveLogo(),
+          accentColor: getEffectiveAccent(),
+          rules: els.spRules.value.trim(),
+          useTimer,
+          modePreset: els.spModePreset.value
+        };
+
+        const patch = {
+          config: configPayload,
+          live: {
+            customTimerOverride: null,
+            timerRunning: useTimer ? undefined : false
+          }
+        };
+
+        try {
+          const storageKey = discipline === 'libres' ? 'tf_libres_live_state' : 'tf_triples_live_state';
+          const currentRaw = localStorage.getItem(storageKey);
+          const currentObj = currentRaw ? JSON.parse(currentRaw) : {};
+          const merged = {
+            ...currentObj,
+            config: {
+              ...(currentObj.config || {}),
+              ...configPayload
+            },
+            live: {
+              ...(currentObj.live || {}),
+              customTimerOverride: null,
+              ...(useTimer ? {} : { timerRunning: false })
+            }
+          };
+          localStorage.setItem(storageKey, JSON.stringify(merged));
+          localStorage.setItem('tf_especiales_control_state', JSON.stringify(merged));
+        } catch (_) {}
+
+        if (discipline === 'libres' && bcLibres) bcLibres.postMessage(patch);
+        if (discipline === 'triples' && bcTriples) bcTriples.postMessage(patch);
+        window.postMessage({ discipline, ...patch }, '*');
+
+        if (db) {
+          const path = discipline === 'libres' ? 'modules/especiales/libres' : 'modules/especiales/triples';
+          db.ref(`${path}/config`).update(configPayload).catch(() => {});
+          db.ref(`${path}/live/customTimerOverride`).set(null).catch(() => {});
+          if (!useTimer) {
+            db.ref(`${path}/live/timerRunning`).set(false).catch(() => {});
+          }
+        }
+
+        els.syncStatus.textContent = 'SINCRONIZADO';
+      }
+
+      els.spModePreset.addEventListener('change', () => {
+        applyPresetSideEffects(els.spModePreset.value);
+        syncSpecialConfigNow();
       });
-    });
+
+      els.spUseTimer.addEventListener('change', syncSpecialConfigNow);
+      els.spDiscipline.addEventListener('change', syncSpecialConfigNow);
+      els.spTitle.addEventListener('input', syncSpecialConfigNow);
+      els.spSubtitle.addEventListener('input', syncSpecialConfigNow);
+      els.spLogo.addEventListener('input', syncSpecialConfigNow);
+      els.spAccent.addEventListener('input', syncSpecialConfigNow);
+      els.spRules.addEventListener('input', syncSpecialConfigNow);
+      els.spPreviewPlayer.addEventListener('change', renderPreview);
+      els.btnSyncNow.addEventListener('click', syncSpecialConfigNow);
+
+      renderPreview();
+      syncSpecialConfigNow();
+    })();
   </script>
 </body>
 </html>
