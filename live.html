@@ -503,6 +503,31 @@
       return pickFromBucket(val.feeds?.manual, field, altKeys);
     }
 
+    function syncEqualTeamWings(homeWing, awayWing, homeName, awayName, cfg) {
+      const minWingWidth = Math.max(160, parseInt(cfg.minTeamWingWidth, 10) || 220);
+      const maxWingWidth = Math.max(minWingWidth, parseInt(cfg.maxTeamWingWidth, 10) || 560);
+
+      [homeWing, awayWing].forEach((wing) => {
+        wing.style.width = "auto";
+        wing.style.flex = "0 0 auto";
+      });
+      [homeName, awayName].forEach((el) => {
+        el.style.maxWidth = "none";
+      });
+
+      const homeNatural = Math.ceil(homeWing.getBoundingClientRect().width);
+      const awayNatural = Math.ceil(awayWing.getBoundingClientRect().width);
+      const equalWidth = Math.max(minWingWidth, Math.min(maxWingWidth, homeNatural, awayNatural, Math.max(homeNatural, awayNatural)));
+
+      [homeWing, awayWing].forEach((wing) => {
+        wing.style.width = `${equalWidth}px`;
+        wing.style.flex = `0 0 ${equalWidth}px`;
+      });
+      [homeName, awayName].forEach((el) => {
+        el.style.maxWidth = "100%";
+      });
+    }
+
     function applySocialStyles(cfg) {
       const accent = cfg.socialAccentColor || cfg.accentColor || "#e3b857";
       const bg = cfg.socialBgColor || "rgba(14, 16, 22, 0.94)";
@@ -672,6 +697,8 @@
       homeName.style.color = cfg.text1Color || "#ffffff";
       awayName.style.color = cfg.text2Color || "#ffffff";
 
+      syncEqualTeamWings(homeWing, awayWing, homeName, awayName, cfg);
+
       const scoreSize = parseInt(cfg.scoreBoxSize, 10) || 48;
       const scoreColor = cfg.scoreTextColor || accent;
       const homeScore = document.getElementById("homeScore");
@@ -751,4 +778,3 @@
   </script>
 </body>
 </html>
-```[cite: 15, 16]
