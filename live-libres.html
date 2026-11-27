@@ -1,303 +1,799 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=1920, height=1080">
-  <title>Live Tiros Libres — Studio TF 2.0</title>
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;1,700;1,800&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tiempo Fuera — Tiros Libres (Live)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet" />
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --tf-accent: #e11d2e;
+      --tf-accent-2: #ff3b4b;
+      --tf-bg-dark: rgba(14, 16, 22, 0.94);
+      --tf-bg-card: rgba(22, 25, 34, 0.92);
+      --tf-text: #ffffff;
+      --tf-text-muted: rgba(255, 255, 255, 0.72);
+      --tf-border: rgba(255, 255, 255, 0.16);
+      --tf-gold: #facc15;
+      --tf-ok: #22c55e;
+      --tf-miss: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
     html, body {
-      width: 1920px;
-      height: 1080px;
-      overflow: hidden;
+      width: 100%;
+      height: 100%;
       background: transparent;
-      font-family: 'Barlow Condensed', system-ui, sans-serif;
-      color: #ffffff;
+      overflow: hidden;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      color: var(--tf-text);
+      user-select: none;
     }
 
-    .scene-root {
+    .hidden {
+      display: none !important;
+    }
+
+    .stage {
       position: relative;
-      width: 1920px;
-      height: 1080px;
-      opacity: 0;
-      transform: translateY(18px);
-      transition: opacity 0.22s ease, transform 0.22s ease;
-    }
-    .scene-root.is-visible {
-      opacity: 1;
-      transform: translateY(0);
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
     }
 
-    .libres-banner {
+    .overlay-wrap {
       position: absolute;
-      left: 64px;
-      right: 64px;
-      bottom: 44px;
-      display: grid;
-      grid-template-columns: auto 1.45fr auto auto auto;
-      align-items: center;
-      gap: 22px;
-      background: rgba(16, 19, 26, 0.95);
-      border: 2px solid rgba(56, 189, 248, 0.55);
-      border-radius: 12px;
-      padding: 16px 26px;
-      box-shadow: 0 14px 36px rgba(0, 0, 0, 0.6);
+      left: 50%;
+      bottom: 36px;
+      transform: translateX(-50%);
+      width: calc(100% - 32px);
+      max-width: 720px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: opacity 0.25s ease, transform 0.25s ease;
     }
 
-    .comp-brand {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding-right: 18px;
-      border-right: 1px solid rgba(255, 255, 255, 0.14);
-    }
-    .comp-logo {
-      width: 66px;
-      height: 66px;
-      object-fit: contain;
-      display: none;
-    }
-    .comp-logo.has-img { display: block; }
-    .comp-title {
-      font-size: 20px;
-      font-weight: 800;
-      text-transform: uppercase;
-      color: #38bdf8;
-      letter-spacing: 0.6px;
-      line-height: 1.05;
-    }
-    .comp-stage {
-      font-size: 16px;
-      font-weight: 700;
-      text-transform: uppercase;
-      color: #cbd5e1;
-      letter-spacing: 0.8px;
-      margin-top: 2px;
+    .overlay-wrap.is-hidden {
+      opacity: 0;
+      transform: translate(-50%, 16px);
+      pointer-events: none;
     }
 
-    .player-section {
+    /* CABECERA SUPERIOR COMPACTA CON LOGO DEL TORNEO */
+    .top-bar {
       display: flex;
       align-items: center;
-      gap: 16px;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 8px 14px;
+      background: var(--tf-bg-dark);
+      border: 1px solid var(--tf-border);
+      border-left: 4px solid var(--tf-accent);
+      border-radius: 10px;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(8px);
+    }
+
+    .tournament-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
       min-width: 0;
     }
-    .team-logo-box {
-      width: 64px;
-      height: 64px;
+
+    .tournament-logo-box {
+      width: 38px;
+      height: 38px;
       border-radius: 8px;
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.14);
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 5px;
+      overflow: hidden;
       flex-shrink: 0;
     }
-    .team-logo-box img {
+
+    .tournament-logo-box img {
       width: 100%;
       height: 100%;
       object-fit: contain;
-      display: none;
-    }
-    .team-logo-box img.has-img { display: block; }
-    .team-logo-fallback {
-      font-size: 14px;
-      font-weight: 800;
-      color: #94a3b8;
-      text-transform: uppercase;
+      padding: 3px;
     }
 
-    .player-name {
-      font-size: 42px;
+    .tournament-logo-fallback {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 900;
+      font-size: 16px;
+      letter-spacing: 0.04em;
+      color: var(--tf-accent-2);
+    }
+
+    .event-meta {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .event-title {
+      font-family: 'Barlow Condensed', sans-serif;
       font-weight: 800;
-      font-style: italic;
+      font-size: 19px;
+      line-height: 1.05;
+      letter-spacing: 0.04em;
       text-transform: uppercase;
-      line-height: 1;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
-    .player-sub {
-      font-size: 20px;
+
+    .event-subtitle {
+      font-size: 11px;
       font-weight: 700;
-      color: #38bdf8;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-top: 3px;
+      color: var(--tf-text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .clock-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 8px;
+      background: var(--tf-accent);
+      color: #ffffff;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 800;
+      font-size: 24px;
+      line-height: 1;
+      letter-spacing: 0.04em;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+    }
+
+    .clock-pill.warning {
+      background: #d97706;
+    }
+
+    .clock-pill.danger {
+      background: #dc2626;
+      animation: pulseClock 0.6s infinite alternate;
+    }
+
+    @keyframes pulseClock {
+      from { transform: scale(1); }
+      to { transform: scale(1.04); }
+    }
+
+    /* TARJETA PRINCIPAL DEL JUGADOR */
+    .player-card {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 18px;
+      background: var(--tf-bg-dark);
+      border: 1px solid var(--tf-border);
+      border-radius: 12px;
+      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.52);
+      backdrop-filter: blur(10px);
+    }
+
+    .player-identity {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .player-logo-badge {
+      width: 52px;
+      height: 52px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .player-logo-badge img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      padding: 4px;
+    }
+
+    .player-names {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .player-first-name {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 900;
+      font-size: 36px;
+      line-height: 0.96;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      color: #ffffff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .player-last-name {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 22px;
+      line-height: 1.05;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--tf-text-muted);
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .player-club {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--tf-accent-2);
+      margin-top: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* PUNTAJE Y RONDAS DE TIROS LIBRES */
+    .score-panel {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .score-label {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--tf-text-muted);
+    }
+
+    .score-value {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 900;
+      font-size: 46px;
+      line-height: 0.92;
+      color: #ffffff;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
     }
 
     .shots-strip {
       display: flex;
       flex-wrap: wrap;
-      max-width: 310px;
-      gap: 6px;
       align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 10px 14px;
+      background: var(--tf-bg-card);
+      border: 1px solid var(--tf-border);
+      border-radius: 10px;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.42);
     }
-    .ball-dot {
-      width: 28px;
+
+    .shots-strip-label {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--tf-text-muted);
+    }
+
+    .shots-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .shot-pill {
+      min-width: 28px;
       height: 28px;
-      border-radius: 50%;
+      padding: 0 8px;
+      border-radius: 6px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      font-size: 14px;
+      font-family: 'Barlow Condensed', sans-serif;
       font-weight: 800;
+      font-size: 15px;
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      color: var(--tf-text-muted);
     }
-    .ball-dot.normal { background: #0284c7; color: #fff; }
-    .ball-dot.money { background: #facc15; color: #111; }
-    .ball-dot.half { background: #16a34a; color: #fff; }
-    .ball-dot.miss { background: rgba(255, 255, 255, 0.12); color: #94a3b8; }
 
-    .stat-box {
-      text-align: center;
-      background: rgba(10, 12, 17, 0.85);
+    .shot-pill.hit {
+      background: var(--tf-ok);
+      border-color: var(--tf-ok);
+      color: #052e16;
+    }
+
+    .shot-pill.miss {
+      background: rgba(239, 68, 68, 0.22);
+      border-color: rgba(239, 68, 68, 0.55);
+      color: #fca5a5;
+    }
+
+    /* ESTADO DE ESPERA: LOGO DEL TORNEO + REGLAS (SIN JUGADOR SELECCIONADO) */
+    .idle-card {
+      display: grid;
+      grid-template-columns: 112px 1fr;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 20px;
+      background: var(--tf-bg-dark);
+      border: 1px solid var(--tf-border);
+      border-left: 5px solid var(--tf-accent);
+      border-radius: 12px;
+      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.52);
+      backdrop-filter: blur(10px);
+    }
+
+    .idle-logo-frame {
+      width: 112px;
+      height: 96px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.06);
       border: 1px solid rgba(255, 255, 255, 0.14);
-      border-radius: 8px;
-      padding: 8px 18px;
-      min-width: 126px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
+      overflow: hidden;
     }
-    .stat-box small {
-      display: block;
-      font-size: 14px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      color: #94a3b8;
+
+    .idle-logo-frame img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    .idle-logo-placeholder {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 900;
+      font-size: 24px;
+      text-align: center;
+      line-height: 1;
+      color: var(--tf-accent-2);
+    }
+
+    .idle-rules-content {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .idle-rules-tag {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
+      color: var(--tf-accent-2);
     }
-    .stat-val {
-      font-size: 52px;
+
+    .idle-rules-heading {
+      font-family: 'Barlow Condensed', sans-serif;
       font-weight: 800;
+      font-size: 26px;
       line-height: 1;
-      font-variant-numeric: tabular-nums;
-      color: #38bdf8;
-    }
-    .clock-val {
-      font-size: 52px;
-      font-weight: 800;
-      line-height: 1;
-      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
       color: #ffffff;
     }
-    .clock-val.danger { color: #ef4444; }
-    .hidden { display: none !important; }
+
+    .idle-rules-text {
+      font-size: 13px;
+      line-height: 1.42;
+      color: var(--tf-text-muted);
+      white-space: pre-line;
+    }
+
+    @media (max-width: 640px) {
+      .overlay-wrap {
+        bottom: 18px;
+        max-width: 720px;
+      }
+
+      .player-first-name {
+        font-size: 28px;
+      }
+
+      .player-last-name {
+        font-size: 18px;
+      }
+
+      .score-value {
+        font-size: 38px;
+      }
+
+      .idle-card {
+        grid-template-columns: 84px 1fr;
+        gap: 12px;
+        padding: 12px 14px;
+      }
+
+      .idle-logo-frame {
+        width: 84px;
+        height: 76px;
+      }
+    }
   </style>
 </head>
 <body>
-  <div class="scene-root" id="sceneRoot">
-    <div class="libres-banner" id="libresBanner">
-      <div class="comp-brand">
-        <img class="comp-logo" id="compLogo" alt="">
-        <div>
-          <div class="comp-title" id="compTitle">TIROS LIBRES</div>
-          <div class="comp-stage" id="compStage">CLASIFICATORIA</div>
+  <div class="stage">
+    <div id="overlayWrap" class="overlay-wrap">
+      <!-- BARRA SUPERIOR: LOGO DEL TORNEO + TÍTULO + RELOJ (SOLO SI APLICA) -->
+      <div class="top-bar">
+        <div class="tournament-brand">
+          <div class="tournament-logo-box">
+            <img id="topTournamentLogo" alt="Logo Torneo" class="hidden" />
+            <span id="topTournamentFallback" class="tournament-logo-fallback">TF</span>
+          </div>
+          <div class="event-meta">
+            <div id="eventTitle" class="event-title">CONCURSO DE TIROS LIBRES</div>
+            <div id="eventSubtitle" class="event-subtitle">COMPETENCIA ESPECIAL</div>
+          </div>
+        </div>
+        <div id="clockPill" class="clock-pill hidden">01:00</div>
+      </div>
+
+      <!-- ESTADO DE ESPERA: SIN JUGADOR SELECCIONADO -> LOGO DEL TORNEO + REGLAS -->
+      <div id="idleStateCard" class="idle-card">
+        <div class="idle-logo-frame">
+          <img id="idleTournamentLogo" alt="Logo del Torneo" class="hidden" />
+          <div id="idleTournamentFallback" class="idle-logo-placeholder">TORNEO</div>
+        </div>
+        <div class="idle-rules-content">
+          <div id="idleTag" class="idle-rules-tag">EN ESPERA DE PARTICIPANTE</div>
+          <div id="idleTitle" class="idle-rules-heading">REGLAS DEL CONCURSO</div>
+          <div id="idleRulesText" class="idle-rules-text">Serie de lanzamientos desde la línea de tiros libres. Cada lanzamiento convertido suma puntos según la ronda. En caso de igualdad, se define por desempate.</div>
         </div>
       </div>
 
-      <div class="player-section">
-        <div class="team-logo-box">
-          <img id="teamLogoImg" alt="">
-          <span class="team-logo-fallback" id="teamLogoText">TL</span>
+      <!-- ESTADO ACTIVO: JUGADOR SELECCIONADO -->
+      <div id="activePlayerSection" class="hidden">
+        <div class="player-card">
+          <div class="player-identity">
+            <div class="player-logo-badge">
+              <img id="playerTournamentLogo" alt="Logo Torneo" class="hidden" />
+              <span id="playerBadgeFallback" class="tournament-logo-fallback">1PT</span>
+            </div>
+            <div class="player-names">
+              <div id="playerFirstName" class="player-first-name">JUGADOR</div>
+              <div id="playerLastName" class="player-last-name">APELLIDO</div>
+              <div id="playerClub" class="player-club">CLUB / EQUIPO</div>
+            </div>
+          </div>
+
+          <div class="score-panel">
+            <div class="score-label">PUNTOS</div>
+            <div id="playerScore" class="score-value">0</div>
+          </div>
         </div>
-        <div>
-          <div class="player-name" id="playerName">ESPERANDO JUGADOR</div>
-          <div class="player-sub" id="playerSub">SUPERAR: 0 PTS</div>
+
+        <div id="shotsStrip" class="shots-strip">
+          <span class="shots-strip-label">LANZAMIENTOS</span>
+          <div id="shotsPills" class="shots-pills"></div>
         </div>
-      </div>
-
-      <div class="shots-strip" id="shotsStrip"></div>
-
-      <div class="stat-box">
-        <small>Puntaje</small>
-        <div class="stat-val" id="scoreVal">0</div>
-      </div>
-
-      <div class="stat-box" id="clockBox">
-        <small id="clockLabel">Tiempo</small>
-        <div class="clock-val" id="clockVal">1:00.0</div>
       </div>
     </div>
   </div>
 
-  <script type="module">
-    import { db, DB_PATH, ref, onValue } from "./js/firebase.js";
+  <!-- Firebase Compat (opcional si se pasa ?dbUrl= o existe configuración global) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
-    let modData = { config: {}, live: {} };
+  <script>
+    (function () {
+      const DEFAULT_RULES =
+        'Serie de lanzamientos desde la línea de tiros libres.\n' +
+        'Cada tiro convertido suma 1 punto (o según la ronda configurada).\n' +
+        'Selecciona un participante desde Control para iniciar.';
 
-    function renderScene() {
-      const cfg = modData.config?.libres || {};
-      const live = modData.live?.libres || {};
-
-      const isVisible = modData.config?.enabledLibres !== false && Boolean(live.visible);
-      document.getElementById("sceneRoot").classList.toggle("is-visible", isVisible);
-
-      document.getElementById("compTitle").textContent = cfg.title || "CONCURSO DE TIROS LIBRES";
-      document.getElementById("compStage").textContent = cfg.stage || "";
-
-      const compLogoEl = document.getElementById("compLogo");
-      if (modData.config?.compLogo) {
-        compLogoEl.src = modData.config.compLogo;
-        compLogoEl.classList.add("has-img");
-      } else {
-        compLogoEl.classList.remove("has-img");
-      }
-
-      const p = live.player || {};
-      document.getElementById("playerName").textContent = p.name || "ESPERANDO JUGADOR";
-      const target = live.targetScore ?? 0;
-      const metaParts = [p.team, p.cat].filter(Boolean).join(" • ");
-      document.getElementById("playerSub").textContent =
-        `${metaParts ? `${metaParts}  |  ` : ""}A SUPERAR: ${target} PTS`;
-
-      const teamLogoImg = document.getElementById("teamLogoImg");
-      const teamLogoText = document.getElementById("teamLogoText");
-      if (live.teamLogo) {
-        teamLogoImg.src = live.teamLogo;
-        teamLogoImg.classList.add("has-img");
-        teamLogoText.classList.add("hidden");
-      } else {
-        teamLogoImg.classList.remove("has-img");
-        teamLogoText.textContent = (p.team || "TL").slice(0, 3);
-        teamLogoText.classList.remove("hidden");
-      }
-
-      document.getElementById("scoreVal").textContent = live.score ?? 0;
-
-      const clockBox = document.getElementById("clockBox");
-      const clockVal = document.getElementById("clockVal");
-      if (cfg.useTimer === false) {
-        if (Number(cfg.maxShots) > 0) {
-          clockBox.classList.remove("hidden");
-          document.getElementById("clockLabel").textContent = "Tiros";
-          clockVal.textContent = `${(live.shots || []).length}/${cfg.maxShots}`;
-          clockVal.classList.remove("danger");
-        } else {
-          clockBox.classList.add("hidden");
+      const state = {
+        visible: true,
+        config: {
+          title: 'CONCURSO DE TIROS LIBRES',
+          subtitle: 'COMPETENCIA ESPECIAL',
+          tournamentLogo: '',
+          rules: DEFAULT_RULES,
+          useTimer: false,
+          showShots: true,
+          shotsCount: 10,
+          accentColor: '#e11d2e',
+          bgColor: 'rgba(14, 16, 22, 0.94)',
+          textColor: '#ffffff'
+        },
+        live: {
+          activePlayerId: null,
+          player: null,
+          score: 0,
+          shots: [], // array de null | true | false
+          timerSeconds: null,
+          timerRunning: false,
+          customTimerOverride: null
         }
-      } else {
-        clockBox.classList.remove("hidden");
-        document.getElementById("clockLabel").textContent = "Tiempo";
-        clockVal.textContent = live.clockText || "1:00.0";
-        clockVal.classList.toggle("danger", Boolean(live.isDangerTime));
+      };
+
+      const els = {
+        overlayWrap: document.getElementById('overlayWrap'),
+        topTournamentLogo: document.getElementById('topTournamentLogo'),
+        topTournamentFallback: document.getElementById('topTournamentFallback'),
+        eventTitle: document.getElementById('eventTitle'),
+        eventSubtitle: document.getElementById('eventSubtitle'),
+        clockPill: document.getElementById('clockPill'),
+        idleStateCard: document.getElementById('idleStateCard'),
+        idleTournamentLogo: document.getElementById('idleTournamentLogo'),
+        idleTournamentFallback: document.getElementById('idleTournamentFallback'),
+        idleRulesText: document.getElementById('idleRulesText'),
+        activePlayerSection: document.getElementById('activePlayerSection'),
+        playerTournamentLogo: document.getElementById('playerTournamentLogo'),
+        playerBadgeFallback: document.getElementById('playerBadgeFallback'),
+        playerFirstName: document.getElementById('playerFirstName'),
+        playerLastName: document.getElementById('playerLastName'),
+        playerClub: document.getElementById('playerClub'),
+        playerScore: document.getElementById('playerScore'),
+        shotsStrip: document.getElementById('shotsStrip'),
+        shotsPills: document.getElementById('shotsPills')
+      };
+
+      function splitFullName(fullName) {
+        const clean = String(fullName || '').trim().replace(/\s+/g, ' ');
+        if (!clean) return { firstName: 'PARTICIPANTE', lastName: '' };
+        const parts = clean.split(' ');
+        if (parts.length === 1) {
+          return { firstName: parts[0], lastName: '' };
+        }
+        return {
+          firstName: parts.slice(0, -1).join(' '),
+          lastName: parts.slice(-1).join(' ')
+        };
       }
 
-      document.getElementById("shotsStrip").innerHTML = (live.shots || []).map((s) => {
-        if (s.type === "normal") return `<span class="ball-dot normal">+${s.pts}</span>`;
-        if (s.type === "money") return `<span class="ball-dot money">+${s.pts}</span>`;
-        if (s.type === "half") return `<span class="ball-dot half">+${s.pts}</span>`;
-        return `<span class="ball-dot miss">✕</span>`;
-      }).join("");
-    }
+      function formatClock(sec) {
+        const total = Math.max(0, Math.floor(Number(sec) || 0));
+        const mins = Math.floor(total / 60);
+        const rem = total % 60;
+        return `${String(mins).padStart(2, '0')}:${String(rem).padStart(2, '0')}`;
+      }
 
-    onValue(ref(db, `${DB_PATH}/modules/especiales`), (snap) => {
-      if (!snap.exists()) return;
-      const val = snap.val();
-      modData = {
-        config: val.config || {},
-        live: val.live || {}
-      };
-      renderScene();
-    });
+      function applyThemeColors() {
+        const root = document.documentElement;
+        const accent = state.config.accentColor || '#e11d2e';
+        const bgDark = state.config.bgColor || 'rgba(14, 16, 22, 0.94)';
+        const text = state.config.textColor || '#ffffff';
+
+        root.style.setProperty('--tf-accent', accent);
+        root.style.setProperty('--tf-accent-2', accent);
+        root.style.setProperty('--tf-bg-dark', bgDark);
+        root.style.setProperty('--tf-text', text);
+      }
+
+      function applyTournamentLogo(logoUrl) {
+        const url = String(logoUrl || '').trim();
+        const imgs = [els.topTournamentLogo, els.idleTournamentLogo, els.playerTournamentLogo];
+        const fallbacks = [els.topTournamentFallback, els.idleTournamentFallback, els.playerBadgeFallback];
+
+        if (url) {
+          imgs.forEach((img) => {
+            img.src = url;
+            img.classList.remove('hidden');
+            img.onerror = () => img.classList.add('hidden');
+          });
+          fallbacks.forEach((fb) => fb.classList.add('hidden'));
+        } else {
+          imgs.forEach((img) => {
+            img.removeAttribute('src');
+            img.classList.add('hidden');
+          });
+          fallbacks.forEach((fb) => fb.classList.remove('hidden'));
+        }
+      }
+
+      function shouldShowTimer() {
+        const hasPlayer = Boolean(
+          state.live.activePlayerId ||
+          (state.live.player && (state.live.player.name || state.live.player.firstName))
+        );
+        if (!hasPlayer) return false;
+
+        if (typeof state.live.customTimerOverride === 'boolean') {
+          return state.live.customTimerOverride;
+        }
+        return Boolean(state.config.useTimer);
+      }
+
+      function renderShots() {
+        if (!state.config.showShots) {
+          els.shotsStrip.classList.add('hidden');
+          return;
+        }
+
+        const totalShots = Math.max(1, Number(state.config.shotsCount) || 10);
+        const shots = Array.isArray(state.live.shots) ? state.live.shots : [];
+        els.shotsStrip.classList.remove('hidden');
+        els.shotsPills.innerHTML = '';
+
+        for (let i = 0; i < totalShots; i++) {
+          const val = shots[i];
+          const pill = document.createElement('span');
+          pill.className = 'shot-pill';
+          if (val === true) {
+            pill.classList.add('hit');
+            pill.textContent = '✓';
+          } else if (val === false) {
+            pill.classList.add('miss');
+            pill.textContent = '✕';
+          } else {
+            pill.textContent = String(i + 1);
+          }
+          els.shotsPills.appendChild(pill);
+        }
+      }
+
+      function render() {
+        applyThemeColors();
+        applyTournamentLogo(state.config.tournamentLogo);
+
+        els.overlayWrap.classList.toggle('is-hidden', !state.visible);
+        els.eventTitle.textContent = state.config.title || 'CONCURSO DE TIROS LIBRES';
+        els.eventSubtitle.textContent = state.config.subtitle || 'COMPETENCIA ESPECIAL';
+
+        const showClock = shouldShowTimer();
+        els.clockPill.classList.toggle('hidden', !showClock);
+        if (showClock) {
+          const sec = state.live.timerSeconds ?? 60;
+          els.clockPill.textContent = formatClock(sec);
+          els.clockPill.classList.remove('warning', 'danger');
+          if (sec <= 5) els.clockPill.classList.add('danger');
+          else if (sec <= 15) els.clockPill.classList.add('warning');
+        }
+
+        const p = state.live.player;
+        const hasActivePlayer = Boolean(
+          state.live.activePlayerId && p && (p.name || p.firstName || p.lastName)
+        );
+
+        if (!hasActivePlayer) {
+          els.idleStateCard.classList.remove('hidden');
+          els.activePlayerSection.classList.add('hidden');
+          els.idleRulesText.textContent =
+            (state.config.rules && String(state.config.rules).trim()) || DEFAULT_RULES;
+          return;
+        }
+
+        els.idleStateCard.classList.add('hidden');
+        els.activePlayerSection.classList.remove('hidden');
+
+        const split = (p.firstName || p.lastName)
+          ? { firstName: p.firstName || '', lastName: p.lastName || '' }
+          : splitFullName(p.name);
+
+        els.playerFirstName.textContent = split.firstName || 'JUGADOR';
+        els.playerLastName.textContent = split.lastName || '';
+        els.playerLastName.classList.toggle('hidden', !split.lastName);
+        els.playerClub.textContent = p.club || p.team || '';
+        els.playerClub.classList.toggle('hidden', !(p.club || p.team));
+        els.playerScore.textContent = Number(state.live.score ?? p.score ?? 0);
+
+        renderShots();
+      }
+
+      function mergePayload(payload) {
+        if (!payload || typeof payload !== 'object') return;
+
+        if (typeof payload.visible === 'boolean') {
+          state.visible = payload.visible;
+        }
+        if (payload.config && typeof payload.config === 'object') {
+          state.config = { ...state.config, ...payload.config };
+        }
+        if (payload.marcadorConfig && typeof payload.marcadorConfig === 'object') {
+          if (!state.config.tournamentLogo && payload.marcadorConfig.logoLiga) {
+            state.config.tournamentLogo = payload.marcadorConfig.logoLiga;
+          }
+          if (!payload.config?.accentColor && payload.marcadorConfig.accentColor) {
+            state.config.accentColor = payload.marcadorConfig.accentColor;
+          }
+        }
+        if (payload.live && typeof payload.live === 'object') {
+          state.live = { ...state.live, ...payload.live };
+        }
+
+        if ('activePlayerId' in payload) state.live.activePlayerId = payload.activePlayerId;
+        if ('player' in payload) state.live.player = payload.player;
+        if ('score' in payload) state.live.score = payload.score;
+        if ('shots' in payload) state.live.shots = payload.shots;
+        if ('timerSeconds' in payload) state.live.timerSeconds = payload.timerSeconds;
+        if ('timerRunning' in payload) state.live.timerRunning = payload.timerRunning;
+        if ('customTimerOverride' in payload) {
+          state.live.customTimerOverride = payload.customTimerOverride;
+        }
+
+        render();
+      }
+
+      window.addEventListener('message', (ev) => {
+        if (ev && ev.data) mergePayload(ev.data);
+      });
+
+      if ('BroadcastChannel' in window) {
+        const bc = new BroadcastChannel('tiempofuera_especiales_libres');
+        bc.onmessage = (ev) => {
+          if (ev && ev.data) mergePayload(ev.data);
+        };
+      }
+
+      window.addEventListener('storage', (ev) => {
+        if (ev.key === 'tf_libres_live_state' && ev.newValue) {
+          try {
+            mergePayload(JSON.parse(ev.newValue));
+          } catch (_) {}
+        }
+      });
+
+      try {
+        const saved = localStorage.getItem('tf_libres_live_state');
+        if (saved) mergePayload(JSON.parse(saved));
+      } catch (_) {}
+
+      const params = new URLSearchParams(window.location.search);
+      const dbUrl = params.get('dbUrl') || window.TF_FIREBASE_DB_URL || '';
+      const basePath = params.get('path') || 'modules/especiales/libres';
+
+      if (dbUrl && window.firebase) {
+        try {
+          if (!firebase.apps.length) {
+            firebase.initializeApp({
+              databaseURL: dbUrl,
+              ...(window.TF_FIREBASE_CONFIG || {})
+            });
+          }
+          const db = firebase.database();
+          db.ref(basePath).on('value', (snap) => {
+            if (snap.exists()) mergePayload(snap.val());
+          });
+          db.ref('marcadores/config').on('value', (snap) => {
+            if (snap.exists()) mergePayload({ marcadorConfig: snap.val() });
+          });
+        } catch (err) {
+          console.warn('Firebase sync error:', err);
+        }
+      }
+
+      render();
+    })();
   </script>
 </body>
 </html>
