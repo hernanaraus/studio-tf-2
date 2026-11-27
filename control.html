@@ -1,1284 +1,1113 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tiempo Fuera — Control de Competencias Especiales</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Control — Studio TF 2.0</title>
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/control.css">
   <style>
-    :root {
-      --bg-app: #0c0e14;
-      --bg-panel: #141822;
-      --bg-card: #1b202d;
-      --bg-input: #10131b;
-      --accent: #e11d2e;
-      --accent-hover: #f42536;
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --border: rgba(255, 255, 255, 0.11);
-      --ok: #22c55e;
-      --warn: #eab308;
-      --danger: #ef4444;
-      --gold: #facc15;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      background: var(--bg-app);
-      color: var(--text-main);
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      min-height: 100vh;
-      padding: 14px;
-    }
-
-    .hidden {
-      display: none !important;
-    }
-
-    .app-shell {
-      max-width: 1380px;
-      margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-
-    /* TOPBAR */
-    .topbar {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      background: var(--bg-panel);
-      border: 1px solid var(--border);
-      border-left: 4px solid var(--accent);
-      border-radius: 12px;
-      padding: 12px 16px;
-    }
-
-    .brand-group {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .logo-preview {
-      width: 44px;
-      height: 44px;
-      border-radius: 8px;
-      background: var(--bg-input);
-      border: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      flex-shrink: 0;
-      font-family: 'Barlow Condensed', sans-serif;
-      font-weight: 900;
-      font-size: 16px;
-      color: var(--accent);
-    }
-
-    .logo-preview img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      padding: 3px;
-    }
-
-    .brand-title {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-weight: 900;
-      font-size: 24px;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      line-height: 1;
-    }
-
-    .brand-sub {
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-top: 3px;
-    }
-
-    .topbar-actions {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 8px;
-    }
-
-    /* BOTONES Y CONTROLES */
-    button, select, input, textarea {
-      font-family: inherit;
-      color: var(--text-main);
-    }
-
-    button {
-      border: 1px solid var(--border);
-      background: var(--bg-card);
-      border-radius: 8px;
-      padding: 9px 13px;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.03em;
-      text-transform: uppercase;
+    .brand-link {
+      font-weight: 800;
+      letter-spacing: 1px;
       cursor: pointer;
-      transition: background 0.15s ease, transform 0.08s ease, border-color 0.15s ease;
+      user-select: none;
+      white-space: nowrap;
     }
-
-    button:hover {
-      background: #242b3c;
-      border-color: rgba(255, 255, 255, 0.24);
-    }
-
-    button:active {
-      transform: scale(0.98);
-    }
-
-    button.primary {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: #ffffff;
-    }
-
-    button.primary:hover {
-      background: var(--accent-hover);
-    }
-
-    button.success {
-      background: rgba(34, 197, 94, 0.16);
-      border-color: rgba(34, 197, 94, 0.45);
-      color: #86efac;
-    }
-
-    button.warn {
-      background: rgba(234, 179, 8, 0.16);
-      border-color: rgba(234, 179, 8, 0.45);
-      color: #fde047;
-    }
-
-    button.danger {
-      background: rgba(239, 68, 68, 0.16);
-      border-color: rgba(239, 68, 68, 0.45);
-      color: #fca5a5;
-    }
-
-    button.active-mode {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: #ffffff;
-    }
-
-    input, select, textarea {
-      background: var(--bg-input);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 9px 11px;
-      font-size: 13px;
-      width: 100%;
-    }
-
-    input:focus, select:focus, textarea:focus {
-      outline: none;
-      border-color: var(--accent);
-    }
-
-    /* LAYOUT PRINCIPAL: MESA + PUNTUACIÓN ARRIBA, PARTICIPANTES DEBAJO EN MÓVIL/TABLET */
-    .sp-layout-main {
-      display: grid;
-      grid-template-columns: 1.25fr 1fr;
-      gap: 14px;
-      align-items: start;
-    }
-
-    .left-stack {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      min-width: 0;
-    }
-
-    .right-stack {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      min-width: 0;
-    }
-
-    .panel {
-      background: var(--bg-panel);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .panel-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 10px;
-    }
-
-    .panel-title {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-weight: 800;
-      font-size: 20px;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-    }
-
-    .badge {
-      font-size: 11px;
-      font-weight: 700;
-      padding: 3px 8px;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.08);
-      color: var(--text-muted);
-      text-transform: uppercase;
-    }
-
-    .badge.live {
-      background: rgba(34, 197, 94, 0.18);
-      color: #86efac;
-    }
-
-    .badge.no-timer {
-      background: rgba(148, 163, 184, 0.16);
-      color: #cbd5e1;
-    }
-
-    /* JUGADOR ACTIVO Y RELOJ */
-    .active-player-bar {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 12px;
-    }
-
-    .active-player-info .label {
-      font-size: 10px;
-      font-weight: 800;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-    }
-
-    .active-player-info .name {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-weight: 900;
-      font-size: 28px;
-      line-height: 1.05;
-      text-transform: uppercase;
-      margin-top: 2px;
-    }
-
-    .active-player-info .meta {
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-top: 2px;
-    }
+    .brand-link span { color: var(--accent); }
 
     .score-box {
-      text-align: right;
-    }
-
-    .score-box .score-lbl {
-      font-size: 10px;
-      font-weight: 800;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-    }
-
-    .score-box .score-num {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-weight: 900;
-      font-size: 44px;
-      line-height: 0.95;
-      color: var(--gold);
-    }
-
-    /* BLOQUE DE RELOJ (OCULTO CUANDO NO APLICA) */
-    #hudClockBox {
-      background: var(--bg-card);
+      background: var(--bg-app);
       border: 1px solid var(--border);
       border-radius: 10px;
       padding: 12px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
-    }
-
-    .clock-readout-row {
-      display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-    }
-
-    .clock-display {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-weight: 900;
-      font-size: 40px;
-      line-height: 1;
-      letter-spacing: 0.04em;
-    }
-
-    #spTimerControlsGrid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
       gap: 8px;
     }
-
-    /* CONTROL PERSONALIZADO DE RELOJ */
-    .timer-mode-row {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      background: var(--bg-input);
+    .score-team-title { font-size: 0.85rem; font-weight: 800; letter-spacing: 0.6px; text-transform: uppercase; }
+    .score-num { font-size: 2.8rem; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+    .score-btns { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+    .score-btn {
+      background: var(--bg-elevated);
+      color: var(--text);
       border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 8px 10px;
+      border-radius: 6px;
+      padding: 6px 11px;
+      font-weight: 800;
+      cursor: pointer;
+      font-size: 0.85rem;
     }
+    .score-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .score-btn.minus:hover { border-color: var(--accent-2); color: #ff7b86; }
 
-    .timer-mode-label {
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      color: var(--text-muted);
-    }
-
-    .timer-mode-btns {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
-
-    .timer-mode-btns button {
-      padding: 6px 9px;
-      font-size: 11px;
-    }
-
-    /* CARROS Y TIROS */
-    .racks-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
-      gap: 10px;
-    }
-
-    .rack-card {
-      background: var(--bg-card);
+    .clock-card {
+      background: var(--bg-app);
       border: 1px solid var(--border);
       border-radius: 10px;
-      padding: 10px;
+      padding: 12px;
       display: flex;
       flex-direction: column;
       gap: 8px;
     }
-
-    .rack-card.money-rack {
-      border-color: rgba(250, 204, 21, 0.45);
-    }
-
-    .rack-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 6px;
-      font-size: 12px;
-      font-weight: 800;
-      text-transform: uppercase;
-    }
-
-    .rack-pts {
-      color: var(--gold);
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 17px;
-    }
-
-    .shots-row {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 5px;
-    }
-
-    .shot-btn {
-      padding: 8px 4px;
-      font-size: 11px;
-      font-weight: 800;
-      text-align: center;
+    .clock-main-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+    .clock-display { font-size: 2.2rem; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1; }
+    .period-pill {
+      background: var(--bg-elevated);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      padding: 5px 12px;
       border-radius: 6px;
-      background: var(--bg-input);
+      font-weight: 800;
+      font-size: 0.9rem;
+    }
+    .clock-controls { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+    .clock-input {
+      width: 90px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 6px;
+      padding: 5px 8px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-align: center;
     }
 
-    .shot-btn.hit {
-      background: var(--ok);
-      border-color: var(--ok);
-      color: #052e16;
-    }
+    .fouls-box { display: flex; flex-direction: column; gap: 6px; width: 100%; align-items: center; }
+    .fouls-pips { display: flex; gap: 5px; }
+    .foul-pip { width: 18px; height: 6px; border-radius: 3px; background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.25); }
+    .foul-pip.on { background: #ffe600; border-color: #111; }
+    .foul-pip.bonus { background: #ff1744; border-color: #fff; }
 
-    .shot-btn.money-ball:not(.hit) {
-      border-color: rgba(250, 204, 21, 0.55);
-      color: var(--gold);
-    }
+    .shot-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; }
+    .shot-num { font-size: 1.4rem; font-weight: 800; color: #ff5252; font-variant-numeric: tabular-nums; min-width: 48px; text-align: center; }
 
-    .shot-btn.money-ball.hit {
-      background: var(--gold);
-      border-color: var(--gold);
-      color: #1c1917;
+    .sp-comp-tabs { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; align-items: center; }
+    .sp-comp-tab {
+      background: var(--bg-app);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 7px 14px;
+      border-radius: 7px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      cursor: pointer;
+      text-transform: uppercase;
     }
-
-    /* PARTICIPANTES */
-    .add-player-form {
-      display: grid;
-      grid-template-columns: 1.2fr 1fr auto;
-      gap: 8px;
+    .sp-comp-tab.is-active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
     }
-
-    .participants-list {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      max-height: 460px;
-      overflow-y: auto;
+    .sp-comp-tab:disabled {
+      opacity: 0.42;
+      cursor: not-allowed;
     }
+    .sp-live-grid { display: grid; grid-template-columns: 1.25fr 1fr; gap: 12px; }
+    @media (max-width: 820px) { .sp-live-grid { grid-template-columns: 1fr; } }
 
-    .participant-row {
+    .sp-panel { background: var(--bg-app); border: 1px solid var(--border); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+    .sp-player-banner { display: flex; align-items: center; justify-content: space-between; gap: 10px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; flex-wrap: wrap; }
+    .sp-score-big { font-size: 2.5rem; font-weight: 800; color: var(--accent); line-height: 1; font-variant-numeric: tabular-nums; }
+    .sp-clock-big { font-size: 1.8rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+    .sp-shots-strip { display: flex; flex-wrap: wrap; gap: 6px; min-height: 30px; padding: 6px; background: var(--bg-surface); border: 1px dashed var(--border); border-radius: 7px; align-items: center; }
+    .sp-shot-chip { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 999px; padding: 2px 9px; font-size: 0.72rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; }
+    .sp-shot-chip.hit { border-color: #22c55e; color: #86efac; }
+    .sp-shot-chip.miss { border-color: #ef4444; color: #fca5a5; }
+    .sp-shot-chip.money { border-color: #e3b857; color: #fde68a; }
+    .sp-shot-chip.half { border-color: #f97316; color: #fdba74; }
+
+    .sp-leader-table { width: 100%; border-collapse: collapse; font-size: 0.76rem; }
+    .sp-leader-table th { text-align: left; color: var(--accent); border-bottom: 1px solid var(--border); padding: 5px 6px; font-size: 0.68rem; text-transform: uppercase; }
+    .sp-leader-table td { padding: 5px 6px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .sp-leader-row.is-selected { background: rgba(227, 184, 87, 0.14); }
+    .sp-leader-row.is-leader td:first-child { color: var(--accent); font-weight: 800; }
+
+    .sp-lock-banner {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 10px;
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 9px;
-      padding: 9px 11px;
+      flex-wrap: wrap;
+      background: rgba(227, 184, 87, 0.1);
+      border: 1px solid rgba(227, 184, 87, 0.35);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 0.76rem;
+      margin-bottom: 10px;
     }
-
-    .participant-row.is-active {
-      border-color: var(--accent);
-      background: rgba(225, 29, 46, 0.12);
-    }
-
-    .participant-main {
-      min-width: 0;
-      flex: 1;
-    }
-
-    .participant-name {
-      font-weight: 700;
-      font-size: 14px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .participant-club {
-      font-size: 11px;
-      color: var(--text-muted);
-    }
-
-    .participant-right {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-shrink: 0;
-    }
-
-    .participant-score {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-weight: 900;
-      font-size: 24px;
-      min-width: 34px;
-      text-align: right;
-      color: var(--gold);
-    }
-
-    .small-btn {
-      padding: 6px 9px;
-      font-size: 11px;
-    }
-
-    /* CONFIGURACIÓN RÁPIDA DE TORNEO / REGLAS */
-    .config-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-    }
-
-    .field-group {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .field-group.full {
-      grid-column: 1 / -1;
-    }
-
-    .field-group label {
-      font-size: 11px;
-      font-weight: 700;
+    .role-tag {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 0.68rem;
+      font-weight: 800;
       text-transform: uppercase;
-      color: var(--text-muted);
-    }
-
-    /* BREAKPOINTS: EN TABLET Y TELÉFONO, PARTICIPANTES SIEMPRE DEBAJO DE MESA Y PUNTAJE */
-    @media (max-width: 1180px) {
-      .sp-layout-main {
-        grid-template-columns: 1fr;
-      }
-
-      .right-stack {
-        order: 2;
-      }
-
-      .left-stack {
-        order: 1;
-      }
-    }
-
-    @media (max-width: 680px) {
-      body {
-        padding: 10px;
-      }
-
-      .add-player-form {
-        grid-template-columns: 1fr;
-      }
-
-      .config-grid {
-        grid-template-columns: 1fr;
-      }
-
-      #spTimerControlsGrid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-
-      .racks-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .participant-row {
-        flex-wrap: wrap;
-      }
-
-      .participant-right {
-        width: 100%;
-        justify-content: flex-end;
-      }
+      background: rgba(255,255,255,0.1);
     }
   </style>
 </head>
 <body>
-  <div class="app-shell">
-    <!-- TOPBAR -->
-    <header class="topbar">
-      <div class="brand-group">
-        <div id="headerLogoBox" class="logo-preview">TF</div>
-        <div>
-          <div id="headerEventTitle" class="brand-title">CONTROL COMPETENCIA ESPECIAL</div>
-          <div id="headerEventSub" class="brand-sub">Tiempo Fuera · Sincronización en vivo</div>
+  <div class="control-shell">
+    <header class="control-topbar">
+      <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+        <div class="brand-link" onclick="location.href='index.html'" title="Ir al menú principal">
+          CONTROL <span>TF 2.0</span>
         </div>
+        <span id="opRoleTag" class="role-tag">ADMIN</span>
+        <span id="opEmailLabel" style="font-size:0.72rem; color:var(--muted);"></span>
       </div>
 
-      <div class="topbar-actions">
-        <span id="timerStatusBadge" class="badge no-timer">SIN RELOJ</span>
-        <button id="btnToggleOverlay" class="success">OVERLAY: VISIBLE</button>
-        <button id="btnClearPlayer" class="warn">SIN JUGADOR (REGLAS)</button>
-        <button id="btnResetScore" class="danger">LIMPIAR TIROS</button>
+      <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+        <span id="conn-status" style="font-size: 0.73rem; color: var(--muted); margin-right: 4px;">Conectando...</span>
+        <button id="btn-studio" type="button" class="btn btn-ghost" style="padding: 5px 10px; font-size: 0.72rem;" onclick="location.href='studio.html'">Estudio</button>
+        <button id="btn-logout" type="button" class="btn btn-ghost" style="padding: 5px 10px; font-size: 0.72rem;">Salir</button>
       </div>
     </header>
 
-    <!-- CUERPO PRINCIPAL -->
-    <main class="sp-layout-main">
-      <!-- COLUMNA IZQUIERDA: MESA DE CONTROL, RELOJ (SI APLICA) Y ANOTACIÓN DE TIROS -->
-      <section class="left-stack">
-        <div class="panel">
-          <div class="panel-header">
-            <span class="panel-title">MESA DE CONTROL & PUNTUACIÓN</span>
-            <span id="syncIndicator" class="badge live">ENLACE ACTIVO</span>
+    <main id="modules-grid" class="modules-grid">
+      <section id="mod-marcadores" class="mod-card is-disabled" data-mod="marcadores">
+        <div class="mod-card-head">
+          <span class="mod-card-title">Marcadores Broadcast</span>
+          <div style="display: flex; gap: 6px; align-items: center;">
+            <span class="mod-badge">Deshabilitado en Estudio</span>
+            <button type="button" class="btn btn-ghost open-overlay-btn" data-url="live-marcador.html" style="padding: 4px 9px; font-size: 0.7rem;">Abrir Overlay</button>
           </div>
-
-          <!-- JUGADOR ACTIVO -->
-          <div class="active-player-bar">
-            <div class="active-player-info">
-              <div class="label">PARTICIPANTE EN CANCHA</div>
-              <div id="activePlayerName" class="name">NINGUNO (MOSTRANDO REGLAS)</div>
-              <div id="activePlayerClub" class="meta">Selecciona un participante de la lista</div>
-            </div>
+        </div>
+        <div class="mod-card-body">
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
             <div class="score-box">
-              <div class="score-lbl">PUNTOS TOTALES</div>
-              <div id="activePlayerScore" class="score-num">0</div>
+              <div id="lbl-team1" class="score-team-title">LOCAL</div>
+              <div id="val-points-1" class="score-num">0</div>
+              <div class="score-btns">
+                <button type="button" class="score-btn minus" data-p="1" data-d="-1">-1</button>
+                <button type="button" class="score-btn" data-p="1" data-d="1">+1</button>
+                <button type="button" class="score-btn" data-p="1" data-d="2">+2</button>
+                <button type="button" class="score-btn" data-p="1" data-d="3">+3</button>
+              </div>
+              <div class="fouls-box">
+                <span style="font-size:0.72rem; color:var(--muted); font-weight:700;">Faltas: <strong id="val-fouls-1">0</strong></span>
+                <div id="pips-fouls-1" class="fouls-pips"></div>
+                <div class="score-btns">
+                  <button type="button" class="score-btn minus" data-f="1" data-d="-1">- Falta</button>
+                  <button type="button" class="score-btn" data-f="1" data-d="1">+ Falta</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="score-box">
+              <div id="lbl-team2" class="score-team-title">VISITA</div>
+              <div id="val-points-2" class="score-num">0</div>
+              <div class="score-btns">
+                <button type="button" class="score-btn minus" data-p="2" data-d="-1">-1</button>
+                <button type="button" class="score-btn" data-p="2" data-d="1">+1</button>
+                <button type="button" class="score-btn" data-p="2" data-d="2">+2</button>
+                <button type="button" class="score-btn" data-p="2" data-d="3">+3</button>
+              </div>
+              <div class="fouls-box">
+                <span style="font-size:0.72rem; color:var(--muted); font-weight:700;">Faltas: <strong id="val-fouls-2">0</strong></span>
+                <div id="pips-fouls-2" class="fouls-pips"></div>
+                <div class="score-btns">
+                  <button type="button" class="score-btn minus" data-f="2" data-d="-1">- Falta</button>
+                  <button type="button" class="score-btn" data-f="2" data-d="1">+ Falta</button>
+                </div>
+              </div>
             </div>
           </div>
 
-          <!-- CONTROL PERSONALIZADO DE RELOJ -->
-          <div class="timer-mode-row">
-            <span class="timer-mode-label">RELOJ DE COMPETENCIA:</span>
-            <div class="timer-mode-btns">
-              <button id="modeAuto" class="active-mode" type="button">AUTO (ESTUDIO)</button>
-              <button id="modeForceOn" type="button">FORZAR RELOJ</button>
-              <button id="modeForceOff" type="button">OCULTAR RELOJ</button>
+          <div class="clock-card">
+            <div class="clock-main-row">
+              <div>
+                <div style="font-size:0.68rem; color:var(--muted); text-transform:uppercase; font-weight:700;">Reloj de Partido</div>
+                <div id="val-timer" class="clock-display">10:00</div>
+              </div>
+              <div style="display:flex; align-items:center; gap:6px;">
+                <span id="val-period" class="period-pill">Q1</span>
+                <button type="button" class="score-btn" id="btn-period-prev" title="Cuarto anterior">◀</button>
+                <button type="button" class="score-btn" id="btn-period-next" title="Siguiente cuarto">▶</button>
+              </div>
+            </div>
+
+            <div class="clock-controls">
+              <button type="button" class="btn" id="btn-clock-toggle" style="padding:5px 12px; font-size:0.75rem;">Iniciar</button>
+              <button type="button" class="btn btn-ghost" id="btn-clock-reset" style="padding:5px 10px; font-size:0.75rem;">Reset 10:00</button>
+              <input type="text" id="input-timer-set" class="clock-input" value="10:00" title="MM:SS">
+              <button type="button" class="btn btn-ghost" id="btn-timer-set" style="padding:5px 9px; font-size:0.75rem;">Fijar</button>
+            </div>
+
+            <div class="shot-row">
+              <span style="font-size:0.75rem; font-weight:700; color:var(--muted);">Reloj de Posesión (24s)</span>
+              <div style="display:flex; align-items:center; gap:6px;">
+                <span id="val-shotclock" class="shot-num">24</span>
+                <button type="button" class="score-btn" id="btn-shot-24">24s</button>
+                <button type="button" class="score-btn" id="btn-shot-14">14s</button>
+                <button type="button" class="score-btn minus" id="btn-shot-clear">Off</button>
+              </div>
             </div>
           </div>
 
-          <!-- RELOJ (SE OCULTA AUTOMÁTICAMENTE SI LA MODALIDAD NO USA TIEMPO) -->
-          <div id="hudClockBox" class="hidden">
-            <div class="clock-readout-row">
-              <span class="badge">CRONÓMETRO</span>
-              <div id="clockReadout" class="clock-display">01:00</div>
-            </div>
-            <div id="spTimerControlsGrid">
-              <button id="btnTimerToggle" class="primary" type="button">INICIAR / PAUSAR</button>
-              <button id="btnTimer60" type="button">1:00 OFICIAL</button>
-              <button id="btnTimer30" type="button">0:30 DESEMP.</button>
-              <button id="btnTimerSudden" type="button">M. SÚBITA</button>
-            </div>
+          <div style="display:flex; gap:8px; justify-content:space-between; flex-wrap:wrap;">
+            <button type="button" class="btn btn-ghost" id="btn-reset-fouls" style="padding:5px 10px; font-size:0.72rem;">Limpiar Faltas</button>
+            <button type="button" class="btn btn-ghost" id="btn-reset-all" style="padding:5px 10px; font-size:0.72rem;">Reiniciar Partido</button>
           </div>
+        </div>
+      </section>
 
-          <!-- GRILLA DE CARROS Y TIROS -->
-          <div id="racksGrid" class="racks-grid"></div>
+      <section id="mod-especiales" class="mod-card is-disabled" data-mod="especiales">
+        <div class="mod-card-head">
+          <span class="mod-card-title">Competencias Especiales (Triples / Tiros Libres)</span>
+          <div style="display: flex; gap: 6px; align-items: center; flex-wrap:wrap;">
+            <span class="mod-badge">Deshabilitado en Estudio</span>
+            <button type="button" class="btn btn-ghost open-overlay-btn" data-url="live-triples.html" style="padding: 4px 9px; font-size: 0.7rem;">Abrir live-triples</button>
+            <button type="button" class="btn btn-ghost open-overlay-btn" data-url="live-libres.html" style="padding: 4px 9px; font-size: 0.7rem;">Abrir live-libres</button>
+          </div>
         </div>
 
-        <!-- CONFIGURACIÓN RÁPIDA DE TORNEO / REGLAS / LOGO -->
-        <div class="panel">
-          <div class="panel-header">
-            <span class="panel-title">TORNEO, LOGO Y REGLAS</span>
-            <button id="btnSaveMeta" class="primary small-btn" type="button">APLICAR EN VIVO</button>
+        <div class="mod-card-body">
+          <div id="spLockBanner" class="sp-lock-banner">
+            <span id="spLockText">Estado de bloqueo: disponible para tomar control.</span>
+            <div style="display:flex; gap:6px;">
+              <button type="button" class="btn" id="btnTakeLock" style="padding:4px 10px; font-size:0.72rem;">Tomar Control</button>
+              <button type="button" class="btn btn-ghost" id="btnReleaseLock" style="padding:4px 10px; font-size:0.72rem;">Liberar</button>
+            </div>
           </div>
-          <div class="config-grid">
-            <div class="field-group">
-              <label for="inpTitle">Título de competencia</label>
-              <input id="inpTitle" type="text" placeholder="Ej: CONCURSO DE TRIPLES" />
+
+          <div class="sp-comp-tabs">
+            <button type="button" class="sp-comp-tab is-active" id="tabCompTriples" data-comp="triples">Concurso de Triples</button>
+            <button type="button" class="sp-comp-tab" id="tabCompLibres" data-comp="libres">Concurso de Tiros Libres</button>
+            <span id="spCompMetaBadge" style="font-size:0.72rem; color:var(--accent); font-weight:700; margin-left:auto;"></span>
+          </div>
+
+          <div class="sp-live-grid">
+            <div class="sp-panel">
+              <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                <select id="spPlayerSelect" style="flex:1; min-width:180px; background:var(--bg-surface); border:1px solid var(--border); color:var(--text); padding:6px 8px; border-radius:6px; font-size:0.8rem;">
+                  <option value="">-- Seleccionar Participante --</option>
+                </select>
+                <button type="button" class="btn btn-ghost" id="spClearPlayerBtn" style="padding:6px 10px; font-size:0.72rem;">Sin Jugador (Reglas)</button>
+                <select id="spRoundMode" style="background:var(--bg-surface); border:1px solid var(--border); color:var(--text); padding:6px 8px; border-radius:6px; font-size:0.78rem; font-weight:700;">
+                  <option value="OFICIAL">Ronda Oficial</option>
+                  <option value="DESEMPATE">Desempate</option>
+                </select>
+              </div>
+
+              <div class="sp-player-banner">
+                <div>
+                  <div id="spActivePlayerName" style="font-size:1.05rem; font-weight:800; text-transform:uppercase;">SIN JUGADOR SELECCIONADO</div>
+                  <div id="spActivePlayerSub" style="font-size:0.74rem; color:var(--muted);">Mostrando logo del torneo y reglas en pantalla</div>
+                </div>
+                <div style="display:flex; align-items:center; gap:14px;">
+                  <div style="text-align:right;">
+                    <div style="font-size:0.65rem; color:var(--muted); font-weight:700;">PUNTOS</div>
+                    <div id="spLiveScore" class="sp-score-big">0</div>
+                  </div>
+                  <div id="spClockControlBox" style="text-align:right;">
+                    <div style="font-size:0.65rem; color:var(--muted); font-weight:700;">TIEMPO</div>
+                    <div id="spLiveClock" class="sp-clock-big">60.0</div>
+                  </div>
+                </div>
+              </div>
+
+              <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+                <button type="button" class="btn" id="spShotHitBtn" style="padding:7px 12px; font-size:0.78rem;">+ Acierto</button>
+                <button type="button" class="btn btn-ghost" id="spShotMissBtn" style="padding:7px 12px; font-size:0.78rem;">✕ Fallo</button>
+                <button type="button" class="btn" id="spShotMoneyBtn" style="padding:7px 12px; font-size:0.78rem; background:#b45309;">+ Balón Especial</button>
+                <button type="button" class="btn" id="spShotHalfBtn" style="padding:7px 12px; font-size:0.78rem; background:#c2410c;">+ Media Cancha</button>
+                <button type="button" class="btn btn-ghost" id="spUndoShotBtn" style="padding:7px 10px; font-size:0.75rem;">↩ Deshacer</button>
+              </div>
+
+              <div id="spTimerButtonsRow" style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+                <button type="button" class="btn" id="spClockStartBtn" style="padding:5px 12px; font-size:0.74rem;">Iniciar Reloj</button>
+                <button type="button" class="btn btn-ghost" id="spClockPauseBtn" style="padding:5px 10px; font-size:0.74rem;">Pausar</button>
+                <button type="button" class="btn btn-ghost" id="spClockResetOfficialBtn" style="padding:5px 10px; font-size:0.74rem;">Reset Oficial</button>
+                <button type="button" class="btn btn-ghost" id="spClockResetTieBtn" style="padding:5px 10px; font-size:0.74rem;">Reset Desempate</button>
+              </div>
+
+              <div>
+                <div style="font-size:0.7rem; color:var(--muted); font-weight:700; margin-bottom:4px;">Historial de Tiros de la Ronda:</div>
+                <div id="spShotsStrip" class="sp-shots-strip">
+                  <span style="font-size:0.72rem; color:var(--muted);">Sin lanzamientos registrados</span>
+                </div>
+              </div>
+
+              <div style="display:flex; gap:8px; justify-content:space-between; flex-wrap:wrap;">
+                <button type="button" class="btn btn-ghost" id="spSaveBestBtn" style="padding:6px 12px; font-size:0.74rem;">Guardar Puntaje en Tabla</button>
+                <button type="button" class="btn btn-ghost" id="spClearRoundBtn" style="padding:6px 12px; font-size:0.74rem;">Limpiar Ronda Actual</button>
+              </div>
             </div>
-            <div class="field-group">
-              <label for="inpSubtitle">Subtítulo / Categoría</label>
-              <input id="inpSubtitle" type="text" placeholder="Ej: LIGA CENTRAL · FECHA 4" />
-            </div>
-            <div class="field-group full">
-              <label for="inpLogoUrl">URL Logo del Torneo (o heredado de Marcador)</label>
-              <input id="inpLogoUrl" type="url" placeholder="https://.../logo-torneo.png" />
-            </div>
-            <div class="field-group full">
-              <label for="inpRules">Reglas (visibles en overlay cuando no hay jugador seleccionado)</label>
-              <textarea id="inpRules" rows="3"></textarea>
+
+            <div class="sp-panel">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <strong style="font-size:0.8rem; color:var(--accent); text-transform:uppercase;">Tabla / Ranking en Vivo</strong>
+                <span id="spTargetInfo" style="font-size:0.72rem; color:var(--muted); font-weight:700;">A superar: 0 pts</span>
+              </div>
+              <table class="sp-leader-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Jugador</th>
+                    <th>Equipo</th>
+                    <th>Cat.</th>
+                    <th>Pts</th>
+                  </tr>
+                </thead>
+                <tbody id="spLeaderboardBody">
+                  <tr><td colspan="5" style="text-align:center; color:var(--muted); padding:12px;">Sin participantes</td></tr>
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- COLUMNA DERECHA: PARTICIPANTES (SIEMPRE DEBAJO EN MÓVIL/TABLET) -->
-      <aside class="right-stack">
-        <div class="panel">
-          <div class="panel-header">
-            <span class="panel-title">PARTICIPANTES</span>
-            <span id="participantsCount" class="badge">0 JUGADORES</span>
-          </div>
-
-          <form id="addPlayerForm" class="add-player-form">
-            <input id="inpPlayerName" type="text" placeholder="Nombre y Apellido" required />
-            <input id="inpPlayerClub" type="text" placeholder="Club / Equipo" />
-            <button type="submit" class="primary">+ AGREGAR</button>
-          </form>
-
-          <div id="participantsList" class="participants-list"></div>
-        </div>
-      </aside>
+      <section id="mod-tercios" class="mod-card is-disabled" data-mod="tercios"><div class="mod-card-head"><span class="mod-card-title">Tercios Inferiores</span><span class="mod-badge">Deshabilitado en Estudio</span></div></section>
+      <section id="mod-sponsors" class="mod-card is-disabled" data-mod="sponsors"><div class="mod-card-head"><span class="mod-card-title">Logos de Sponsors</span><span class="mod-badge">Deshabilitado en Estudio</span></div></section>
+      <section id="mod-auspiciadores" class="mod-card is-disabled" data-mod="auspiciadores"><div class="mod-card-head"><span class="mod-card-title">Logos de Auspiciadores</span><span class="mod-badge">Deshabilitado en Estudio</span></div></section>
+      <section id="mod-cg" class="mod-card is-disabled" data-mod="cg"><div class="mod-card-head"><span class="mod-card-title">Control de CG (Scroll)</span><span class="mod-badge">Deshabilitado en Estudio</span></div></section>
+      <section id="mod-equipos" class="mod-card is-disabled" data-mod="equipos"><div class="mod-card-head"><span class="mod-card-title">Presentación de Equipos</span><span class="mod-badge">Deshabilitado en Estudio</span></div></section>
+      <section id="mod-estadisticas" class="mod-card is-disabled" data-mod="estadisticas"><div class="mod-card-head"><span class="mod-card-title">Estadísticas</span><span class="mod-badge">Deshabilitado en Estudio</span></div></section>
     </main>
   </div>
 
-  <!-- Firebase Compat (opcional si se pasa ?dbUrl= o configuración global) -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+  <script type="module">
+    import { db, DB_PATH, ref, set, update, onValue, get, requireSession, signOutUser } from "./js/firebase.js";
 
-  <script>
-    (function () {
-      const DEFAULT_RULES =
-        '5 carros de 5 balones en distintas zonas de la cancha.\n' +
-        'Balón normal = 1 pt · Balón dinero / especial = 2 pts.\n' +
-        'Selecciona un participante para iniciar.';
+    const statusEl = document.getElementById("conn-status");
+    const PERIODS = ["Q1", "Q2", "Q3", "Q4", "OT1", "OT2"];
 
-      const state = {
-        visible: true,
-        config: {
-          title: 'CONCURSO DE TRIPLES',
-          subtitle: 'COMPETENCIA ESPECIAL',
-          tournamentLogo: '',
-          rules: DEFAULT_RULES,
-          useTimer: false, // Por defecto respeta si la modalidad del estudio usa reloj
-          showRacks: true,
-          racksCount: 5,
-          ballsPerRack: 5
-        },
-        live: {
-          activePlayerId: null,
-          score: 0,
-          racks: [],
-          timerSeconds: 60,
-          timerRunning: false,
-          customTimerOverride: null // null = Auto (Estudio), true = Forzar reloj, false = Ocultar reloj
-        },
-        participants: []
+    let currentUserEmail = "";
+    let currentUserRole = "admin";
+    let currentUserScope = "all";
+    let locksData = {};
+
+    let state = {
+      points_1: 0,
+      points_2: 0,
+      fouls_1: 0,
+      fouls_2: 0,
+      timer: 600,
+      clockRunning: false,
+      periodIndex: 0,
+      shotclock: 24
+    };
+
+    let sbConfig = {
+      name1: "LOCAL",
+      name2: "VISITA",
+      sources: {
+        points_1: "manual",
+        points_2: "manual",
+        timer: "scoresight",
+        period: "scoresight",
+        fouls_1: "scoresight",
+        fouls_2: "scoresight",
+        shotclock: "scoresight"
+      }
+    };
+
+    let especialesMod = {
+      enabled: false,
+      config: {
+        enabledTriples: true,
+        enabledLibres: false,
+        triples: { title: "CONCURSO DE TRIPLES", officialSec: 60, tiebreakSec: 30, useTimer: true, maxShots: 0, ptsNormal: 1, moneyEnabled: true, ptsMoney: 3, halfEnabled: true, ptsHalf: 3, targetOverride: 0, players: [] },
+        libres: { title: "CONCURSO DE TIROS LIBRES", officialSec: 60, tiebreakSec: 30, useTimer: true, maxShots: 0, ptsNormal: 1, moneyEnabled: false, ptsMoney: 2, halfEnabled: false, ptsHalf: 3, targetOverride: 0, players: [] }
+      },
+      live: {
+        activeComp: "triples",
+        triples: { playerId: "", roundMode: "OFICIAL", score: 0, clockSec: 60, running: false, shots: [] },
+        libres: { playerId: "", roundMode: "OFICIAL", score: 0, clockSec: 60, running: false, shots: [] }
+      }
+    };
+
+    let activeCompTab = "triples";
+    let lastClockTick = Date.now();
+    let lastSpTick = Date.now();
+
+    function sanitizeEmailKey(email) {
+      return (email || "").trim().toLowerCase().replace(/\./g, "_");
+    }
+
+    function canOperateKind(kind) {
+      if (currentUserRole === "admin" || currentUserRole === "gestor") return true;
+      if (currentUserRole === "op_marcador") return false;
+      if (currentUserRole === "op_competencias") {
+        if (currentUserScope && currentUserScope !== "ambas" && currentUserScope !== "all" && currentUserScope !== kind) {
+          return false;
+        }
+        const lock = locksData[kind];
+        if (lock && lock.email && lock.email !== currentUserEmail) {
+          return false;
+        }
+        return true;
+      }
+      return false;
+    }
+
+    function canOperateMarcador() {
+      if (currentUserRole === "admin" || currentUserRole === "gestor" || currentUserRole === "op_marcador") return true;
+      return false;
+    }
+
+    function applyRoleUI() {
+      document.getElementById("opRoleTag").textContent = (currentUserRole || "admin").toUpperCase();
+      document.getElementById("opEmailLabel").textContent = currentUserEmail || "";
+
+      if (currentUserRole === "op_marcador" || currentUserRole === "op_competencias") {
+        document.getElementById("btn-studio").style.display = "none";
+      } else {
+        document.getElementById("btn-studio").style.display = "";
+      }
+
+      const marcCard = document.getElementById("mod-marcadores");
+      const allowedMarc = canOperateMarcador();
+      marcCard.querySelectorAll("button, input").forEach((el) => {
+        if (el.classList.contains("open-overlay-btn")) return;
+        el.disabled = !allowedMarc;
+      });
+    }
+
+    function renderLockBanner() {
+      const lock = locksData[activeCompTab];
+      const bannerText = document.getElementById("spLockText");
+      const btnTake = document.getElementById("btnTakeLock");
+      const btnRel = document.getElementById("btnReleaseLock");
+      const compName = activeCompTab === "libres" ? "Tiros Libres" : "Triples";
+
+      if (currentUserRole === "admin" || currentUserRole === "gestor") {
+        bannerText.textContent = lock?.email
+          ? `${compName} bloqueado por: ${lock.email} (Tú tienes acceso administrativo)`
+          : `${compName} disponible (Acceso administrativo)`;
+        btnTake.style.display = "none";
+        btnRel.style.display = lock?.email ? "" : "none";
+      } else if (currentUserRole === "op_competencias") {
+        if (currentUserScope && currentUserScope !== "ambas" && currentUserScope !== activeCompTab) {
+          bannerText.textContent = `Tu cuenta está asignada únicamente a ${currentUserScope === "libres" ? "Tiros Libres" : "Triples"}.`;
+          btnTake.disabled = true;
+          btnRel.disabled = true;
+        } else if (!lock?.email) {
+          bannerText.textContent = `${compName} libre. Toma control para operar y bloquear a otros operadores.`;
+          btnTake.disabled = false;
+          btnRel.disabled = true;
+        } else if (lock.email === currentUserEmail) {
+          bannerText.textContent = `Tienes el control bloqueado de ${compName}.`;
+          btnTake.disabled = true;
+          btnRel.disabled = false;
+        } else {
+          bannerText.textContent = `${compName} ocupado por ${lock.email}. Espera a que libere.`;
+          btnTake.disabled = true;
+          btnRel.disabled = true;
+        }
+      } else {
+        bannerText.textContent = `Solo lectura para tu rol en ${compName}.`;
+        btnTake.style.display = "none";
+        btnRel.style.display = "none";
+      }
+
+      const canOp = canOperateKind(activeCompTab);
+      const panel = document.querySelector("#mod-especiales .sp-panel");
+      if (panel) {
+        panel.querySelectorAll("button, select").forEach((el) => {
+          el.disabled = !canOp;
+        });
+      }
+    }
+
+    document.getElementById("btnTakeLock").addEventListener("click", async () => {
+      if (currentUserRole !== "op_competencias") return;
+      if (currentUserScope && currentUserScope !== "ambas" && currentUserScope !== activeCompTab) return;
+      const existing = locksData[activeCompTab];
+      if (existing?.email && existing.email !== currentUserEmail) return;
+
+      await update(ref(db, `${DB_PATH}/locks/${activeCompTab}`), {
+        email: currentUserEmail,
+        takenAt: Date.now()
+      });
+    });
+
+    document.getElementById("btnReleaseLock").addEventListener("click", async () => {
+      const existing = locksData[activeCompTab];
+      if (currentUserRole === "admin" || currentUserRole === "gestor" || existing?.email === currentUserEmail) {
+        await update(ref(db, `${DB_PATH}/locks/${activeCompTab}`), null);
+      }
+    });
+
+    function formatClock(sec) {
+      const s = Math.max(0, Math.floor(Number(sec) || 0));
+      const m = Math.floor(s / 60);
+      const r = s % 60;
+      return `${String(m).padStart(2, "0")}:${String(r).padStart(2, "0")}`;
+    }
+
+    function parseClock(str) {
+      const parts = String(str || "").trim().split(":");
+      if (parts.length === 2) {
+        const m = parseInt(parts[0], 10) || 0;
+        const s = parseInt(parts[1], 10) || 0;
+        return Math.max(0, m * 60 + s);
+      }
+      return Math.max(0, parseInt(str, 10) || 0);
+    }
+
+    function renderFouls(teamNum, count) {
+      const wrap = document.getElementById(`pips-fouls-${teamNum}`);
+      const lbl = document.getElementById(`val-fouls-${teamNum}`);
+      if (!wrap || !lbl) return;
+      lbl.textContent = count;
+      wrap.innerHTML = Array.from({ length: 5 }, (_, idx) => {
+        const isOn = idx < count;
+        const cls = !isOn ? "foul-pip" : (count >= 5 ? "foul-pip bonus" : "foul-pip on");
+        return `<span class="${cls}"></span>`;
+      }).join("");
+    }
+
+    function renderScoreboardUI() {
+      document.getElementById("lbl-team1").textContent = sbConfig.name1 || "LOCAL";
+      document.getElementById("lbl-team2").textContent = sbConfig.name2 || "VISITA";
+      document.getElementById("val-points-1").textContent = state.points_1;
+      document.getElementById("val-points-2").textContent = state.points_2;
+      renderFouls(1, state.fouls_1);
+      renderFouls(2, state.fouls_2);
+      document.getElementById("val-timer").textContent = formatClock(state.timer);
+      document.getElementById("val-period").textContent = PERIODS[state.periodIndex] || "Q1";
+      document.getElementById("val-shotclock").textContent = state.shotclock ?? "--";
+      document.getElementById("btn-clock-toggle").textContent = state.clockRunning ? "Pausar" : "Iniciar";
+    }
+
+    async function pushState() {
+      await set(ref(db, `${DB_PATH}/state`), state);
+    }
+
+    document.querySelectorAll(".score-btn[data-p]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        if (!canOperateMarcador()) return;
+        const team = btn.dataset.p;
+        const delta = parseInt(btn.dataset.d, 10);
+        const key = `points_${team}`;
+        state[key] = Math.max(0, (state[key] || 0) + delta);
+        renderScoreboardUI();
+        await pushState();
+      });
+    });
+
+    document.querySelectorAll(".score-btn[data-f]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        if (!canOperateMarcador()) return;
+        const team = btn.dataset.f;
+        const delta = parseInt(btn.dataset.d, 10);
+        const key = `fouls_${team}`;
+        state[key] = Math.max(0, Math.min(5, (state[key] || 0) + delta));
+        renderScoreboardUI();
+        await pushState();
+      });
+    });
+
+    document.getElementById("btn-period-prev").addEventListener("click", async () => {
+      if (!canOperateMarcador()) return;
+      state.periodIndex = Math.max(0, (state.periodIndex || 0) - 1);
+      renderScoreboardUI();
+      await pushState();
+    });
+
+    document.getElementById("btn-period-next").addEventListener("click", async () => {
+      if (!canOperateMarcador()) return;
+      state.periodIndex = Math.min(PERIODS.length - 1, (state.periodIndex || 0) + 1);
+      renderScoreboardUI();
+      await pushState();
+    });
+
+    document.getElementById("btn-clock-toggle").addEventListener("click", async () => {
+      if (!canOperateMarcador()) return;
+      state.clockRunning = !state.clockRunning;
+      lastClockTick = Date.now();
+      renderScoreboardUI();
+      await pushState();
+    });
+
+    document.getElementById("btn-clock-reset").addEventListener("click", async () => {
+      if (!canOperateMarcador()) return;
+      state.clockRunning = false;
+      state.timer = 600;
+      renderScoreboardUI();
+      await pushState();
+    });
+
+    document.getElementById("btn-timer-set").addEventListener("click", async () => {
+      if (!canOperateMarcador()) return;
+      const val = document.getElementById("input-timer-set").value;
+      state.timer = parseClock(val);
+      renderScoreboardUI();
+      await pushState();
+    });
+
+    document.getElementById("btn-shot-24").addEventListener("click", async () => {
+      if (!canOperateMarcador()) return;
+      state.shotclock = 24;
+      renderScoreboardUI();
+      await pushState();
+    });
+
+    document.getElementById("btn-shot-14").addEventListener("click", async () => {
+      if (!canOperateMarcador()) return;
+      state.shotclock = 14;
+      renderScoreboardUI();
+      await pushState();
+    });
+
+    document.getElementById("btn-shot-clear").addEventListener("click", async () => {
+      if (!canOperateMarcador()) return;
+      state.shotclock = null;
+      renderScoreboardUI();
+      await pushState();
+    });
+
+    document.getElementById("btn-reset-fouls").addEventListener("click", async () => {
+      if (!canOperateMarcador()) return;
+      state.fouls_1 = 0;
+      state.fouls_2 = 0;
+      renderScoreboardUI();
+      await pushState();
+    });
+
+    document.getElementById("btn-reset-all").addEventListener("click", async () => {
+      if (!canOperateMarcador()) return;
+      state = { points_1: 0, points_2: 0, fouls_1: 0, fouls_2: 0, timer: 600, clockRunning: false, periodIndex: 0, shotclock: 24 };
+      renderScoreboardUI();
+      await pushState();
+    });
+
+    function getCompCfg(kind = activeCompTab) {
+      return especialesMod.config?.[kind] || {};
+    }
+
+    function getCompLive(kind = activeCompTab) {
+      const base = especialesMod.live?.[kind] || {};
+      const cfg = getCompCfg(kind);
+      const defaultSec = base.roundMode === "DESEMPATE" ? (cfg.tiebreakSec ?? 30) : (cfg.officialSec ?? 60);
+      return {
+        playerId: base.playerId || "",
+        roundMode: base.roundMode || "OFICIAL",
+        score: Number(base.score) || 0,
+        clockSec: base.clockSec !== undefined ? Number(base.clockSec) : defaultSec,
+        running: Boolean(base.running),
+        shots: Array.isArray(base.shots) ? base.shots : []
       };
+    }
 
-      let timerInterval = null;
-      let dbRef = null;
-      let marcadorConfigRef = null;
+    async function pushSpecialLive(kind = activeCompTab) {
+      const liveObj = getCompLive(kind);
+      await update(ref(db, `${DB_PATH}/modules/especiales/live/${kind}`), liveObj);
+      await update(ref(db, `${DB_PATH}/modules/especiales/live`), { activeComp: kind });
+    }
 
-      const els = {
-        headerLogoBox: document.getElementById('headerLogoBox'),
-        headerEventTitle: document.getElementById('headerEventTitle'),
-        headerEventSub: document.getElementById('headerEventSub'),
-        timerStatusBadge: document.getElementById('timerStatusBadge'),
-        btnToggleOverlay: document.getElementById('btnToggleOverlay'),
-        btnClearPlayer: document.getElementById('btnClearPlayer'),
-        btnResetScore: document.getElementById('btnResetScore'),
-        activePlayerName: document.getElementById('activePlayerName'),
-        activePlayerClub: document.getElementById('activePlayerClub'),
-        activePlayerScore: document.getElementById('activePlayerScore'),
-        hudClockBox: document.getElementById('hudClockBox'),
-        clockReadout: document.getElementById('clockReadout'),
-        btnTimerToggle: document.getElementById('btnTimerToggle'),
-        btnTimer60: document.getElementById('btnTimer60'),
-        btnTimer30: document.getElementById('btnTimer30'),
-        btnTimerSudden: document.getElementById('btnTimerSudden'),
-        modeAuto: document.getElementById('modeAuto'),
-        modeForceOn: document.getElementById('modeForceOn'),
-        modeForceOff: document.getElementById('modeForceOff'),
-        racksGrid: document.getElementById('racksGrid'),
-        inpTitle: document.getElementById('inpTitle'),
-        inpSubtitle: document.getElementById('inpSubtitle'),
-        inpLogoUrl: document.getElementById('inpLogoUrl'),
-        inpRules: document.getElementById('inpRules'),
-        btnSaveMeta: document.getElementById('btnSaveMeta'),
-        addPlayerForm: document.getElementById('addPlayerForm'),
-        inpPlayerName: document.getElementById('inpPlayerName'),
-        inpPlayerClub: document.getElementById('inpPlayerClub'),
-        participantsList: document.getElementById('participantsList'),
-        participantsCount: document.getElementById('participantsCount')
+    function renderSpecialsControlUI() {
+      const enTriples = especialesMod.config?.enabledTriples !== false;
+      const enLibres = Boolean(especialesMod.config?.enabledLibres);
+      const tabTr = document.getElementById("tabCompTriples");
+      const tabFt = document.getElementById("tabCompLibres");
+      tabTr.disabled = !enTriples;
+      tabFt.disabled = !enLibres;
+
+      if (activeCompTab === "libres" && !enLibres && enTriples) activeCompTab = "triples";
+      if (activeCompTab === "triples" && !enTriples && enLibres) activeCompTab = "libres";
+
+      tabTr.classList.toggle("is-active", activeCompTab === "triples");
+      tabFt.classList.toggle("is-active", activeCompTab === "libres");
+
+      const cfg = getCompCfg(activeCompTab);
+      const live = getCompLive(activeCompTab);
+      const players = cfg.players || [];
+
+      const useTimer = cfg.useTimer !== false;
+      document.getElementById("spClockControlBox").style.display = useTimer ? "" : "none";
+      document.getElementById("spTimerButtonsRow").style.display = useTimer ? "flex" : "none";
+
+      const metaParts = [cfg.stage, cfg.categoryLabel];
+      if (!useTimer && cfg.maxShots > 0) metaParts.push(`${cfg.maxShots} tiros`);
+      document.getElementById("spCompMetaBadge").textContent = metaParts.filter(Boolean).join(" · ");
+
+      document.getElementById("spShotMoneyBtn").style.display = cfg.moneyEnabled ? "" : "none";
+      document.getElementById("spShotHalfBtn").style.display = cfg.halfEnabled ? "" : "none";
+      if (cfg.moneyEnabled) {
+        document.getElementById("spShotMoneyBtn").textContent = `+ Especial (+${cfg.ptsMoney || 3})`;
+      }
+      if (cfg.halfEnabled) {
+        document.getElementById("spShotHalfBtn").textContent = `+ Media (+${cfg.ptsHalf || 3})`;
+      }
+
+      const sel = document.getElementById("spPlayerSelect");
+      sel.innerHTML = `<option value="">-- Seleccionar Participante (${players.length}) --</option>` +
+        players.map((p) => `<option value="${p.id}" ${String(p.id) === String(live.playerId) ? "selected" : ""}>${p.name} (${p.team})</option>`).join("");
+
+      document.getElementById("spRoundMode").value = live.roundMode || "OFICIAL";
+
+      const curPlayer = players.find((p) => String(p.id) === String(live.playerId));
+      if (curPlayer) {
+        document.getElementById("spActivePlayerName").textContent = curPlayer.name;
+        document.getElementById("spActivePlayerSub").textContent = `${curPlayer.team}${curPlayer.cat ? " · " + curPlayer.cat : ""}${curPlayer.pos ? " · " + curPlayer.pos : ""} — ${live.roundMode}`;
+      } else {
+        document.getElementById("spActivePlayerName").textContent = "SIN JUGADOR SELECCIONADO";
+        document.getElementById("spActivePlayerSub").textContent = "Overlay en modo Reglas + Logo del Torneo";
+      }
+
+      document.getElementById("spLiveScore").textContent = live.score;
+      document.getElementById("spLiveClock").textContent = Number(live.clockSec || 0).toFixed(1);
+      document.getElementById("spClockStartBtn").textContent = live.running ? "Corriendo..." : "Iniciar Reloj";
+
+      const strip = document.getElementById("spShotsStrip");
+      if (!live.shots.length) {
+        strip.innerHTML = `<span style="font-size:0.72rem; color:var(--muted);">Sin lanzamientos registrados</span>`;
+      } else {
+        strip.innerHTML = live.shots.map((s, idx) => {
+          const cls = s.type === "miss" ? "miss" : (s.type === "money" ? "money" : (s.type === "half" ? "half" : "hit"));
+          const lbl = s.type === "miss" ? `#${idx + 1} ✕` : `#${idx + 1} +${s.pts}`;
+          return `<span class="sp-shot-chip ${cls}">${lbl}</span>`;
+        }).join("");
+      }
+
+      const targetPts = cfg.targetOverride > 0
+        ? cfg.targetOverride
+        : Math.max(0, ...players.map((p) => Number(p.bestScore) || 0));
+      document.getElementById("spTargetInfo").textContent = `A superar: ${targetPts} pts`;
+
+      const sorted = [...players].sort((a, b) => (Number(b.bestScore) || 0) - (Number(a.bestScore) || 0));
+      const topScore = sorted[0]?.bestScore ?? null;
+      const tbody = document.getElementById("spLeaderboardBody");
+
+      if (!sorted.length) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--muted); padding:12px;">Sin participantes</td></tr>`;
+      } else {
+        tbody.innerHTML = sorted.map((p, idx) => {
+          const isSel = String(p.id) === String(live.playerId);
+          const isLeader = topScore !== null && Number(p.bestScore) === Number(topScore) && Number(topScore) > 0;
+          return `<tr class="sp-leader-row ${isSel ? "is-selected" : ""} ${isLeader ? "is-leader" : ""}" data-pick-player="${p.id}" style="cursor:pointer;">
+            <td>${idx + 1}</td>
+            <td>${p.name}</td>
+            <td>${p.team}</td>
+            <td>${p.cat || "-"}</td>
+            <td>${p.bestScore !== null && p.bestScore !== undefined ? p.bestScore : "-"}</td>
+          </tr>`;
+        }).join("");
+
+        tbody.querySelectorAll("[data-pick-player]").forEach((row) => {
+          row.addEventListener("click", () => {
+            if (!canOperateKind(activeCompTab)) return;
+            selectSpecialPlayer(row.dataset.pickPlayer);
+          });
+        });
+      }
+
+      renderLockBanner();
+    }
+
+    async function selectSpecialPlayer(playerId) {
+      if (!canOperateKind(activeCompTab)) return;
+      const cfg = getCompCfg(activeCompTab);
+      const currentLive = getCompLive(activeCompTab);
+      const defaultSec = currentLive.roundMode === "DESEMPATE" ? (cfg.tiebreakSec ?? 30) : (cfg.officialSec ?? 60);
+
+      especialesMod.live[activeCompTab] = {
+        playerId: playerId || "",
+        roundMode: currentLive.roundMode || "OFICIAL",
+        score: 0,
+        clockSec: defaultSec,
+        running: false,
+        shots: []
       };
+      especialesMod.live.activeComp = activeCompTab;
+      renderSpecialsControlUI();
+      await pushSpecialLive(activeCompTab);
+    }
 
-      const bc = ('BroadcastChannel' in window)
-        ? new BroadcastChannel('tiempofuera_especiales_triples')
-        : null;
+    async function recordSpecialShot(type) {
+      if (!canOperateKind(activeCompTab)) return;
+      const cfg = getCompCfg(activeCompTab);
+      const live = getCompLive(activeCompTab);
+      if (cfg.maxShots > 0 && live.shots.length >= cfg.maxShots) return;
 
-      function ensureRacksArray() {
-        const count = Number(state.config.racksCount) || 5;
-        const perRack = Number(state.config.ballsPerRack) || 5;
-        if (!Array.isArray(state.live.racks)) state.live.racks = [];
-        for (let r = 0; r < count; r++) {
-          if (!state.live.racks[r]) {
-            state.live.racks[r] = {
-              label: `CARRO ${r + 1}`,
-              isMoneyRack: r === count - 1,
-              shots: Array(perRack).fill(false)
-            };
-          } else if (!Array.isArray(state.live.racks[r].shots)) {
-            state.live.racks[r].shots = Array(perRack).fill(false);
-          }
+      let pts = 0;
+      if (type === "normal") pts = Number(cfg.ptsNormal) || 1;
+      else if (type === "money") pts = Number(cfg.ptsMoney) || 3;
+      else if (type === "half") pts = Number(cfg.ptsHalf) || 3;
+      else pts = 0;
+
+      const nextShots = [...live.shots, { type, pts, ts: Date.now() }];
+      const nextScore = live.score + pts;
+      const shouldStop = cfg.maxShots > 0 && nextShots.length >= cfg.maxShots;
+
+      especialesMod.live[activeCompTab] = {
+        ...live,
+        score: nextScore,
+        shots: nextShots,
+        running: shouldStop ? false : live.running
+      };
+      renderSpecialsControlUI();
+      await pushSpecialLive(activeCompTab);
+    }
+
+    document.getElementById("tabCompTriples").addEventListener("click", async () => {
+      if (document.getElementById("tabCompTriples").disabled) return;
+      activeCompTab = "triples";
+      especialesMod.live.activeComp = "triples";
+      renderSpecialsControlUI();
+      await update(ref(db, `${DB_PATH}/modules/especiales/live`), { activeComp: "triples" });
+    });
+
+    document.getElementById("tabCompLibres").addEventListener("click", async () => {
+      if (document.getElementById("tabCompLibres").disabled) return;
+      activeCompTab = "libres";
+      especialesMod.live.activeComp = "libres";
+      renderSpecialsControlUI();
+      await update(ref(db, `${DB_PATH}/modules/especiales/live`), { activeComp: "libres" });
+    });
+
+    document.getElementById("spPlayerSelect").addEventListener("change", (e) => {
+      selectSpecialPlayer(e.target.value);
+    });
+
+    document.getElementById("spClearPlayerBtn").addEventListener("click", () => {
+      selectSpecialPlayer("");
+    });
+
+    document.getElementById("spRoundMode").addEventListener("change", async (e) => {
+      if (!canOperateKind(activeCompTab)) return;
+      const cfg = getCompCfg(activeCompTab);
+      const live = getCompLive(activeCompTab);
+      const mode = e.target.value;
+      const sec = mode === "DESEMPATE" ? (cfg.tiebreakSec ?? 30) : (cfg.officialSec ?? 60);
+      especialesMod.live[activeCompTab] = {
+        ...live,
+        roundMode: mode,
+        clockSec: sec,
+        running: false
+      };
+      renderSpecialsControlUI();
+      await pushSpecialLive(activeCompTab);
+    });
+
+    document.getElementById("spShotHitBtn").addEventListener("click", () => recordSpecialShot("normal"));
+    document.getElementById("spShotMissBtn").addEventListener("click", () => recordSpecialShot("miss"));
+    document.getElementById("spShotMoneyBtn").addEventListener("click", () => recordSpecialShot("money"));
+    document.getElementById("spShotHalfBtn").addEventListener("click", () => recordSpecialShot("half"));
+
+    document.getElementById("spUndoShotBtn").addEventListener("click", async () => {
+      if (!canOperateKind(activeCompTab)) return;
+      const live = getCompLive(activeCompTab);
+      if (!live.shots.length) return;
+      const nextShots = live.shots.slice(0, -1);
+      const nextScore = nextShots.reduce((acc, s) => acc + (Number(s.pts) || 0), 0);
+      especialesMod.live[activeCompTab] = { ...live, shots: nextShots, score: nextScore };
+      renderSpecialsControlUI();
+      await pushSpecialLive(activeCompTab);
+    });
+
+    document.getElementById("spClockStartBtn").addEventListener("click", async () => {
+      if (!canOperateKind(activeCompTab)) return;
+      const live = getCompLive(activeCompTab);
+      if (live.clockSec <= 0) return;
+      lastSpTick = Date.now();
+      especialesMod.live[activeCompTab] = { ...live, running: true };
+      renderSpecialsControlUI();
+      await pushSpecialLive(activeCompTab);
+    });
+
+    document.getElementById("spClockPauseBtn").addEventListener("click", async () => {
+      if (!canOperateKind(activeCompTab)) return;
+      const live = getCompLive(activeCompTab);
+      especialesMod.live[activeCompTab] = { ...live, running: false };
+      renderSpecialsControlUI();
+      await pushSpecialLive(activeCompTab);
+    });
+
+    document.getElementById("spClockResetOfficialBtn").addEventListener("click", async () => {
+      if (!canOperateKind(activeCompTab)) return;
+      const cfg = getCompCfg(activeCompTab);
+      const live = getCompLive(activeCompTab);
+      especialesMod.live[activeCompTab] = {
+        ...live,
+        roundMode: "OFICIAL",
+        clockSec: cfg.officialSec ?? 60,
+        running: false
+      };
+      renderSpecialsControlUI();
+      await pushSpecialLive(activeCompTab);
+    });
+
+    document.getElementById("spClockResetTieBtn").addEventListener("click", async () => {
+      if (!canOperateKind(activeCompTab)) return;
+      const cfg = getCompCfg(activeCompTab);
+      const live = getCompLive(activeCompTab);
+      especialesMod.live[activeCompTab] = {
+        ...live,
+        roundMode: "DESEMPATE",
+        clockSec: cfg.tiebreakSec ?? 30,
+        running: false
+      };
+      renderSpecialsControlUI();
+      await pushSpecialLive(activeCompTab);
+    });
+
+    document.getElementById("spClearRoundBtn").addEventListener("click", async () => {
+      if (!canOperateKind(activeCompTab)) return;
+      const cfg = getCompCfg(activeCompTab);
+      const live = getCompLive(activeCompTab);
+      const sec = live.roundMode === "DESEMPATE" ? (cfg.tiebreakSec ?? 30) : (cfg.officialSec ?? 60);
+      especialesMod.live[activeCompTab] = {
+        ...live,
+        score: 0,
+        shots: [],
+        clockSec: sec,
+        running: false
+      };
+      renderSpecialsControlUI();
+      await pushSpecialLive(activeCompTab);
+    });
+
+    document.getElementById("spSaveBestBtn").addEventListener("click", async () => {
+      if (!canOperateKind(activeCompTab)) return;
+      const live = getCompLive(activeCompTab);
+      if (!live.playerId) return;
+      const players = especialesMod.config[activeCompTab]?.players || [];
+      const updatedPlayers = players.map((p) => {
+        if (String(p.id) !== String(live.playerId)) return p;
+        const prevBest = p.bestScore !== null && p.bestScore !== undefined ? Number(p.bestScore) : -1;
+        return { ...p, bestScore: Math.max(prevBest, Number(live.score) || 0) };
+      });
+      especialesMod.config[activeCompTab].players = updatedPlayers;
+      renderSpecialsControlUI();
+      await update(ref(db, `${DB_PATH}/modules/especiales/config/${activeCompTab}`), {
+        players: updatedPlayers
+      });
+    });
+
+    setInterval(async () => {
+      const now = Date.now();
+      const dt = (now - lastClockTick) / 1000;
+      lastClockTick = now;
+
+      if (state.clockRunning && canOperateMarcador()) {
+        state.timer = Math.max(0, Number((state.timer - dt).toFixed(1)));
+        if (state.shotclock !== null && state.shotclock !== undefined) {
+          state.shotclock = Math.max(0, Number((state.shotclock - dt).toFixed(1)));
         }
-        state.live.racks = state.live.racks.slice(0, count);
+        if (state.timer <= 0) {
+          state.clockRunning = false;
+          state.timer = 0;
+        }
+        renderScoreboardUI();
+        await pushState();
       }
 
-      function computeScoreFromRacks() {
-        let total = 0;
-        const perRack = Number(state.config.ballsPerRack) || 5;
-        state.live.racks.forEach((rack) => {
-          const isMoneyRack = Boolean(rack.isMoneyRack);
-          (rack.shots || []).forEach((hit, idx) => {
-            if (hit) {
-              const isMoneyBall = isMoneyRack || idx === perRack - 1;
-              total += isMoneyBall ? 2 : 1;
-            }
-          });
+      const spDt = (now - lastSpTick) / 1000;
+      lastSpTick = now;
+      for (const kind of ["triples", "libres"]) {
+        const spLive = especialesMod.live?.[kind];
+        if (spLive?.running && canOperateKind(kind)) {
+          const nextSec = Math.max(0, Number((Number(spLive.clockSec || 0) - spDt).toFixed(1)));
+          const stopped = nextSec <= 0;
+          especialesMod.live[kind] = {
+            ...spLive,
+            clockSec: nextSec,
+            running: stopped ? false : true
+          };
+          if (kind === activeCompTab) renderSpecialsControlUI();
+          await update(ref(db, `${DB_PATH}/modules/especiales/live/${kind}`), especialesMod.live[kind]);
+        }
+      }
+    }, 250);
+
+    document.querySelectorAll(".open-overlay-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        window.open(btn.dataset.url, "_blank", "noopener");
+      });
+    });
+
+    document.getElementById("btn-logout").addEventListener("click", async () => {
+      await signOutUser();
+      location.href = "login.html";
+    });
+
+    requireSession(async (user) => {
+      currentUserEmail = (user?.email || "").toLowerCase();
+      const roleKey = sanitizeEmailKey(currentUserEmail);
+
+      const rolesSnap = await get(ref(db, `${DB_PATH}/roles/${roleKey}`));
+      if (rolesSnap.exists()) {
+        const rVal = rolesSnap.val();
+        currentUserRole = rVal.role || "admin";
+        currentUserScope = rVal.scope || "all";
+      } else {
+        currentUserRole = "admin";
+        currentUserScope = "all";
+      }
+      applyRoleUI();
+
+      onValue(ref(db, `${DB_PATH}/roles/${roleKey}`), (s) => {
+        if (s.exists()) {
+          currentUserRole = s.val().role || "admin";
+          currentUserScope = s.val().scope || "all";
+          applyRoleUI();
+          renderSpecialsControlUI();
+        }
+      });
+
+      onValue(ref(db, `${DB_PATH}/locks`), (s) => {
+        locksData = s.exists() ? (s.val() || {}) : {};
+        renderSpecialsControlUI();
+      });
+
+      onValue(ref(db, `${DB_PATH}/modules`), (snap) => {
+        statusEl.textContent = "En línea";
+        if (!snap.exists()) return;
+        const mods = snap.val();
+
+        document.querySelectorAll(".mod-card[data-mod]").forEach((card) => {
+          const modKey = card.dataset.mod;
+          const enabled = Boolean(mods[modKey]?.enabled);
+          card.classList.toggle("is-disabled", !enabled);
+          const badge = card.querySelector(".mod-badge");
+          if (badge) {
+            badge.textContent = enabled ? "Habilitado" : "Deshabilitado en Estudio";
+          }
         });
-        return total;
-      }
 
-      function formatClock(sec) {
-        const s = Math.max(0, Math.floor(Number(sec) || 0));
-        const m = Math.floor(s / 60);
-        const rem = s % 60;
-        return `${String(m).padStart(2, '0')}:${String(rem).padStart(2, '0')}`;
-      }
-
-      function isTimerActiveForEvent() {
-        if (typeof state.live.customTimerOverride === 'boolean') {
-          return state.live.customTimerOverride;
-        }
-        return Boolean(state.config.useTimer);
-      }
-
-      function stopTimerInterval() {
-        if (timerInterval) {
-          clearInterval(timerInterval);
-          timerInterval = null;
-        }
-        state.live.timerRunning = false;
-      }
-
-      function syncTimerInterval() {
-        if (!isTimerActiveForEvent() || !state.live.timerRunning) {
-          if (timerInterval) {
-            clearInterval(timerInterval);
-            timerInterval = null;
-          }
-          return;
-        }
-        if (timerInterval) return;
-        timerInterval = setInterval(() => {
-          if (!isTimerActiveForEvent() || !state.live.timerRunning) {
-            stopTimerInterval();
-            return;
-          }
-          if (state.live.timerSeconds > 0) {
-            state.live.timerSeconds -= 1;
-            publishState();
-            render();
-          } else {
-            stopTimerInterval();
-            publishState();
-            render();
-          }
-        }, 1000);
-      }
-
-      function getActivePlayer() {
-        if (!state.live.activePlayerId) return null;
-        return state.participants.find((p) => p.id === state.live.activePlayerId) || null;
-      }
-
-      function publishState() {
-        ensureRacksArray();
-        state.live.score = computeScoreFromRacks();
-        const activePlayer = getActivePlayer();
-
-        if (activePlayer) {
-          activePlayer.score = state.live.score;
-          activePlayer.racks = JSON.parse(JSON.stringify(state.live.racks));
+        if (mods.marcadores?.config) {
+          sbConfig = { ...sbConfig, ...mods.marcadores.config };
+          renderScoreboardUI();
         }
 
-        const payload = {
-          visible: state.visible,
-          config: state.config,
-          live: {
-            activePlayerId: state.live.activePlayerId,
-            player: activePlayer ? {
-              id: activePlayer.id,
-              name: activePlayer.name,
-              club: activePlayer.club,
-              score: state.live.score
-            } : null,
-            score: state.live.score,
-            racks: state.live.racks,
-            timerSeconds: state.live.timerSeconds,
-            timerRunning: state.live.timerRunning,
-            customTimerOverride: state.live.customTimerOverride
-          },
-          participants: state.participants
-        };
-
-        try {
-          localStorage.setItem('tf_triples_live_state', JSON.stringify(payload));
-          localStorage.setItem('tf_especiales_control_state', JSON.stringify(payload));
-        } catch (_) {}
-
-        if (bc) {
-          bc.postMessage(payload);
-        }
-
-        window.postMessage(payload, '*');
-
-        if (dbRef) {
-          dbRef.set(payload).catch(() => {});
-        }
-      }
-
-      function renderHeaderAndTimer() {
-        const logoUrl = String(state.config.tournamentLogo || '').trim();
-        if (logoUrl) {
-          els.headerLogoBox.innerHTML = `<img src="${logoUrl}" alt="Logo" onerror="this.parentElement.textContent='TF'" />`;
-        } else {
-          els.headerLogoBox.textContent = 'TF';
-        }
-
-        els.headerEventTitle.textContent = state.config.title || 'CONTROL COMPETENCIA ESPECIAL';
-        els.headerEventSub.textContent = state.config.subtitle || 'Tiempo Fuera · Sincronización en vivo';
-
-        els.btnToggleOverlay.textContent = state.visible ? 'OVERLAY: VISIBLE' : 'OVERLAY: OCULTO';
-        els.btnToggleOverlay.className = state.visible ? 'success' : 'danger';
-
-        // Botones de modo de reloj
-        els.modeAuto.classList.toggle('active-mode', state.live.customTimerOverride === null);
-        els.modeForceOn.classList.toggle('active-mode', state.live.customTimerOverride === true);
-        els.modeForceOff.classList.toggle('active-mode', state.live.customTimerOverride === false);
-
-        const timerEnabled = isTimerActiveForEvent();
-        if (!timerEnabled && state.live.timerRunning) {
-          stopTimerInterval();
-        }
-
-        els.hudClockBox.classList.toggle('hidden', !timerEnabled);
-        els.timerStatusBadge.textContent = timerEnabled ? 'RELOJ ACTIVO' : 'SIN RELOJ';
-        els.timerStatusBadge.className = timerEnabled ? 'badge live' : 'badge no-timer';
-
-        if (timerEnabled) {
-          els.clockReadout.textContent = formatClock(state.live.timerSeconds);
-          els.btnTimerToggle.textContent = state.live.timerRunning ? 'PAUSAR RELOJ' : 'INICIAR RELOJ';
-        }
-      }
-
-      function renderActivePlayerAndRacks() {
-        ensureRacksArray();
-        const player = getActivePlayer();
-        const totalScore = computeScoreFromRacks();
-        state.live.score = totalScore;
-
-        if (player) {
-          els.activePlayerName.textContent = player.name;
-          els.activePlayerClub.textContent = player.club || 'Sin club / categoría';
-        } else {
-          els.activePlayerName.textContent = 'NINGUNO (MOSTRANDO REGLAS)';
-          els.activePlayerClub.textContent = 'En el overlay se muestra el logo del torneo y las reglas';
-        }
-        els.activePlayerScore.textContent = totalScore;
-
-        // Render carros
-        const perRack = Number(state.config.ballsPerRack) || 5;
-        els.racksGrid.innerHTML = '';
-
-        state.live.racks.forEach((rack, rIdx) => {
-          const isMoneyRack = Boolean(rack.isMoneyRack);
-          const card = document.createElement('div');
-          card.className = 'rack-card' + (isMoneyRack ? ' money-rack' : '');
-
-          let rackPoints = 0;
-          (rack.shots || []).forEach((hit, bIdx) => {
-            if (hit) {
-              rackPoints += (isMoneyRack || bIdx === perRack - 1) ? 2 : 1;
+        if (mods.especiales) {
+          especialesMod = {
+            enabled: Boolean(mods.especiales.enabled),
+            config: {
+              ...especialesMod.config,
+              ...(mods.especiales.config || {}),
+              triples: { ...especialesMod.config.triples, ...(mods.especiales.config?.triples || {}) },
+              libres: { ...especialesMod.config.libres, ...(mods.especiales.config?.libres || {}) }
+            },
+            live: {
+              ...especialesMod.live,
+              ...(mods.especiales.live || {}),
+              triples: { ...especialesMod.live.triples, ...(mods.especiales.live?.triples || {}) },
+              libres: { ...especialesMod.live.libres, ...(mods.especiales.live?.libres || {}) }
             }
-          });
-
-          const head = document.createElement('div');
-          head.className = 'rack-head';
-          head.innerHTML = `<span>${rack.label || `CARRO ${rIdx + 1}`}</span><span class="rack-pts">+${rackPoints} PTS</span>`;
-
-          const shotsRow = document.createElement('div');
-          shotsRow.className = 'shots-row';
-
-          for (let b = 0; b < perRack; b++) {
-            const hit = Boolean(rack.shots[b]);
-            const isMoneyBall = isMoneyRack || b === perRack - 1;
-            const btn = document.createElement('button');
-            btn.type = 'button';
-            btn.className = 'shot-btn' + (hit ? ' hit' : '') + (isMoneyBall ? ' money-ball' : '');
-            btn.textContent = isMoneyBall ? '2P' : '1P';
-            btn.addEventListener('click', () => {
-              rack.shots[b] = !rack.shots[b];
-              publishState();
-              render();
-            });
-            shotsRow.appendChild(btn);
+          };
+          if (especialesMod.live?.activeComp) {
+            activeCompTab = especialesMod.live.activeComp;
           }
-
-          card.appendChild(head);
-          card.appendChild(shotsRow);
-          els.racksGrid.appendChild(card);
-        });
-      }
-
-      function renderParticipants() {
-        els.participantsCount.textContent = `${state.participants.length} JUGADORES`;
-        els.participantsList.innerHTML = '';
-
-        if (!state.participants.length) {
-          els.participantsList.innerHTML = '<div class="brand-sub">Aún no hay participantes agregados.</div>';
-          return;
-        }
-
-        state.participants.forEach((p) => {
-          const isActive = p.id === state.live.activePlayerId;
-          const row = document.createElement('div');
-          row.className = 'participant-row' + (isActive ? ' is-active' : '');
-
-          row.innerHTML = `
-            <div class="participant-main">
-              <div class="participant-name">${escapeHtml(p.name)}</div>
-              <div class="participant-club">${escapeHtml(p.club || 'Sin club')}</div>
-            </div>
-            <div class="participant-right">
-              <div class="participant-score">${Number(p.score || 0)}</div>
-              <button type="button" class="small-btn ${isActive ? 'success' : 'primary'}" data-select="${p.id}">
-                ${isActive ? 'EN CANCHA' : 'ENVIAR'}
-              </button>
-              <button type="button" class="small-btn danger" data-del="${p.id}">✕</button>
-            </div>
-          `;
-
-          row.querySelector('[data-select]').addEventListener('click', () => {
-            state.live.activePlayerId = p.id;
-            if (Array.isArray(p.racks) && p.racks.length) {
-              state.live.racks = JSON.parse(JSON.stringify(p.racks));
-            } else {
-              resetRacksState();
-            }
-            publishState();
-            render();
-          });
-
-          row.querySelector('[data-del]').addEventListener('click', () => {
-            if (state.live.activePlayerId === p.id) {
-              state.live.activePlayerId = null;
-              resetRacksState();
-            }
-            state.participants = state.participants.filter((item) => item.id !== p.id);
-            publishState();
-            render();
-          });
-
-          els.participantsList.appendChild(row);
-        });
-      }
-
-      function resetRacksState() {
-        const count = Number(state.config.racksCount) || 5;
-        const perRack = Number(state.config.ballsPerRack) || 5;
-        state.live.racks = Array.from({ length: count }, (_, r) => ({
-          label: `CARRO ${r + 1}`,
-          isMoneyRack: r === count - 1,
-          shots: Array(perRack).fill(false)
-        }));
-        state.live.score = 0;
-      }
-
-      function escapeHtml(str) {
-        return String(str || '')
-          .replace(/&/g, '&amp;')
-          .replace(/</g, '&lt;')
-          .replace(/>/g, '&gt;')
-          .replace(/"/g, '&quot;');
-      }
-
-      function syncInputsFromState() {
-        els.inpTitle.value = state.config.title || '';
-        els.inpSubtitle.value = state.config.subtitle || '';
-        els.inpLogoUrl.value = state.config.tournamentLogo || '';
-        els.inpRules.value = state.config.rules || DEFAULT_RULES;
-      }
-
-      function render() {
-        renderHeaderAndTimer();
-        renderActivePlayerAndRacks();
-        renderParticipants();
-        syncTimerInterval();
-      }
-
-      // EVENTOS DE BOTONES
-      els.btnToggleOverlay.addEventListener('click', () => {
-        state.visible = !state.visible;
-        publishState();
-        render();
-      });
-
-      els.btnClearPlayer.addEventListener('click', () => {
-        stopTimerInterval();
-        state.live.activePlayerId = null;
-        resetRacksState();
-        publishState();
-        render();
-      });
-
-      els.btnResetScore.addEventListener('click', () => {
-        stopTimerInterval();
-        resetRacksState();
-        publishState();
-        render();
-      });
-
-      els.modeAuto.addEventListener('click', () => {
-        state.live.customTimerOverride = null;
-        publishState();
-        render();
-      });
-
-      els.modeForceOn.addEventListener('click', () => {
-        state.live.customTimerOverride = true;
-        publishState();
-        render();
-      });
-
-      els.modeForceOff.addEventListener('click', () => {
-        stopTimerInterval();
-        state.live.customTimerOverride = false;
-        publishState();
-        render();
-      });
-
-      els.btnTimerToggle.addEventListener('click', () => {
-        if (!isTimerActiveForEvent()) return;
-        if (state.live.timerRunning) {
-          stopTimerInterval();
-        } else {
-          if (state.live.timerSeconds <= 0) state.live.timerSeconds = 60;
-          state.live.timerRunning = true;
-        }
-        publishState();
-        render();
-      });
-
-      els.btnTimer60.addEventListener('click', () => {
-        stopTimerInterval();
-        state.live.customTimerOverride = true;
-        state.live.timerSeconds = 60;
-        publishState();
-        render();
-      });
-
-      els.btnTimer30.addEventListener('click', () => {
-        stopTimerInterval();
-        state.live.customTimerOverride = true;
-        state.live.timerSeconds = 30;
-        publishState();
-        render();
-      });
-
-      els.btnTimerSudden.addEventListener('click', () => {
-        stopTimerInterval();
-        state.live.customTimerOverride = false;
-        publishState();
-        render();
-      });
-
-      els.btnSaveMeta.addEventListener('click', () => {
-        state.config.title = els.inpTitle.value.trim() || 'CONCURSO DE TRIPLES';
-        state.config.subtitle = els.inpSubtitle.value.trim() || 'COMPETENCIA ESPECIAL';
-        state.config.tournamentLogo = els.inpLogoUrl.value.trim();
-        state.config.rules = els.inpRules.value.trim() || DEFAULT_RULES;
-        publishState();
-        render();
-      });
-
-      els.addPlayerForm.addEventListener('submit', (ev) => {
-        ev.preventDefault();
-        const name = els.inpPlayerName.value.trim();
-        const club = els.inpPlayerClub.value.trim();
-        if (!name) return;
-
-        const newPlayer = {
-          id: 'p_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
-          name,
-          club,
-          score: 0,
-          racks: []
-        };
-        state.participants.push(newPlayer);
-        els.inpPlayerName.value = '';
-        els.inpPlayerClub.value = '';
-        publishState();
-        render();
-      });
-
-      // ESCUCHAR ACTUALIZACIONES DESDE STUDIO / OTROS CANALES
-      function ingestExternalData(data) {
-        if (!data || typeof data !== 'object') return;
-        if (typeof data.visible === 'boolean') state.visible = data.visible;
-        if (data.config && typeof data.config === 'object') {
-          state.config = { ...state.config, ...data.config };
-          syncInputsFromState();
-        }
-        if (data.live && typeof data.live === 'object') {
-          state.live = { ...state.live, ...data.live };
-        }
-        if (Array.isArray(data.participants)) {
-          state.participants = data.participants;
-        }
-        render();
-      }
-
-      if (bc) {
-        bc.onmessage = (ev) => ingestExternalData(ev.data);
-      }
-
-      window.addEventListener('message', (ev) => {
-        if (ev && ev.data) ingestExternalData(ev.data);
-      });
-
-      window.addEventListener('storage', (ev) => {
-        if ((ev.key === 'tf_triples_live_state' || ev.key === 'tf_especiales_control_state') && ev.newValue) {
-          try {
-            ingestExternalData(JSON.parse(ev.newValue));
-          } catch (_) {}
+          renderSpecialsControlUI();
         }
       });
 
-      // Carga inicial guardada
-      try {
-        const saved = localStorage.getItem('tf_especiales_control_state') || localStorage.getItem('tf_triples_live_state');
-        if (saved) ingestExternalData(JSON.parse(saved));
-      } catch (_) {}
-
-      // Firebase opcional
-      const params = new URLSearchParams(window.location.search);
-      const dbUrl = params.get('dbUrl') || window.TF_FIREBASE_DB_URL || '';
-      const basePath = params.get('path') || 'modules/especiales/triples';
-
-      if (dbUrl && window.firebase) {
-        try {
-          if (!firebase.apps.length) {
-            firebase.initializeApp({
-              databaseURL: dbUrl,
-              ...(window.TF_FIREBASE_CONFIG || {})
-            });
-          }
-          const db = firebase.database();
-          dbRef = db.ref(basePath);
-          dbRef.on('value', (snap) => {
-            if (snap.exists()) ingestExternalData(snap.val());
-          });
-
-          marcadorConfigRef = db.ref('marcadores/config');
-          marcadorConfigRef.on('value', (snap) => {
-            if (snap.exists()) {
-              const mCfg = snap.val();
-              if (!state.config.tournamentLogo && mCfg.logoLiga) {
-                state.config.tournamentLogo = mCfg.logoLiga;
-                syncInputsFromState();
-                publishState();
-                render();
-              }
-            }
-          });
-        } catch (e) {
-          console.warn('Firebase control error:', e);
-        }
-      }
-
-      resetRacksState();
-      syncInputsFromState();
-      render();
-      publishState();
-    })();
+      onValue(ref(db, `${DB_PATH}/state`), (snap) => {
+        if (!snap.exists()) return;
+        const remote = snap.val();
+        state = { ...state, ...remote };
+        renderScoreboardUI();
+      });
+    }, { requireAdmin: false });
   </script>
 </body>
 </html>
