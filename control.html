@@ -2,903 +2,2101 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Modo Control — Studio TF 2.0</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0f1116">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Control — Studio TF 2.0</title>
+  <link rel="manifest" href="manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;1,700;1,800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/base.css">
   <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg-app);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .ctrl-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 8px 14px;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+
     .brand-link {
       font-weight: 800;
       letter-spacing: 1px;
       cursor: pointer;
       user-select: none;
+      font-size: 0.98rem;
     }
     .brand-link span { color: var(--accent); }
 
-    .ctrl-wrap {
-      max-width: 1120px;
-      margin: 0 auto;
-      padding: 16px;
-    }
-
-    /* Slidebar seguro arriba del todo para encender/apagar marcador */
-    .master-slidebar-card {
-      background: var(--bg-panel);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 12px 16px;
-      margin-bottom: 14px;
-      display: flex;
+    .op-alert {
+      display: none;
       align-items: center;
       justify-content: space-between;
-      gap: 14px;
+      gap: 10px;
+      background: rgba(245, 158, 11, 0.16);
+      border-bottom: 1px solid #f59e0b;
+      color: #fde68a;
+      padding: 8px 14px;
+      font-size: 0.8rem;
+      font-weight: 600;
       flex-wrap: wrap;
     }
-    .master-slidebar-info {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-    .master-slidebar-title {
-      font-size: 0.85rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.6px;
-    }
-    .master-slidebar-sub {
-      font-size: 0.75rem;
-      color: var(--muted);
-    }
-    .slide-switch {
-      position: relative;
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      cursor: pointer;
-      user-select: none;
-    }
-    .slide-switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-      position: absolute;
-    }
-    .slide-track {
-      position: relative;
-      width: 64px;
-      height: 32px;
-      background: #2b2e38;
-      border: 1px solid var(--border);
-      border-radius: 999px;
-      transition: background 0.2s ease, border-color 0.2s ease;
-    }
-    .slide-track::after {
-      content: "";
-      position: absolute;
-      top: 3px;
-      left: 3px;
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      background: #fff;
-      transition: transform 0.2s ease;
-    }
-    .slide-switch input:checked + .slide-track {
-      background: var(--ok, #16a34a);
-      border-color: var(--ok, #16a34a);
-    }
-    .slide-switch input:checked + .slide-track::after {
-      transform: translateX(32px);
-    }
-    .slide-state-label {
-      font-size: 0.8rem;
-      font-weight: 800;
-      min-width: 58px;
-    }
+    .op-alert.is-active { display: flex; }
 
     .ctrl-tabs {
       display: flex;
-      gap: 8px;
-      margin-bottom: 14px;
-      flex-wrap: wrap;
+      gap: 6px;
+      padding: 8px 14px;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;
     }
     .ctrl-tab {
-      background: var(--bg-panel);
-      border: 1px solid var(--border);
+      background: var(--bg-app);
       color: var(--muted);
-      padding: 8px 16px;
+      border: 1px solid var(--border);
+      padding: 6px 12px;
       border-radius: 7px;
-      font-size: 0.8rem;
+      font-size: 0.76rem;
       font-weight: 700;
       cursor: pointer;
+      white-space: nowrap;
     }
     .ctrl-tab.is-active {
       background: var(--accent);
+      color: #111;
       border-color: var(--accent);
-      color: #fff;
-    }
-    .ctrl-tab:disabled {
-      opacity: 0.35;
-      cursor: not-allowed;
     }
 
-    .ctrl-pane { display: none; }
-    .ctrl-pane.is-active { display: block; }
-
-    /* Columnas en paralelo Local | Visita */
-    .teams-parallel-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(280px, 1fr));
-      gap: 14px;
-      margin-bottom: 14px;
-    }
-    @media (max-width: 720px) {
-      .teams-parallel-grid { grid-template-columns: 1fr; }
-    }
-
-    .team-panel {
-      background: var(--bg-panel);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 16px;
+    .ctrl-main {
+      flex: 1;
+      padding: 12px;
+      max-width: 1440px;
+      width: 100%;
+      margin: 0 auto;
       display: flex;
       flex-direction: column;
       gap: 12px;
     }
-    .team-header {
-      display: flex;
-      justify-content: space-between;
+
+    /* Monitor superior Marcadores */
+    .scoreboard-monitor {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
       align-items: center;
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 8px;
+      gap: 10px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 14px;
     }
-    .team-title {
-      font-size: 1rem;
+    .mon-team {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      min-width: 0;
+    }
+    .mon-name {
+      font-size: clamp(0.75rem, 2.2vw, 1rem);
       font-weight: 800;
-      letter-spacing: 0.5px;
-    }
-    .score-big {
-      font-size: 2.6rem;
-      font-weight: 900;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      color: var(--muted);
       text-align: center;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .mon-pts {
+      font-size: clamp(1.8rem, 5vw, 2.7rem);
+      font-weight: 900;
       line-height: 1;
-      padding: 8px 0;
-      font-variant-numeric: tabular-nums;
-    }
-    .pts-btn-row {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
-    }
-    .pts-btn {
-      padding: 11px 6px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      background: var(--bg-app);
-      color: var(--text);
-      font-weight: 800;
-      font-size: 0.9rem;
-      cursor: pointer;
-    }
-    .pts-btn:hover { border-color: var(--accent); }
-    .pts-btn.plus { background: rgba(225, 29, 46, 0.16); border-color: rgba(225, 29, 46, 0.45); }
-
-    .fouls-box {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      background: var(--bg-app);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px 12px;
-    }
-    .fouls-count {
-      font-size: 1.2rem;
-      font-weight: 800;
-      font-variant-numeric: tabular-nums;
-    }
-    .bonus-pill {
-      font-size: 0.7rem;
-      font-weight: 800;
-      padding: 2px 7px;
-      border-radius: 999px;
-      background: rgba(255, 23, 68, 0.2);
-      color: #ff6b81;
-      border: 1px solid rgba(255, 23, 68, 0.45);
-      display: none;
-    }
-    .bonus-pill.is-bonus { display: inline-block; }
-
-    /* Panel inferior Tiempo y Cuartos */
-    .clock-card {
-      background: var(--bg-panel);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-    .clock-top-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-    .clock-inputs {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-    .clock-inputs input {
-      width: 64px;
-      padding: 8px;
-      border-radius: 6px;
-      border: 1px solid var(--border);
-      background: var(--bg-app);
-      color: var(--text);
-      font-size: 1rem;
-      font-weight: 800;
-      text-align: center;
-    }
-    .periods-row {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
-    .period-btn {
-      padding: 7px 12px;
-      border-radius: 6px;
-      border: 1px solid var(--border);
-      background: var(--bg-app);
-      color: var(--text);
-      font-size: 0.78rem;
-      font-weight: 800;
-      cursor: pointer;
-    }
-    .period-btn.is-active {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: #fff;
-    }
-
-    /* Competencias Especiales en Control */
-    .sp-ctrl-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 14px;
-      margin-bottom: 14px;
-    }
-    .sp-ctrl-card {
-      background: var(--bg-panel);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .sp-score-big {
-      font-size: 2.4rem;
-      font-weight: 900;
-      text-align: center;
-      font-variant-numeric: tabular-nums;
-    }
-    .sp-timer-big {
-      font-size: 2rem;
-      font-weight: 900;
-      text-align: center;
       font-variant-numeric: tabular-nums;
       color: var(--accent);
     }
-    .sp-actions-row {
+    .mon-fouls {
+      font-size: clamp(0.68rem, 1.8vw, 0.8rem);
+      font-weight: 700;
+      color: var(--muted);
+    }
+    .mon-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      padding: 6px 12px;
+      background: var(--bg-app);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+    .mon-timer {
+      font-size: clamp(1.3rem, 4vw, 2rem);
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+    }
+    .mon-timer.clutch { color: #f87171; }
+    .mon-period {
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: var(--accent);
+      background: rgba(255,255,255,0.06);
+      padding: 2px 9px;
+      border-radius: 5px;
+    }
+
+    .control-layout {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .teams-parallel {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      align-items: start;
+    }
+    .teams-parallel.single-col {
+      grid-template-columns: minmax(260px, 520px);
+      justify-content: center;
+    }
+
+    @media (min-width: 820px) and (orientation: landscape), (min-width: 1024px) {
+      .control-layout {
+        display: grid;
+        grid-template-columns: 1.45fr 1fr;
+        gap: 14px;
+        align-items: start;
+      }
+      .control-layout.general-only {
+        grid-template-columns: minmax(320px, 560px);
+        justify-content: center;
+      }
+    }
+
+    .col-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: clamp(10px, 2.2vw, 16px);
+      display: flex;
+      flex-direction: column;
+      gap: clamp(8px, 1.8vw, 12px);
+      min-width: 0;
+    }
+    .col-title {
+      font-size: clamp(0.72rem, 1.9vw, 0.85rem);
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--accent);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .pts-pair {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(6px, 1.5vw, 10px);
+    }
+    .c-btn {
+      border: 1px solid var(--border);
+      background: var(--bg-app);
+      color: var(--text);
+      border-radius: 8px;
+      padding: clamp(9px, 2vw, 14px) 8px;
+      font-size: clamp(0.82rem, 2.3vw, 1rem);
+      font-weight: 800;
+      cursor: pointer;
+      touch-action: manipulation;
+      transition: transform 0.06s ease, background 0.15s ease;
+    }
+    .c-btn:active { transform: scale(0.97); }
+    .c-btn.plus {
+      background: rgba(34, 197, 94, 0.16);
+      border-color: rgba(34, 197, 94, 0.45);
+      color: #86efac;
+    }
+    .c-btn.minus {
+      background: rgba(239, 68, 68, 0.14);
+      border-color: rgba(239, 68, 68, 0.4);
+      color: #fca5a5;
+    }
+    .c-btn.warn {
+      background: rgba(245, 158, 11, 0.16);
+      border-color: rgba(245, 158, 11, 0.45);
+      color: #fde68a;
+    }
+    .c-btn.live-on {
+      background: #16a34a;
+      border-color: #22c55e;
+      color: #ffffff;
+      padding: clamp(11px, 2.2vw, 15px);
+    }
+    .c-btn.live-off {
+      background: #dc2626;
+      border-color: #ef4444;
+      color: #ffffff;
+      padding: clamp(11px, 2.2vw, 15px);
+    }
+    .c-btn.running {
+      background: #d97706;
+      border-color: #f59e0b;
+      color: #111;
+    }
+
+    .fouls-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+    @media (max-width: 420px) {
+      .fouls-row { grid-template-columns: 1fr; }
+    }
+
+    .time-edit-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr) auto;
+      gap: 6px;
+      align-items: center;
+    }
+    .time-edit-row input {
+      width: 100%;
+      background: var(--bg-app);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 7px 4px;
+      border-radius: 7px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .preset-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+    .preset-btn {
+      background: var(--bg-app);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 7px 6px;
+      border-radius: 7px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .preset-btn:hover { color: var(--text); border-color: var(--accent); }
+
+    .period-row {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 8px;
+      align-items: center;
+    }
+    .period-badge {
+      padding: 8px 12px;
+      background: var(--bg-app);
+      border: 1px solid var(--accent);
+      border-radius: 8px;
+      font-weight: 900;
+      font-size: 0.95rem;
+      color: var(--accent);
+      min-width: 64px;
+      text-align: center;
+    }
+
+    .sub-label {
+      font-size: 0.7rem;
+      color: var(--muted);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .hidden { display: none !important; }
+
+    /* ==================== ESTILOS COMPETENCIAS ESPECIALES (BASADO EN control_triples_2.html) ==================== */
+    .sp-selector-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      flex-wrap: wrap;
+    }
+    .sp-kind-btns {
       display: flex;
       gap: 8px;
       flex-wrap: wrap;
+    }
+    .sp-kind-btn {
+      background: var(--bg-app);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+    .sp-kind-btn.is-active {
+      background: #e3b857;
+      border-color: #e3b857;
+      color: #111;
+    }
+    .sp-lock-banner {
+      background: rgba(239, 68, 68, 0.16);
+      border: 1px solid #ef4444;
+      color: #fecaca;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      display: none;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .sp-lock-banner.is-active { display: flex; }
+
+    .sp-layout-main {
+      display: grid;
+      grid-template-columns: 1.32fr 1.05fr;
+      gap: 14px;
+      align-items: start;
+    }
+    @media (max-width: 1050px) {
+      .sp-layout-main { grid-template-columns: 1fr; }
+    }
+    .sp-disabled-block {
+      opacity: 0.42;
+      pointer-events: none;
+    }
+
+    .live-hud {
+      display: grid;
+      grid-template-columns: 1.55fr 1fr 1fr;
+      gap: 12px;
+      background: #121317;
+      border: 1px solid #2e323d;
+      border-radius: 8px;
+      padding: 14px;
+      align-items: center;
+    }
+    .live-hud.no-timer {
+      grid-template-columns: 1.8fr 1fr;
+    }
+    @media (max-width: 640px) {
+      .live-hud, .live-hud.no-timer { grid-template-columns: 1fr; }
+    }
+    .hud-player-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .hud-team-logo {
+      width: 60px;
+      height: 60px;
+      border-radius: 8px;
+      background: #1d2028;
+      border: 1px solid #353a47;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 5px;
+      flex-shrink: 0;
+    }
+    .hud-team-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .hud-team-logo span {
+      font-size: 10px;
+      color: #666;
+      font-weight: 800;
+      text-align: center;
+      line-height: 1.1;
+    }
+    .hud-player-name {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 28px;
+      font-weight: 800;
+      text-transform: uppercase;
+      line-height: 1.05;
+      color: #fff;
+    }
+    .hud-player-meta {
+      font-size: 13px;
+      color: #e3b857;
+      font-weight: 700;
+      margin-top: 3px;
+    }
+    .hud-box {
+      text-align: center;
+      background: #1a1d24;
+      border-radius: 8px;
+      padding: 8px 10px;
+      border: 1px solid #2d323e;
+    }
+    .hud-box small {
+      display: block;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #999;
+    }
+    .hud-score {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 46px;
+      font-weight: 800;
+      color: #e3b857;
+      line-height: 1;
+    }
+    .hud-clock {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 46px;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+    .hud-clock.danger { color: #ef4444; }
+
+    .btn-grid-timer {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 8px;
+    }
+    @media (max-width: 560px) {
+      .btn-grid-timer { grid-template-columns: 1fr 1fr; }
+    }
+    .btn-grid-shots, .btn-grid-special {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .sp-btn {
+      padding: 11px 12px;
+      border: none;
+      border-radius: 7px;
+      font-weight: 800;
+      font-size: 13px;
+      cursor: pointer;
+      transition: transform 0.08s ease, filter 0.15s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      touch-action: manipulation;
+    }
+    .sp-btn:hover:not(:disabled) { filter: brightness(1.1); }
+    .sp-btn:active:not(:disabled) { transform: scale(0.97); }
+    .sp-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    .btn-start { background: #22c55e; color: #051b0c; font-size: 15px; }
+    .btn-pause { background: #eab308; color: #111; font-size: 15px; }
+    .btn-dark { background: #2a2e38; color: #fff; border: 1px solid #3f4452; }
+    .btn-danger { background: #7f1d1d; color: #fecaca; border: 1px solid #dc2626; }
+    .btn-gold { background: linear-gradient(135deg, #e3b857, #c59636); color: #111; }
+    .btn-make { background: #16a34a; color: #fff; padding: 18px 12px; font-size: 16px; border: 2px solid #4ade80; }
+    .btn-miss { background: #dc2626; color: #fff; padding: 18px 12px; font-size: 16px; border: 2px solid #f87171; }
+    .btn-money { background: linear-gradient(135deg, #f59e0b, #d97706); color: #111; padding: 13px 10px; border: 2px solid #fde047; }
+    .btn-half { background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #fff; padding: 13px 10px; border: 2px solid #93c5fd; }
+
+    .kbd-hint {
+      font-size: 11px;
+      opacity: 0.85;
+      font-weight: 600;
+      display: block;
+      margin-top: 2px;
+    }
+
+    .shot-history-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      min-height: 36px;
+      background: #121317;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #282c36;
+      align-items: center;
+    }
+    .ball-badge {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 800;
+    }
+    .ball-1 { background: #ea580c; color: #fff; border: 1px solid #fdba74; }
+    .ball-0 { background: #262932; color: #777; border: 1px solid #3c404d; }
+    .ball-money { background: linear-gradient(135deg, #facc15, #ea580c); color: #111; border: 1px solid #fff; }
+    .ball-half { background: #2563eb; color: #fff; border: 1px solid #93c5fd; }
+
+    .roster-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #282c36;
+    }
+    .roster-toolbar button {
+      padding: 5px 9px;
+      font-size: 11px;
+    }
+    .sp-input {
+      background: #252830;
+      border: 1px solid #3c414d;
+      color: #fff;
+      padding: 6px 9px;
+      border-radius: 6px;
+      font-size: 13px;
+      width: 100%;
     }
     .sp-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.8rem;
+      font-size: 12px;
     }
-    .sp-table th, .sp-table td {
-      padding: 7px 8px;
-      border-bottom: 1px solid var(--border);
+    .sp-table th {
       text-align: left;
+      color: #e3b857;
+      border-bottom: 1px solid #333;
+      padding: 6px 4px;
+      text-transform: uppercase;
+      font-size: 11px;
     }
-    .sp-table th { color: var(--accent); font-size: 0.72rem; text-transform: uppercase; }
+    .sp-table td {
+      padding: 6px 4px;
+      border-bottom: 1px solid #22252e;
+      vertical-align: middle;
+    }
+    .sp-table tr.active-row {
+      background: rgba(227, 184, 87, 0.16);
+    }
+    .tbl-logo {
+      width: 28px;
+      height: 28px;
+      object-fit: contain;
+      background: #121317;
+      border: 1px solid #333;
+      border-radius: 4px;
+      padding: 2px;
+      display: block;
+    }
+    .actions-cell {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+      white-space: nowrap;
+    }
   </style>
 </head>
 <body>
-  <div class="studio-shell">
-    <header class="studio-topbar">
-      <div class="brand-link" onclick="location.href='index.html'">
-        STUDIO <span>TF 2.0</span> · CONTROL
-      </div>
-      <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-        <span id="ctrl-status" style="font-size: 0.75rem; color: var(--muted);">Conectando...</span>
-        <button id="ctrl-logout-btn" type="button" class="btn btn-ghost" style="padding: 5px 10px; font-size: 0.72rem;">Salir</button>
-      </div>
-    </header>
+  <header class="ctrl-topbar">
+    <div class="brand-link" onclick="location.href='index.html'" title="Volver al menú principal">
+      STUDIO <span>TF 2.0</span>
+    </div>
+    <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+      <span id="op-badge" style="font-size:0.74rem; color:var(--muted);">Operador listo</span>
+      <button type="button" id="goStudioBtn" class="btn btn-ghost" style="padding:5px 10px; font-size:0.74rem;" onclick="location.href='studio.html'">Estudio</button>
+    </div>
+  </header>
 
-    <main class="ctrl-wrap">
-      <!-- Slidebar superior seguro para encender/apagar marcador en vivo -->
-      <section class="master-slidebar-card" id="masterSlidebarSection">
-        <div class="master-slidebar-info">
-          <span class="master-slidebar-title">Salida del Marcador en Vivo (Live)</span>
-          <span class="master-slidebar-sub">Desliza para mostrar u ocultar el marcador sin riesgo de apagarlo operando puntos</span>
-        </div>
-        <label class="slide-switch" for="liveScoreboardSlide">
-          <input type="checkbox" id="liveScoreboardSlide">
-          <span class="slide-track"></span>
-          <span class="slide-state-label" id="liveScoreboardStateLabel">APAGADO</span>
-        </label>
-      </section>
-
-      <nav class="ctrl-tabs" id="ctrlTabsNav">
-        <button type="button" class="ctrl-tab is-active" data-ctrl-tab="marcadores" id="tabBtnMarcadores">Marcador de Partido</button>
-        <button type="button" class="ctrl-tab" data-ctrl-tab="especiales" id="tabBtnEspeciales" disabled>Competencias Especiales</button>
-      </nav>
-
-      <!-- ==================== PESTAÑA MARCADOR DE PARTIDO ==================== -->
-      <section id="pane-marcadores" class="ctrl-pane is-active">
-        <div class="teams-parallel-grid">
-          <!-- Columna Local -->
-          <article class="team-panel">
-            <div class="team-header">
-              <span class="team-title" id="ctrlName1">LOCAL</span>
-              <span class="bonus-pill" id="bonusPill1">BONUS (5+)</span>
-            </div>
-            <div class="score-big" id="ctrlScore1">0</div>
-            <div class="pts-btn-row">
-              <button type="button" class="pts-btn plus" data-team="1" data-delta="1">+1</button>
-              <button type="button" class="pts-btn plus" data-team="1" data-delta="2">+2</button>
-              <button type="button" class="pts-btn plus" data-team="1" data-delta="3">+3</button>
-              <button type="button" class="pts-btn" data-team="1" data-delta="-1">-1</button>
-            </div>
-            <div class="fouls-box">
-              <div>
-                <div style="font-size: 0.72rem; color: var(--muted); font-weight: 700;">FALTAS EQUIPO</div>
-                <div class="fouls-count" id="ctrlFouls1">0</div>
-              </div>
-              <div style="display: flex; gap: 6px;">
-                <button type="button" class="pts-btn" data-foul="1" data-delta="-1">- Falta</button>
-                <button type="button" class="pts-btn plus" data-foul="1" data-delta="1">+ Falta</button>
-              </div>
-            </div>
-          </article>
-
-          <!-- Columna Visita -->
-          <article class="team-panel">
-            <div class="team-header">
-              <span class="team-title" id="ctrlName2">VISITA</span>
-              <span class="bonus-pill" id="bonusPill2">BONUS (5+)</span>
-            </div>
-            <div class="score-big" id="ctrlScore2">0</div>
-            <div class="pts-btn-row">
-              <button type="button" class="pts-btn plus" data-team="2" data-delta="1">+1</button>
-              <button type="button" class="pts-btn plus" data-team="2" data-delta="2">+2</button>
-              <button type="button" class="pts-btn plus" data-team="2" data-delta="3">+3</button>
-              <button type="button" class="pts-btn" data-team="2" data-delta="-1">-1</button>
-            </div>
-            <div class="fouls-box">
-              <div>
-                <div style="font-size: 0.72rem; color: var(--muted); font-weight: 700;">FALTAS EQUIPO</div>
-                <div class="fouls-count" id="ctrlFouls2">0</div>
-              </div>
-              <div style="display: flex; gap: 6px;">
-                <button type="button" class="pts-btn" data-foul="2" data-delta="-1">- Falta</button>
-                <button type="button" class="pts-btn plus" data-foul="2" data-delta="1">+ Falta</button>
-              </div>
-            </div>
-          </article>
-        </div>
-
-        <!-- Panel inferior: Tiempo y Cuartos -->
-        <section class="clock-card">
-          <div class="clock-top-row">
-            <div>
-              <div style="font-size: 0.72rem; color: var(--muted); font-weight: 700; margin-bottom: 4px;">RELOJ DE PARTIDO (MM:SS)</div>
-              <div class="clock-inputs">
-                <input type="number" id="clockMinInput" min="0" max="99" value="10">
-                <span style="font-weight: 900; font-size: 1.2rem;">:</span>
-                <input type="number" id="clockSecInput" min="0" max="59" value="00">
-                <button type="button" id="clockToggleBtn" class="btn">Iniciar / Pausar</button>
-                <button type="button" id="clockSetBtn" class="btn btn-ghost">Aplicar Tiempo</button>
-              </div>
-            </div>
-
-            <div>
-              <div style="font-size: 0.72rem; color: var(--muted); font-weight: 700; margin-bottom: 4px;">POSESIÓN / 24s</div>
-              <div class="clock-inputs">
-                <input type="number" id="shotClockInput" min="0" max="24" value="24">
-                <button type="button" id="shot24Btn" class="btn btn-ghost">24s</button>
-                <button type="button" id="shot14Btn" class="btn btn-ghost">14s</button>
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <div style="font-size: 0.72rem; color: var(--muted); font-weight: 700; margin-bottom: 6px;">CUARTO / PERÍODO</div>
-            <div class="periods-row" id="periodsRow">
-              <button type="button" class="period-btn is-active" data-period="Q1">Q1</button>
-              <button type="button" class="period-btn" data-period="Q2">Q2</button>
-              <button type="button" class="period-btn" data-period="Q3">Q3</button>
-              <button type="button" class="period-btn" data-period="Q4">Q4</button>
-              <button type="button" class="period-btn" data-period="OT">OT</button>
-            </div>
-          </div>
-
-          <div style="display: flex; gap: 8px; flex-wrap: wrap; border-top: 1px solid var(--border); padding-top: 10px;">
-            <button type="button" id="resetFoulsBtn" class="btn btn-ghost">Reiniciar Faltas</button>
-            <button type="button" id="resetMatchBtn" class="btn btn-ghost">Reiniciar Marcador (0-0)</button>
-          </div>
-        </section>
-      </section>
-
-      <!-- ==================== PESTAÑA COMPETENCIAS ESPECIALES ==================== -->
-      <section id="pane-especiales" class="ctrl-pane">
-        <div class="sp-ctrl-grid">
-          <article class="sp-ctrl-card">
-            <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap;">
-              <strong style="font-size: 0.9rem;">Competencia Activa en Live</strong>
-              <select id="spActiveKindSelect" style="padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-app); color: var(--text); font-weight: 700;">
-                <option value="triples">Concurso de Triples</option>
-                <option value="libres">Concurso de Tiros Libres</option>
-              </select>
-            </div>
-
-            <div style="font-size: 0.8rem; color: var(--muted);" id="spModeSummary">Modalidad: —</div>
-            <div class="sp-timer-big" id="spLiveTimer">01:00</div>
-            <div class="sp-score-big" id="spLiveScore">0 pts</div>
-
-            <div class="sp-actions-row">
-              <button type="button" id="spShowLiveBtn" class="btn">Mostrar en Live</button>
-              <button type="button" id="spHideLiveBtn" class="btn btn-ghost">Ocultar en Live</button>
-              <button type="button" id="spStartTimerBtn" class="btn btn-ghost">Iniciar/Pausar Reloj</button>
-              <button type="button" id="spTiebreakBtn" class="btn btn-ghost">Desempate (0:30)</button>
-            </div>
-
-            <div class="sp-actions-row" id="spScoringButtons">
-              <button type="button" class="pts-btn plus" id="spAddNormalBtn">+1 Acierto</button>
-              <button type="button" class="pts-btn plus" id="spAddSpecialBtn">+3 Balón Esp.</button>
-              <button type="button" class="pts-btn" id="spUndoBtn">-1</button>
-              <button type="button" class="pts-btn" id="spResetTurnBtn">Limpiar Turno</button>
-            </div>
-          </article>
-
-          <article class="sp-ctrl-card">
-            <strong style="font-size: 0.9rem;">Participante en Turno y Tabla</strong>
-            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-              <select id="spPlayerSelect" style="flex: 1; min-width: 180px; padding: 7px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-app); color: var(--text);"></select>
-              <button type="button" id="spSaveBestBtn" class="btn">Guardar Mejor Marca</button>
-            </div>
-
-            <div style="max-height: 240px; overflow: auto;">
-              <table class="sp-table">
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Jugador</th>
-                    <th>Equipo</th>
-                    <th>Mejor</th>
-                  </tr>
-                </thead>
-                <tbody id="spStandingsBody"></tbody>
-              </table>
-            </div>
-          </article>
-        </div>
-      </section>
-    </main>
+  <div id="multiOpAlert" class="op-alert">
+    <span id="multiOpText">Otro operador está usando este control en este momento.</span>
+    <button type="button" id="takeControlBtn" class="btn" style="padding:4px 10px; font-size:0.74rem;">Tomar Control</button>
   </div>
 
+  <nav class="ctrl-tabs" id="ctrlTabs">
+    <button type="button" class="ctrl-tab is-active" id="tabBtnMarcadores" data-pane="tab-marcadores">Marcadores</button>
+    <button type="button" class="ctrl-tab" id="tabBtnEspeciales" data-pane="tab-especiales">Competencias Especiales</button>
+  </nav>
+
+  <main class="ctrl-main">
+    <!-- ==================== PESTAÑA MARCADORES (INTACTA) ==================== -->
+    <section id="tab-marcadores">
+      <div class="scoreboard-monitor">
+        <div class="mon-team">
+          <div class="mon-name" id="monName1">LOCAL</div>
+          <div class="mon-pts" id="monPts1">0</div>
+          <div class="mon-fouls">Faltas: <span id="monFouls1">0</span>/5</div>
+        </div>
+
+        <div class="mon-center">
+          <div class="mon-timer" id="monTimer">10:00</div>
+          <div class="mon-period" id="monPeriod">Q1</div>
+          <div style="font-size:0.66rem; color:var(--muted);" id="monSourceHint">FIBA / Clutch &lt;10s</div>
+        </div>
+
+        <div class="mon-team">
+          <div class="mon-name" id="monName2">VISITA</div>
+          <div class="mon-pts" id="monPts2">0</div>
+          <div class="mon-fouls">Faltas: <span id="monFouls2">0</span>/5</div>
+        </div>
+      </div>
+
+      <div class="control-layout" id="controlLayout">
+        <div class="teams-parallel" id="teamsParallel">
+          <div class="col-card" id="colLocal">
+            <div class="col-title">
+              <span id="titleLocal">LOCAL</span>
+              <span style="font-size:0.66rem; color:var(--muted);">MANUAL</span>
+            </div>
+
+            <div id="localPointsBox" style="display:flex; flex-direction:column; gap:8px;">
+              <span class="sub-label">Puntos Local</span>
+              <div class="pts-pair">
+                <button type="button" class="c-btn plus" data-pts="1" data-delta="1">+1</button>
+                <button type="button" class="c-btn minus" data-pts="1" data-delta="-1">-1</button>
+              </div>
+              <div class="pts-pair">
+                <button type="button" class="c-btn plus" data-pts="1" data-delta="2">+2</button>
+                <button type="button" class="c-btn minus" data-pts="1" data-delta="-2">-2</button>
+              </div>
+              <div class="pts-pair">
+                <button type="button" class="c-btn plus" data-pts="1" data-delta="3">+3</button>
+                <button type="button" class="c-btn minus" data-pts="1" data-delta="-3">-3</button>
+              </div>
+            </div>
+
+            <div id="localFoulsBox" style="display:flex; flex-direction:column; gap:8px;">
+              <span class="sub-label">Faltas Local</span>
+              <div class="fouls-row">
+                <button type="button" class="c-btn plus" data-foul="1" data-delta="1">+1</button>
+                <button type="button" class="c-btn minus" data-foul="1" data-delta="-1">-1</button>
+                <button type="button" class="c-btn warn" data-foul="1" data-delta="reset">Reset</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-card" id="colVisita">
+            <div class="col-title">
+              <span id="titleVisita">VISITA</span>
+              <span style="font-size:0.66rem; color:var(--muted);">MANUAL</span>
+            </div>
+
+            <div id="visitaPointsBox" style="display:flex; flex-direction:column; gap:8px;">
+              <span class="sub-label">Puntos Visita</span>
+              <div class="pts-pair">
+                <button type="button" class="c-btn plus" data-pts="2" data-delta="1">+1</button>
+                <button type="button" class="c-btn minus" data-pts="2" data-delta="-1">-1</button>
+              </div>
+              <div class="pts-pair">
+                <button type="button" class="c-btn plus" data-pts="2" data-delta="2">+2</button>
+                <button type="button" class="c-btn minus" data-pts="2" data-delta="-2">-2</button>
+              </div>
+              <div class="pts-pair">
+                <button type="button" class="c-btn plus" data-pts="2" data-delta="3">+3</button>
+                <button type="button" class="c-btn minus" data-pts="2" data-delta="-3">-3</button>
+              </div>
+            </div>
+
+            <div id="visitaFoulsBox" style="display:flex; flex-direction:column; gap:8px;">
+              <span class="sub-label">Faltas Visita</span>
+              <div class="fouls-row">
+                <button type="button" class="c-btn plus" data-foul="2" data-delta="1">+1</button>
+                <button type="button" class="c-btn minus" data-foul="2" data-delta="-1">-1</button>
+                <button type="button" class="c-btn warn" data-foul="2" data-delta="reset">Reset</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-card" id="colGeneral">
+          <div class="col-title">
+            <span>Control General</span>
+            <span id="modStatusTag" style="font-size:0.66rem; color:var(--muted);">OFF AIR</span>
+          </div>
+
+          <button type="button" id="toggleLiveBtn" class="c-btn live-off">MOSTRAR MARCADOR EN LIVE</button>
+
+          <div id="manualTimerBox" style="display:flex; flex-direction:column; gap:8px; border-top:1px solid var(--border); padding-top:10px;">
+            <span class="sub-label">Reloj FIBA (MM:SS · &lt;10s en MM:SS:ms)</span>
+            <button type="button" id="timerStartStopBtn" class="c-btn plus">▶ Iniciar Tiempo</button>
+
+            <div class="preset-row">
+              <button type="button" class="preset-btn" data-preset-min="10" data-preset-sec="0">10:00 Adulto</button>
+              <button type="button" class="preset-btn" data-preset-min="8" data-preset-sec="0">08:00 Formativa</button>
+              <button type="button" class="preset-btn" data-preset-min="5" data-preset-sec="0">05:00 OT</button>
+            </div>
+
+            <span class="sub-label">Ajuste Manual / Clutch (Min · Seg · Déc 0–9)</span>
+            <div class="time-edit-row">
+              <input type="number" id="editMin" min="0" max="59" value="10" placeholder="Min">
+              <input type="number" id="editSec" min="0" max="59" value="0" placeholder="Seg">
+              <input type="number" id="editDec" min="0" max="9" value="0" placeholder="Déc">
+              <button type="button" id="applyTimeBtn" class="c-btn" style="padding:7px 10px; font-size:0.78rem;">Fijar</button>
+            </div>
+          </div>
+
+          <div id="manualPeriodBox" style="display:flex; flex-direction:column; gap:8px; border-top:1px solid var(--border); padding-top:10px;">
+            <span class="sub-label">Cuarto / Tiempo Extra (FIBA)</span>
+            <div class="period-row">
+              <button type="button" id="periodMinusBtn" class="c-btn minus">− Cuarto</button>
+              <div class="period-badge" id="ctrlPeriodLabel">Q1</div>
+              <button type="button" id="periodPlusBtn" class="c-btn plus">+ Cuarto</button>
+            </div>
+            <span style="font-size:0.68rem; color:var(--muted);">Entre Q1–Q4 resetea faltas y vuelve al tiempo base; en OT mantiene faltas.</span>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:8px; border-top:1px solid var(--border); padding-top:10px;">
+            <span class="sub-label">Redes Sociales (@tiempofuera_cl)</span>
+            <div class="pts-pair">
+              <button type="button" class="c-btn" data-social="ig">Mostrar Instagram</button>
+              <button type="button" class="c-btn" data-social="yt">Mostrar YouTube</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== PESTAÑA COMPETENCIAS ESPECIALES (FORMATO control_triples_2.html) ==================== -->
+    <section id="tab-especiales" class="hidden">
+      <!-- Barra superior de selección de competencia y bloqueo dual -->
+      <div class="sp-selector-bar" style="margin-bottom: 12px;">
+        <div class="sp-kind-btns">
+          <button type="button" class="sp-kind-btn is-active" id="btnPickTriples" data-kind="triples">
+            🏀 Concurso de Triples <span id="lockTagTriples" style="font-size:0.68rem; opacity:0.85;"></span>
+          </button>
+          <button type="button" class="sp-kind-btn" id="btnPickLibres" data-kind="libres">
+            🎯 Concurso de Tiros Libres <span id="lockTagLibres" style="font-size:0.68rem; opacity:0.85;"></span>
+          </button>
+        </div>
+
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+          <span id="spSceneUrlHint" style="font-size:0.72rem; color:var(--muted);">Escena OBS: <strong>live-triples.html</strong></span>
+          <button type="button" class="btn btn-ghost" id="btnOpenSpecialLive" style="padding:5px 10px; font-size:0.72rem;">👁 Abrir Overlay</button>
+          <button type="button" class="btn btn-ghost" id="btnReleaseMyLock" style="padding:5px 10px; font-size:0.72rem;">Liberar Mi Bloqueo</button>
+        </div>
+      </div>
+
+      <div id="spLockBanner" class="sp-lock-banner" style="margin-bottom: 12px;">
+        <span id="spLockBannerText">Esta competencia está siendo operada y bloqueada por otro operador.</span>
+        <button type="button" id="btnForceTakeSpecial" class="btn" style="padding:4px 10px; font-size:0.72rem;">Forzar Toma (Admin)</button>
+      </div>
+
+      <div class="sp-layout-main" id="spWorkspace">
+        <!-- COLUMNA IZQUIERDA: MESA DE CONTROL EN VIVO -->
+        <div class="col-card">
+          <div class="col-title">
+            <span id="spMesaTitle">MESA DE CONTROL EN VIVO — TRIPLES</span>
+            <label style="font-size:12px; color:#ccc; cursor:pointer; display:flex; align-items:center; gap:6px; text-transform:none;">
+              <input type="checkbox" id="spOverlayVisible" checked> Mostrar Overlay
+            </label>
+          </div>
+
+          <!-- HUD -->
+          <div class="live-hud" id="spLiveHud">
+            <div class="hud-player-wrap">
+              <div class="hud-team-logo" id="hudTeamLogoBox">
+                <span>SIN<br>LOGO</span>
+              </div>
+              <div>
+                <div class="hud-player-name" id="hudName">SIN PARTICIPANTES</div>
+                <div class="hud-player-meta" id="hudMeta">AGREGA O ELIGE UN JUGADOR EN LA TABLA</div>
+                <div style="font-size: 12px; color: #aaa; margin-top: 5px;">
+                  Puntaje a Superar: <strong id="hudTarget" style="color: #fff;">0 PTS</strong>
+                </div>
+              </div>
+            </div>
+            <div class="hud-box">
+              <small>Puntaje Turno</small>
+              <div class="hud-score" id="hudScore">0</div>
+            </div>
+            <div class="hud-box" id="hudClockBox">
+              <small id="hudClockLabel">Cronómetro</small>
+              <div class="hud-clock" id="hudClock">1:00.0</div>
+            </div>
+          </div>
+
+          <!-- CONTROLES DE RELOJ Y MODO (DINÁMICOS SEGÚN ESTUDIO) -->
+          <div class="btn-grid-timer" id="spTimerControlsGrid">
+            <button type="button" class="sp-btn btn-start" id="btnToggleTimer">
+              ▶ INICIAR RELOJ
+              <span class="kbd-hint">[Barra Espaciadora]</span>
+            </button>
+            <button type="button" class="sp-btn btn-dark" id="btnModeOficial">1:00 Oficial</button>
+            <button type="button" class="sp-btn btn-dark" id="btnModeDesempate">0:30 Desemp.</button>
+            <button type="button" class="sp-btn btn-dark" id="btnModeSubita">M. Súbita</button>
+          </div>
+
+          <!-- CONTROLES DE RONDAS POR TIROS (CUANDO ES SIN CRONÓMETRO / FEMICENTRO) -->
+          <div id="spShotsOnlyBar" class="hidden" style="display:flex; gap:8px;">
+            <button type="button" class="sp-btn btn-dark" id="btnResetShotsRound" style="flex:1;">↺ Reiniciar Turno de Tiros</button>
+          </div>
+
+          <!-- BOTONES DE TIRO NORMAL -->
+          <div class="btn-grid-shots">
+            <button type="button" class="sp-btn btn-make" id="btnMakeNormal">
+              🏀 TRIPLE ADENTRO (+1 PT)
+              <span class="kbd-hint">[Tecla 1 o Flecha →]</span>
+            </button>
+            <button type="button" class="sp-btn btn-miss" id="btnMissNormal">
+              ✕ TIRO FALLADO (0 PTS)
+              <span class="kbd-hint">[Tecla 0 o Flecha ←]</span>
+            </button>
+          </div>
+
+          <!-- BOTONES ESPECIALES (DINÁMICOS SEGÚN ESTUDIO) -->
+          <div class="btn-grid-special" id="spSpecialShotsGrid">
+            <button type="button" class="sp-btn btn-money" id="btnMoneyBall">
+              🔥 BALÓN ESPECIAL (+3 PTS)
+              <span class="kbd-hint">[Tecla E — 1 uso por ronda]</span>
+            </button>
+            <button type="button" class="sp-btn btn-half" id="btnHalfCourt">
+              🎯 MEDIA CANCHA (+3 PTS)
+              <span class="kbd-hint">[Tecla M — Al expirar reloj]</span>
+            </button>
+          </div>
+
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button type="button" class="sp-btn btn-dark" style="flex:1;" id="btnMissMoney">✕ Falló Balón Esp.</button>
+            <button type="button" class="sp-btn btn-dark" style="flex:1;" id="btnMissHalf">✕ Falló Media Cancha</button>
+            <button type="button" class="sp-btn btn-dark" style="flex:1;" id="btnUndoShot">↩ Deshacer [Backspace]</button>
+            <button type="button" class="sp-btn btn-gold" style="flex:1.2;" id="btnSavePlayerScore">💾 Guardar Puntaje en Tabla</button>
+          </div>
+
+          <div style="font-size: 11px; color: #999; text-transform: uppercase;">
+            Secuencia de tiros en el turno actual:
+          </div>
+          <div class="shot-history-strip" id="shotHistoryStrip"></div>
+        </div>
+
+        <!-- COLUMNA DERECHA: PARTICIPANTES Y TABLA -->
+        <div class="col-card">
+          <div class="col-title">
+            <span>Participantes (<span id="playerCountLabel">0</span>)</span>
+            <select id="filterCat" style="width:auto; padding:4px 8px; font-size:12px; background:#252830; color:#fff; border:1px solid #3c414d; border-radius:6px;">
+              <option value="ALL">Todas las Categorías</option>
+            </select>
+          </div>
+
+          <div class="roster-toolbar">
+            <button type="button" class="sp-btn btn-dark" id="btnClearScores">↺ Limpiar Puntajes</button>
+            <button type="button" class="sp-btn btn-danger" id="btnClearList">🗑 Vaciar Lista</button>
+            <button type="button" class="sp-btn btn-dark" id="btnRestoreBase">↻ Restaurar Base</button>
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1.3fr 1fr 0.75fr 0.7fr; gap:6px;">
+            <input type="text" class="sp-input" id="newPlayerName" placeholder="Nombre jugador...">
+            <input type="text" class="sp-input" id="newPlayerTeam" placeholder="Equipo...">
+            <input type="text" class="sp-input" id="newPlayerCat" placeholder="+35 / Fem">
+            <button type="button" class="sp-btn btn-gold" style="padding:6px;" id="btnAddPlayer">+ Sumar</button>
+          </div>
+
+          <div style="display:flex; align-items:center; gap:8px; font-size:11px; color:#aaa; flex-wrap:wrap;">
+            <span>Escudo nuevo jugador (opcional):</span>
+            <input type="file" id="newPlayerLogoIn" accept="image/*" style="width:auto; font-size:11px;">
+          </div>
+
+          <input type="file" id="rowTeamLogoPicker" accept="image/*" style="display:none;">
+
+          <div style="max-height: 440px; overflow-y: auto;">
+            <table class="sp-table">
+              <thead>
+                <tr>
+                  <th>Escudo</th>
+                  <th>Jugador</th>
+                  <th>Equipo</th>
+                  <th>Cat</th>
+                  <th>Pts</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody id="playersTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
   <script type="module">
-    import {
-      auth,
-      db,
-      DB_PATH,
-      ref,
-      set,
-      update,
-      onValue,
-      signOut,
-      getUserRole,
-      requireSession
-    } from "./js/firebase.js";
+    import { db, DB_PATH, ref, update, get, onValue, requireSession } from "./js/firebase.js";
 
-    const statusEl = document.getElementById("ctrl-status");
-    const liveSlideInput = document.getElementById("liveScoreboardSlide");
-    const liveSlideLabel = document.getElementById("liveScoreboardStateLabel");
-
+    const SESSION_ID = `op_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+    let operatorName = "Operador";
+    let operatorEmail = "";
+    let userRole = "admin";
     let userScope = "all";
-    let matchState = {
-      points_1: 0,
-      points_2: 0,
-      fouls_1: 0,
-      fouls_2: 0,
-      period: "Q1",
-      timerSec: 600,
-      timerRunning: false,
-      shotclock: 24
-    };
+    let hasControlLock = true;
 
-    let especialesModule = {
-      enabled: false,
-      config: {
-        enabledTriples: true,
-        enabledLibres: false,
-        triples: { title: "TORNEO TRIPLES", officialSec: 60, tiebreakSec: 30, ptsNormal: 1, moneyEnabled: true, ptsMoney: 3, players: [] },
-        libres: { title: "TIROS LIBRES", officialSec: 60, tiebreakSec: 30, ptsNormal: 1, bonusLastEnabled: false, ptsBonus: 2, players: [] }
+    function sanitizeEmailKey(email) {
+      return (email || "").trim().toLowerCase().replace(/\./g, "_");
+    }
+
+    /* ==================== ESTADO Y LÓGICA MARCADOR PARTIDO (INTACTA) ==================== */
+    let modState = {
+      enabled: true,
+      on: false,
+      config: {},
+      feeds: {
+        manual: { points_1: 0, points_2: 0, timer: "10:00", period: 1, fouls_1: 0, fouls_2: 0 },
+        scoresight: {},
+        flexyscore: {}
       }
     };
 
-    let spLive = {
-      visible: false,
-      kind: "triples",
-      score: 0,
-      shots: 0,
-      seconds: 60,
-      running: false,
-      isTiebreak: false,
-      playerName: ""
-    };
+    let timerRunning = false;
+    let remainingTenths = 6000;
+    let quarterBaseTenths = 6000;
+    let lastTickMs = 0;
+    let lastFirebasePushMs = 0;
+    let timerRafId = null;
 
-    function formatClock(sec) {
-      const s = Math.max(0, parseInt(sec, 10) || 0);
-      const m = Math.floor(s / 60);
-      const r = s % 60;
-      return `${String(m).padStart(2, "0")}:${String(r).padStart(2, "0")}`;
+    function formatClockFromTenths(tenths) {
+      const t = Math.max(0, Math.floor(tenths));
+      const totalSec = Math.floor(t / 10);
+      const dec = t % 10;
+      const mm = String(Math.floor(totalSec / 60)).padStart(2, "0");
+      const ss = String(totalSec % 60).padStart(2, "0");
+      if (t < 100) return `${mm}:${ss}:${dec}`;
+      return `${mm}:${ss}`;
     }
 
-    function updateSlideLabel(isOn) {
-      liveSlideLabel.textContent = isOn ? "ENCENDIDO" : "APAGADO";
-      liveSlideLabel.style.color = isOn ? "#4ade80" : "var(--muted)";
-    }
-
-    function renderMatchUI() {
-      document.getElementById("ctrlScore1").textContent = matchState.points_1 ?? 0;
-      document.getElementById("ctrlScore2").textContent = matchState.points_2 ?? 0;
-      document.getElementById("ctrlFouls1").textContent = matchState.fouls_1 ?? 0;
-      document.getElementById("ctrlFouls2").textContent = matchState.fouls_2 ?? 0;
-
-      document.getElementById("bonusPill1").classList.toggle("is-bonus", (matchState.fouls_1 ?? 0) >= 5);
-      document.getElementById("bonusPill2").classList.toggle("is-bonus", (matchState.fouls_2 ?? 0) >= 5);
-
-      const sec = Math.max(0, parseInt(matchState.timerSec, 10) || 0);
-      if (document.activeElement !== document.getElementById("clockMinInput")) {
-        document.getElementById("clockMinInput").value = Math.floor(sec / 60);
+    function parseTimerToTenths(val) {
+      if (typeof val === "number" && !isNaN(val)) return Math.max(0, Math.round(val * 10));
+      const str = String(val || "10:00").trim();
+      const parts = str.split(":");
+      if (parts.length === 3) {
+        const m = parseInt(parts[0], 10) || 0;
+        const s = parseInt(parts[1], 10) || 0;
+        const rawDec = String(parts[2] || "0").replace(/[^0-9]/g, "");
+        const d = parseInt(rawDec.slice(0, 1) || "0", 10) || 0;
+        return Math.max(0, (m * 60 + s) * 10 + d);
       }
-      if (document.activeElement !== document.getElementById("clockSecInput")) {
-        document.getElementById("clockSecInput").value = String(sec % 60).padStart(2, "0");
+      if (parts.length === 2) {
+        const m = parseInt(parts[0], 10) || 0;
+        const s = parseInt(parts[1], 10) || 0;
+        return Math.max(0, (m * 60 + s) * 10);
       }
-      if (document.activeElement !== document.getElementById("shotClockInput")) {
-        document.getElementById("shotClockInput").value = matchState.shotclock ?? 24;
-      }
-
-      document.querySelectorAll(".period-btn").forEach((btn) => {
-        btn.classList.toggle("is-active", btn.dataset.period === matchState.period);
-      });
+      return 6000;
     }
 
-    async function pushMatchState() {
-      await update(ref(db, `${DB_PATH}/modules/marcadores/live`), matchState);
+    function syncTimeInputsFromTenths(tenths) {
+      const t = Math.max(0, Math.floor(tenths));
+      const totalSec = Math.floor(t / 10);
+      document.getElementById("editMin").value = Math.floor(totalSec / 60);
+      document.getElementById("editSec").value = totalSec % 60;
+      document.getElementById("editDec").value = t % 10;
     }
 
-    // Cambio en el slidebar superior
-    liveSlideInput.addEventListener("change", async () => {
-      const checked = liveSlideInput.checked;
-      updateSlideLabel(checked);
-      await update(ref(db, `${DB_PATH}/modules/marcadores`), { enabled: checked });
-    });
+    function formatPeriodFiba(p) {
+      const n = parseInt(String(p ?? "1").replace(/[^0-9]/g, ""), 10) || 1;
+      return n <= 4 ? `Q${n}` : `OT${n - 4}`;
+    }
 
-    // Puntos y faltas en paralelo
-    document.querySelectorAll("button[data-team]").forEach((btn) => {
-      btn.addEventListener("click", async () => {
-        const team = btn.dataset.team;
-        const delta = parseInt(btn.dataset.delta, 10) || 0;
-        const key = team === "1" ? "points_1" : "points_2";
-        matchState[key] = Math.max(0, (parseInt(matchState[key], 10) || 0) + delta);
-        renderMatchUI();
-        await pushMatchState();
-      });
-    });
+    function getSourceFor(field) {
+      return modState.config?.sources?.[field] || "manual";
+    }
 
-    document.querySelectorAll("button[data-foul]").forEach((btn) => {
-      btn.addEventListener("click", async () => {
-        const team = btn.dataset.foul;
-        const delta = parseInt(btn.dataset.delta, 10) || 0;
-        const key = team === "1" ? "fouls_1" : "fouls_2";
-        matchState[key] = Math.max(0, (parseInt(matchState[key], 10) || 0) + delta);
-        renderMatchUI();
-        await pushMatchState();
-      });
-    });
-
-    document.getElementById("clockSetBtn").addEventListener("click", async () => {
-      const m = Math.max(0, parseInt(document.getElementById("clockMinInput").value, 10) || 0);
-      const s = Math.max(0, Math.min(59, parseInt(document.getElementById("clockSecInput").value, 10) || 0));
-      matchState.timerSec = m * 60 + s;
-      renderMatchUI();
-      await pushMatchState();
-    });
-
-    document.getElementById("clockToggleBtn").addEventListener("click", async () => {
-      matchState.timerRunning = !matchState.timerRunning;
-      await pushMatchState();
-    });
-
-    document.getElementById("shot24Btn").addEventListener("click", async () => {
-      matchState.shotclock = 24;
-      renderMatchUI();
-      await pushMatchState();
-    });
-
-    document.getElementById("shot14Btn").addEventListener("click", async () => {
-      matchState.shotclock = 14;
-      renderMatchUI();
-      await pushMatchState();
-    });
-
-    document.getElementById("shotClockInput").addEventListener("change", async (e) => {
-      matchState.shotclock = Math.max(0, Math.min(24, parseInt(e.target.value, 10) || 0));
-      await pushMatchState();
-    });
-
-    document.querySelectorAll(".period-btn").forEach((btn) => {
-      btn.addEventListener("click", async () => {
-        matchState.period = btn.dataset.period;
-        renderMatchUI();
-        await pushMatchState();
-      });
-    });
-
-    document.getElementById("resetFoulsBtn").addEventListener("click", async () => {
-      matchState.fouls_1 = 0;
-      matchState.fouls_2 = 0;
-      renderMatchUI();
-      await pushMatchState();
-    });
-
-    document.getElementById("resetMatchBtn").addEventListener("click", async () => {
-      matchState.points_1 = 0;
-      matchState.points_2 = 0;
-      matchState.fouls_1 = 0;
-      matchState.fouls_2 = 0;
-      matchState.timerRunning = false;
-      renderMatchUI();
-      await pushMatchState();
-    });
-
-    // Reloj de partido en control
-    setInterval(async () => {
-      if (matchState.timerRunning && matchState.timerSec > 0) {
-        matchState.timerSec -= 1;
-        if (matchState.timerSec <= 0) {
-          matchState.timerSec = 0;
-          matchState.timerRunning = false;
+    function readEffectiveValue(field, altKeys = []) {
+      const src = getSourceFor(field);
+      const bucket = modState.feeds?.[src] || {};
+      for (const k of [field, ...altKeys]) {
+        if (bucket[k] !== undefined && bucket[k] !== null && bucket[k] !== "") {
+          return bucket[k];
         }
-        renderMatchUI();
-        await pushMatchState();
       }
-    }, 1000);
-
-    /* ==================== COMPETENCIAS ESPECIALES EN CONTROL ==================== */
-    function getActiveSpConfig() {
-      const kind = spLive.kind === "libres" ? "libres" : "triples";
-      return especialesModule.config?.[kind] || {};
+      return (modState.feeds?.manual || {})[field];
     }
 
-    function renderEspecialesControlUI() {
-      const cfg = especialesModule.config || {};
-      const sel = document.getElementById("spActiveKindSelect");
-      const trOpt = sel.querySelector('option[value="triples"]');
-      const ftOpt = sel.querySelector('option[value="libres"]');
-      trOpt.disabled = cfg.enabledTriples === false;
-      ftOpt.disabled = !cfg.enabledLibres;
+    function updateConditionalVisibility() {
+      const p1Manual = getSourceFor("points_1") === "manual";
+      const p2Manual = getSourceFor("points_2") === "manual";
+      const f1Manual = getSourceFor("fouls_1") === "manual";
+      const f2Manual = getSourceFor("fouls_2") === "manual";
+      const tManual = getSourceFor("timer") === "manual";
+      const qManual = getSourceFor("period") === "manual";
 
-      if (spLive.kind === "libres" && !cfg.enabledLibres && cfg.enabledTriples !== false) {
-        spLive.kind = "triples";
-      } else if (spLive.kind === "triples" && cfg.enabledTriples === false && cfg.enabledLibres) {
-        spLive.kind = "libres";
+      document.getElementById("localPointsBox").classList.toggle("hidden", !p1Manual);
+      document.getElementById("localFoulsBox").classList.toggle("hidden", !f1Manual);
+      const showLocal = p1Manual || f1Manual;
+      document.getElementById("colLocal").classList.toggle("hidden", !showLocal);
+
+      document.getElementById("visitaPointsBox").classList.toggle("hidden", !p2Manual);
+      document.getElementById("visitaFoulsBox").classList.toggle("hidden", !f2Manual);
+      const showVisita = p2Manual || f2Manual;
+      document.getElementById("colVisita").classList.toggle("hidden", !showVisita);
+
+      document.getElementById("manualTimerBox").classList.toggle("hidden", !tManual);
+      document.getElementById("manualPeriodBox").classList.toggle("hidden", !qManual);
+
+      const parallel = document.getElementById("teamsParallel");
+      const anyTeam = showLocal || showVisita;
+      parallel.classList.toggle("hidden", !anyTeam);
+      parallel.classList.toggle("single-col", (showLocal && !showVisita) || (!showLocal && showVisita));
+
+      const anyGeneralManual = tManual || qManual;
+      document.getElementById("controlLayout").classList.toggle("general-only", !anyTeam && anyGeneralManual);
+    }
+
+    function renderMonitor() {
+      const cfg = modState.config || {};
+      const n1 = cfg.name1 || "LOCAL";
+      const n2 = cfg.name2 || "VISITA";
+      document.getElementById("monName1").textContent = n1;
+      document.getElementById("monName2").textContent = n2;
+      document.getElementById("titleLocal").textContent = n1;
+      document.getElementById("titleVisita").textContent = n2;
+
+      const pts1 = parseInt(readEffectiveValue("points_1", ["points1", "score_1"]) ?? 0, 10) || 0;
+      const pts2 = parseInt(readEffectiveValue("points_2", ["points2", "score_2"]) ?? 0, 10) || 0;
+      const f1 = parseInt(readEffectiveValue("fouls_1", ["fouls1"]) ?? 0, 10) || 0;
+      const f2 = parseInt(readEffectiveValue("fouls_2", ["fouls2"]) ?? 0, 10) || 0;
+      const per = readEffectiveValue("period", ["moment"]) ?? 1;
+      const tmr = readEffectiveValue("timer") ?? "10:00";
+
+      document.getElementById("monPts1").textContent = pts1;
+      document.getElementById("monPts2").textContent = pts2;
+      document.getElementById("monFouls1").textContent = f1;
+      document.getElementById("monFouls2").textContent = f2;
+
+      const monTimerEl = document.getElementById("monTimer");
+      monTimerEl.textContent = tmr;
+      monTimerEl.classList.toggle("clutch", parseTimerToTenths(tmr) < 100);
+
+      document.getElementById("monPeriod").textContent = formatPeriodFiba(per);
+      document.getElementById("ctrlPeriodLabel").textContent = formatPeriodFiba(per);
+
+      const liveBtn = document.getElementById("toggleLiveBtn");
+      const statusTag = document.getElementById("modStatusTag");
+      if (modState.on) {
+        liveBtn.textContent = "EN VIVO — OCULTAR MARCADOR";
+        liveBtn.classList.remove("live-off");
+        liveBtn.classList.add("live-on");
+        statusTag.textContent = "ON AIR";
+        statusTag.style.color = "#4ade80";
+      } else {
+        liveBtn.textContent = "MOSTRAR MARCADOR EN LIVE";
+        liveBtn.classList.remove("live-on");
+        liveBtn.classList.add("live-off");
+        statusTag.textContent = "OFF AIR";
+        statusTag.style.color = "var(--muted)";
       }
-      sel.value = spLive.kind;
 
-      const cur = getActiveSpConfig();
-      const modeLabel = cur.modePreset === "femicentro"
-        ? `Femicentro (${cur.maxShots || (spLive.kind === "libres" ? 10 : 6)} tiros)`
-        : cur.modePreset === "personalizada"
-          ? "Personalizada"
-          : `Time Attack (${cur.officialSec || 60}s / Desempate ${cur.tiebreakSec || 30}s)`;
-
-      document.getElementById("spModeSummary").textContent =
-        `${cur.title || "Competencia"} · ${modeLabel} · ${cur.stage || ""}`;
-      document.getElementById("spLiveTimer").textContent = formatClock(spLive.seconds);
-      document.getElementById("spLiveScore").textContent = `${spLive.score || 0} pts (${spLive.shots || 0} tiros)`;
-
-      const normalPts = cur.ptsNormal || 1;
-      const bonusPts = spLive.kind === "libres" ? (cur.ptsBonus || 2) : (cur.ptsMoney || 3);
-      document.getElementById("spAddNormalBtn").textContent = `+${normalPts} Acierto`;
-      document.getElementById("spAddSpecialBtn").textContent = `+${bonusPts} Balón Esp.`;
-
-      const players = cur.players || [];
-      const playerSelect = document.getElementById("spPlayerSelect");
-      playerSelect.innerHTML = players.length
-        ? players.map((p) => `<option value="${p.id}">${p.name} (${p.team})</option>`).join("")
-        : `<option value="">Sin participantes cargados</option>`;
-      if (spLive.playerId) playerSelect.value = String(spLive.playerId);
-
-      const sorted = [...players].sort((a, b) => (b.bestScore ?? -1) - (a.bestScore ?? -1));
-      const tbody = document.getElementById("spStandingsBody");
-      tbody.innerHTML = sorted.length
-        ? sorted.map((p, idx) => `
-            <tr>
-              <td>${idx + 1}</td>
-              <td><strong>${p.name}</strong></td>
-              <td>${p.team}</td>
-              <td><strong>${p.bestScore !== null && p.bestScore !== undefined ? p.bestScore : "-"}</strong></td>
-            </tr>
-          `).join("")
-        : `<tr><td colspan="4" style="color:var(--muted);">Sin marcas registradas</td></tr>`;
+      updateConditionalVisibility();
     }
 
-    async function pushEspecialesLive() {
-      await update(ref(db, `${DB_PATH}/modules/especiales/live`), spLive);
+    async function writeManual(patch) {
+      modState.feeds.manual = { ...(modState.feeds?.manual || {}), ...patch };
+      renderMonitor();
+      await update(ref(db, `${DB_PATH}/modules/marcadores/feeds/manual`), patch);
     }
 
-    document.getElementById("spActiveKindSelect").addEventListener("change", async (e) => {
-      spLive.kind = e.target.value;
-      const cur = getActiveSpConfig();
-      spLive.seconds = cur.officialSec || 60;
-      spLive.score = 0;
-      spLive.shots = 0;
-      spLive.running = false;
-      spLive.isTiebreak = false;
-      renderEspecialesControlUI();
-      await pushEspecialesLive();
-    });
-
-    document.getElementById("spShowLiveBtn").addEventListener("click", async () => {
-      spLive.visible = true;
-      await pushEspecialesLive();
-    });
-
-    document.getElementById("spHideLiveBtn").addEventListener("click", async () => {
-      spLive.visible = false;
-      spLive.running = false;
-      await pushEspecialesLive();
-    });
-
-    document.getElementById("spStartTimerBtn").addEventListener("click", async () => {
-      spLive.running = !spLive.running;
-      await pushEspecialesLive();
-    });
-
-    document.getElementById("spTiebreakBtn").addEventListener("click", async () => {
-      const cur = getActiveSpConfig();
-      spLive.isTiebreak = true;
-      spLive.seconds = cur.tiebreakSec || 30;
-      spLive.score = 0;
-      spLive.shots = 0;
-      spLive.running = false;
-      renderEspecialesControlUI();
-      await pushEspecialesLive();
-    });
-
-    document.getElementById("spAddNormalBtn").addEventListener("click", async () => {
-      const cur = getActiveSpConfig();
-      spLive.score = (spLive.score || 0) + (parseInt(cur.ptsNormal, 10) || 1);
-      spLive.shots = (spLive.shots || 0) + 1;
-      renderEspecialesControlUI();
-      await pushEspecialesLive();
-    });
-
-    document.getElementById("spAddSpecialBtn").addEventListener("click", async () => {
-      const cur = getActiveSpConfig();
-      const extra = spLive.kind === "libres"
-        ? (parseInt(cur.ptsBonus, 10) || 2)
-        : (parseInt(cur.ptsMoney, 10) || 3);
-      spLive.score = (spLive.score || 0) + extra;
-      spLive.shots = (spLive.shots || 0) + 1;
-      renderEspecialesControlUI();
-      await pushEspecialesLive();
-    });
-
-    document.getElementById("spUndoBtn").addEventListener("click", async () => {
-      spLive.score = Math.max(0, (spLive.score || 0) - 1);
-      spLive.shots = Math.max(0, (spLive.shots || 0) - 1);
-      renderEspecialesControlUI();
-      await pushEspecialesLive();
-    });
-
-    document.getElementById("spResetTurnBtn").addEventListener("click", async () => {
-      const cur = getActiveSpConfig();
-      spLive.score = 0;
-      spLive.shots = 0;
-      spLive.running = false;
-      spLive.isTiebreak = false;
-      spLive.seconds = cur.officialSec || 60;
-      renderEspecialesControlUI();
-      await pushEspecialesLive();
-    });
-
-    document.getElementById("spSaveBestBtn").addEventListener("click", async () => {
-      const selId = document.getElementById("spPlayerSelect").value;
-      if (!selId) return;
-      const cur = getActiveSpConfig();
-      const players = cur.players || [];
-      const updated = players.map((p) => {
-        if (String(p.id) !== String(selId)) return p;
-        const prevBest = p.bestScore ?? 0;
-        return { ...p, bestScore: Math.max(prevBest, spLive.score || 0) };
+    document.querySelectorAll("[data-pts]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const key = btn.dataset.pts === "1" ? "points_1" : "points_2";
+        const delta = parseInt(btn.dataset.delta, 10);
+        const cur = parseInt(modState.feeds?.manual?.[key] ?? 0, 10) || 0;
+        await writeManual({ [key]: Math.max(0, cur + delta) });
       });
-      await set(ref(db, `${DB_PATH}/modules/especiales/config/${spLive.kind}/players`), updated);
     });
+
+    document.querySelectorAll("[data-foul]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const key = btn.dataset.foul === "1" ? "fouls_1" : "fouls_2";
+        if (btn.dataset.delta === "reset") {
+          await writeManual({ [key]: 0 });
+          return;
+        }
+        const delta = parseInt(btn.dataset.delta, 10);
+        const cur = parseInt(modState.feeds?.manual?.[key] ?? 0, 10) || 0;
+        await writeManual({ [key]: Math.max(0, Math.min(5, cur + delta)) });
+      });
+    });
+
+    async function applyPeriodTransition(nextPeriod) {
+      stopTimerLoop();
+      const isOvertime = nextPeriod > 4;
+      const targetTenths = isOvertime ? 3000 : quarterBaseTenths;
+      remainingTenths = targetTenths;
+      syncTimeInputsFromTenths(targetTenths);
+      const patch = { period: nextPeriod, timer: formatClockFromTenths(targetTenths) };
+      if (!isOvertime) {
+        patch.fouls_1 = 0;
+        patch.fouls_2 = 0;
+      }
+      await writeManual(patch);
+    }
+
+    document.getElementById("periodMinusBtn").addEventListener("click", async () => {
+      const cur = parseInt(String(modState.feeds?.manual?.period ?? "1").replace(/[^0-9]/g, ""), 10) || 1;
+      await applyPeriodTransition(Math.max(1, cur - 1));
+    });
+
+    document.getElementById("periodPlusBtn").addEventListener("click", async () => {
+      const cur = parseInt(String(modState.feeds?.manual?.period ?? "1").replace(/[^0-9]/g, ""), 10) || 1;
+      await applyPeriodTransition(cur + 1);
+    });
+
+    const startStopBtn = document.getElementById("timerStartStopBtn");
+    function stopTimerLoop() {
+      timerRunning = false;
+      if (timerRafId) cancelAnimationFrame(timerRafId);
+      timerRafId = null;
+      startStopBtn.textContent = "▶ Iniciar Tiempo";
+      startStopBtn.classList.remove("running");
+      startStopBtn.classList.add("plus");
+    }
+
+    function tickClock(now) {
+      if (!timerRunning) return;
+      const elapsedTenths = Math.floor((now - lastTickMs) / 100);
+      if (elapsedTenths >= 1) {
+        lastTickMs += elapsedTenths * 100;
+        remainingTenths = Math.max(0, remainingTenths - elapsedTenths);
+        const formatted = formatClockFromTenths(remainingTenths);
+        modState.feeds.manual.timer = formatted;
+        syncTimeInputsFromTenths(remainingTenths);
+        renderMonitor();
+
+        const isClutch = remainingTenths < 100;
+        const pushInterval = isClutch ? 120 : 950;
+        if (remainingTenths === 0 || (now - lastFirebasePushMs) >= pushInterval) {
+          lastFirebasePushMs = now;
+          update(ref(db, `${DB_PATH}/modules/marcadores/feeds/manual`), { timer: formatted });
+        }
+        if (remainingTenths <= 0) {
+          stopTimerLoop();
+          return;
+        }
+      }
+      timerRafId = requestAnimationFrame(tickClock);
+    }
+
+    startStopBtn.addEventListener("click", () => {
+      if (timerRunning) {
+        stopTimerLoop();
+      } else if (remainingTenths > 0) {
+        timerRunning = true;
+        lastTickMs = performance.now();
+        lastFirebasePushMs = 0;
+        startStopBtn.textContent = "⏸ Detener Tiempo";
+        startStopBtn.classList.remove("plus");
+        startStopBtn.classList.add("running");
+        timerRafId = requestAnimationFrame(tickClock);
+      }
+    });
+
+    document.querySelectorAll("[data-preset-min]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        stopTimerLoop();
+        const m = parseInt(btn.dataset.presetMin, 10) || 0;
+        const s = parseInt(btn.dataset.presetSec, 10) || 0;
+        const totalTenths = (m * 60 + s) * 10;
+        remainingTenths = totalTenths;
+        if (m === 10 || m === 8) quarterBaseTenths = totalTenths;
+        syncTimeInputsFromTenths(totalTenths);
+        await writeManual({ timer: formatClockFromTenths(totalTenths) });
+      });
+    });
+
+    document.getElementById("applyTimeBtn").addEventListener("click", async () => {
+      stopTimerLoop();
+      const m = Math.max(0, Math.min(59, parseInt(document.getElementById("editMin").value, 10) || 0));
+      const s = Math.max(0, Math.min(59, parseInt(document.getElementById("editSec").value, 10) || 0));
+      const d = Math.max(0, Math.min(9, parseInt(document.getElementById("editDec").value, 10) || 0));
+      remainingTenths = (m * 60 + s) * 10 + d;
+      await writeManual({ timer: formatClockFromTenths(remainingTenths) });
+    });
+
+    document.getElementById("toggleLiveBtn").addEventListener("click", async () => {
+      await update(ref(db, `${DB_PATH}/modules/marcadores`), {
+        enabled: true,
+        on: !modState.on
+      });
+    });
+
+    document.querySelectorAll("[data-social]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        await update(ref(db, `${DB_PATH}/modules/marcadores/cmd`), {
+          action: "social_now",
+          network: btn.dataset.social,
+          ts: Date.now()
+        });
+      });
+    });
+
+    /* ==================== ESTADO Y LÓGICA COMPETENCIAS ESPECIALES (FORMATO control_triples_2.html) ==================== */
+    const DEFAULT_PLAYERS = [
+      { id: 1, name: "Andrés Tapia", team: "ARABE UNIDO", cat: "+35", pos: "Base", bestScore: null },
+      { id: 2, name: "Bryan Rodriguez", team: "RAVENS", cat: "+35", pos: "Base", bestScore: null },
+      { id: 3, name: "Henderson Blanco", team: "JUMP STOP", cat: "+35", pos: "Alero", bestScore: null },
+      { id: 4, name: "Juan Esteban Montero", team: "UNION FORMOSA", cat: "+35", pos: "Escolta", bestScore: null },
+      { id: 5, name: "Rodrigo Flores", team: "LML", cat: "+40", pos: "Alero", bestScore: null },
+      { id: 6, name: "Rodrigo Bello", team: "ISB", cat: "+40", pos: "Alero", bestScore: null },
+      { id: 7, name: "Cristian Silva", team: "ISB", cat: "+40", pos: "Base", bestScore: null },
+      { id: 8, name: "Braulio Muñoz", team: "RAVENS", cat: "+40", pos: "Ala-Pivot", bestScore: null },
+      { id: 9, name: "Alexander de Arcos", team: "CAIMANES", cat: "+40", pos: "Alero", bestScore: null },
+      { id: 10, name: "Carlos Colina", team: "CAIMANES", cat: "+40", pos: "Alero", bestScore: null }
+    ];
+
+    let activeSpecialKind = "triples";
+    let specialLocks = { triples: null, libres: null };
+    let specialsStudioConfig = {
+      enabledTriples: true,
+      enabledLibres: false,
+      triples: {
+        title: "TORNEO TRIPLES CLAUSURA 2026",
+        stage: "GRUPO A",
+        useTimer: true,
+        officialSec: 60,
+        tiebreakSec: 30,
+        maxShots: 0,
+        ptsNormal: 1,
+        moneyEnabled: true,
+        ptsMoney: 3,
+        halfEnabled: true,
+        ptsHalf: 3,
+        targetOverride: 0,
+        teamLogos: {},
+        players: JSON.parse(JSON.stringify(DEFAULT_PLAYERS))
+      },
+      libres: {
+        title: "CONCURSO DE TIROS LIBRES 2026",
+        stage: "CLASIFICATORIA",
+        useTimer: true,
+        officialSec: 60,
+        tiebreakSec: 30,
+        maxShots: 0,
+        ptsNormal: 1,
+        moneyEnabled: false,
+        ptsMoney: 2,
+        halfEnabled: false,
+        ptsHalf: 3,
+        targetOverride: 0,
+        teamLogos: {},
+        players: []
+      }
+    };
+
+    let spLiveByKind = {
+      triples: {
+        visible: true,
+        activePlayerId: 1,
+        roundMode: "oficial",
+        timeMs: 60000,
+        shots: [],
+        moneyStatus: "available",
+        halfStatus: "available"
+      },
+      libres: {
+        visible: true,
+        activePlayerId: null,
+        roundMode: "oficial",
+        timeMs: 60000,
+        shots: [],
+        moneyStatus: "disabled",
+        halfStatus: "disabled"
+      }
+    };
+
+    let spTimerRunning = false;
+    let spLastTick = 0;
+    let spRafId = null;
+    let spLastPush = 0;
+    let pendingTeamForLogo = "";
+
+    function getCurCfg() {
+      return specialsStudioConfig[activeSpecialKind] || {};
+    }
+    function getCurLive() {
+      return spLiveByKind[activeSpecialKind];
+    }
+
+    function isSpecialLockedByOther(kind = activeSpecialKind) {
+      if (userRole === "admin") return false;
+      const lock = specialLocks[kind];
+      if (!lock || !lock.sessionId) return false;
+      if (lock.sessionId === SESSION_ID) return false;
+      return (Date.now() - (lock.ts || 0)) < 45000;
+    }
+
+    async function claimSpecialLock(kind = activeSpecialKind, force = false) {
+      if (isSpecialLockedByOther(kind) && !force) {
+        updateSpecialLockUI();
+        return false;
+      }
+      // Si es operador normal, libera cualquier bloqueo previo en la otra competencia (1 competencia a la vez)
+      if (userRole !== "admin") {
+        const otherKind = kind === "triples" ? "libres" : "triples";
+        if (specialLocks[otherKind]?.sessionId === SESSION_ID) {
+          await update(ref(db, `${DB_PATH}/locks`), { [otherKind]: null });
+        }
+      }
+      await update(ref(db, `${DB_PATH}/locks/${kind}`), {
+        sessionId: SESSION_ID,
+        email: operatorEmail,
+        name: operatorName,
+        ts: Date.now()
+      });
+      return true;
+    }
+
+    async function releaseMySpecialLock() {
+      const patch = {};
+      if (specialLocks.triples?.sessionId === SESSION_ID) patch.triples = null;
+      if (specialLocks.libres?.sessionId === SESSION_ID) patch.libres = null;
+      if (Object.keys(patch).length) {
+        await update(ref(db, `${DB_PATH}/locks`), patch);
+      }
+    }
+
+    function updateSpecialLockUI() {
+      const lockT = specialLocks.triples;
+      const lockL = specialLocks.libres;
+      document.getElementById("lockTagTriples").textContent =
+        lockT && (Date.now() - (lockT.ts || 0)) < 45000
+          ? (lockT.sessionId === SESSION_ID ? "(TUYA)" : `(BLOQ: ${lockT.name})`)
+          : "(LIBRE)";
+      document.getElementById("lockTagLibres").textContent =
+        lockL && (Date.now() - (lockL.ts || 0)) < 45000
+          ? (lockL.sessionId === SESSION_ID ? "(TUYA)" : `(BLOQ: ${lockL.name})`)
+          : "(LIBRE)";
+
+      const blocked = isSpecialLockedByOther(activeSpecialKind);
+      const banner = document.getElementById("spLockBanner");
+      const workspace = document.getElementById("spWorkspace");
+
+      if (blocked) {
+        const holder = specialLocks[activeSpecialKind]?.name || "otro operador";
+        banner.classList.add("is-active");
+        document.getElementById("spLockBannerText").textContent =
+          `Competencia bloqueada por "${holder}". Toma la otra competencia disponible o espera que la libere.`;
+        workspace.classList.add("sp-disabled-block");
+      } else {
+        banner.classList.remove("is-active");
+        workspace.classList.remove("sp-disabled-block");
+      }
+    }
+
+    function spCalcScore(live = getCurLive()) {
+      return (live.shots || []).reduce((acc, s) => acc + (Number(s.pts) || 0), 0);
+    }
+
+    function spCalcTarget() {
+      const cfg = getCurCfg();
+      const live = getCurLive();
+      if (cfg.targetOverride && Number(cfg.targetOverride) > 0) {
+        return Number(cfg.targetOverride);
+      }
+      const list = cfg.players || [];
+      const activeP = list.find((p) => String(p.id) === String(live.activePlayerId));
+      const cat = activeP ? activeP.cat : "";
+      let max = 0;
+      list.forEach((p) => {
+        if ((!cat || p.cat === cat) && String(p.id) !== String(live.activePlayerId) && p.bestScore !== null && p.bestScore !== undefined && Number(p.bestScore) > max) {
+          max = Number(p.bestScore);
+        }
+      });
+      return max;
+    }
+
+    function spFormatClock(ms, roundMode) {
+      if (roundMode === "muerte_subita") return "SÚBITA";
+      const totalTenths = Math.max(0, Math.ceil(ms / 100));
+      const secs = Math.floor(totalTenths / 10);
+      const tenths = totalTenths % 10;
+      if (secs >= 60) {
+        const mins = Math.floor(secs / 60);
+        const remSecs = secs % 60;
+        return `${mins}:${remSecs < 10 ? "0" : ""}${remSecs}.${tenths}`;
+      }
+      return `${secs < 10 ? "0" : ""}${secs}.${tenths}`;
+    }
+
+    async function pushSpecialLive(kind = activeSpecialKind) {
+      const cfg = specialsStudioConfig[kind] || {};
+      const live = spLiveByKind[kind];
+      const list = cfg.players || [];
+      const activeP = list.find((p) => String(p.id) === String(live.activePlayerId)) || list[0] || {
+        name: "ESPERANDO JUGADOR",
+        team: activeSpecialKind === "libres" ? "TIROS LIBRES" : "TORNEO TRIPLES",
+        cat: "",
+        pos: ""
+      };
+      const teamKey = (activeP.team || "").trim().toUpperCase();
+
+      const payload = {
+        visible: Boolean(live.visible),
+        activePlayerId: activeP.id ?? null,
+        player: activeP,
+        teamLogo: (cfg.teamLogos || {})[teamKey] || "",
+        score: spCalcScore(live),
+        targetScore: spCalcTarget(),
+        timeMs: live.timeMs,
+        clockText: spFormatClock(live.timeMs, live.roundMode),
+        isDangerTime: Boolean(cfg.useTimer && live.roundMode !== "muerte_subita" && live.timeMs <= 10000 && live.timeMs > 0),
+        roundMode: live.roundMode,
+        shots: live.shots || [],
+        moneyStatus: live.moneyStatus,
+        halfStatus: live.halfStatus,
+        updatedAt: Date.now()
+      };
+
+      await update(ref(db, `${DB_PATH}/modules/especiales/live/${kind}`), payload);
+    }
+
+    function syncSpecialDynamicButtons() {
+      const cfg = getCurCfg();
+      const live = getCurLive();
+      const useTimer = cfg.useTimer !== false;
+
+      document.getElementById("spMesaTitle").textContent =
+        activeSpecialKind === "libres" ? "MESA DE CONTROL EN VIVO — TIROS LIBRES" : "MESA DE CONTROL EN VIVO — TRIPLES";
+      document.getElementById("spSceneUrlHint").innerHTML =
+        `Escena OBS: <strong>${activeSpecialKind === "libres" ? "live-libres.html" : "live-triples.html"}</strong>`;
+
+      // Cronómetro vs Modo sin tiempo (Femicentro)
+      const hud = document.getElementById("spLiveHud");
+      const clockBox = document.getElementById("hudClockBox");
+      const timerGrid = document.getElementById("spTimerControlsGrid");
+      const shotsOnlyBar = document.getElementById("spShotsOnlyBar");
+
+      if (useTimer) {
+        hud.classList.remove("no-timer");
+        clockBox.classList.remove("hidden");
+        timerGrid.classList.remove("hidden");
+        shotsOnlyBar.classList.add("hidden");
+
+        const offSec = Number(cfg.officialSec) || 60;
+        const tieSec = Number(cfg.tiebreakSec) || 30;
+        document.getElementById("btnModeOficial").textContent = `${Math.floor(offSec / 60)}:${String(offSec % 60).padStart(2, "0")} Oficial`;
+        document.getElementById("btnModeDesempate").textContent = `${Math.floor(tieSec / 60)}:${String(tieSec % 60).padStart(2, "0")} Desemp.`;
+      } else {
+        hud.classList.add("no-timer");
+        timerGrid.classList.add("hidden");
+        shotsOnlyBar.classList.remove("hidden");
+        if (Number(cfg.maxShots) > 0) {
+          clockBox.classList.remove("hidden");
+          document.getElementById("hudClockLabel").textContent = "Tiros";
+        } else {
+          clockBox.classList.add("hidden");
+        }
+      }
+
+      // Botón acierto normal dinámico
+      const ptsNorm = Number(cfg.ptsNormal) || 1;
+      const makeLabel = activeSpecialKind === "libres"
+        ? `🏀 TIRO LIBRE ADENTRO (+${ptsNorm} PT${ptsNorm > 1 ? "S" : ""})`
+        : `🏀 TRIPLE ADENTRO (+${ptsNorm} PT${ptsNorm > 1 ? "S" : ""})`;
+      document.getElementById("btnMakeNormal").innerHTML = `${makeLabel}<span class="kbd-hint">[Tecla 1 o Flecha →]</span>`;
+
+      // Botones especiales (Balón Especial / Media Cancha) dinámicos según Estudio
+      const hasMoney = Boolean(cfg.moneyEnabled);
+      const hasHalf = Boolean(cfg.halfEnabled);
+      const specialGrid = document.getElementById("spSpecialShotsGrid");
+      specialGrid.classList.toggle("hidden", !hasMoney && !hasHalf);
+
+      const btnMoney = document.getElementById("btnMoneyBall");
+      const btnHalf = document.getElementById("btnHalfCourt");
+      const btnMissMoney = document.getElementById("btnMissMoney");
+      const btnMissHalf = document.getElementById("btnMissHalf");
+
+      btnMoney.classList.toggle("hidden", !hasMoney);
+      btnMissMoney.classList.toggle("hidden", !hasMoney);
+      if (hasMoney) {
+        const pM = Number(cfg.ptsMoney) || 3;
+        btnMoney.innerHTML = `🔥 BALÓN ESPECIAL (+${pM} PTS)<span class="kbd-hint">[Tecla E — 1 uso por ronda]</span>`;
+      }
+
+      btnHalf.classList.toggle("hidden", !hasHalf);
+      btnMissHalf.classList.toggle("hidden", !hasHalf);
+      if (hasHalf) {
+        const pH = Number(cfg.ptsHalf) || 3;
+        const hLabel = activeSpecialKind === "libres" ? `🎯 TIRO BONUS (+${pH} PTS)` : `🎯 MEDIA CANCHA (+${pH} PTS)`;
+        btnHalf.innerHTML = `${hLabel}<span class="kbd-hint">[Tecla M — Al expirar reloj]</span>`;
+      }
+
+      const isOficial = live.roundMode === "oficial";
+      btnMoney.disabled = !(hasMoney && isOficial && live.moneyStatus === "available");
+      btnMissMoney.disabled = !(hasMoney && isOficial && live.moneyStatus === "available");
+      btnHalf.disabled = !(hasHalf && isOficial && live.halfStatus === "available");
+      btnMissHalf.disabled = !(hasHalf && isOficial && live.halfStatus === "available");
+    }
+
+    function updateSpecialHUD() {
+      const cfg = getCurCfg();
+      const live = getCurLive();
+      const list = cfg.players || [];
+      const p = list.find((x) => String(x.id) === String(live.activePlayerId)) || list[0] || null;
+      if (p && live.activePlayerId === null) live.activePlayerId = p.id;
+
+      document.getElementById("spOverlayVisible").checked = Boolean(live.visible);
+      document.getElementById("hudName").textContent = p ? p.name : "SIN PARTICIPANTES";
+      document.getElementById("hudMeta").textContent = p
+        ? `${p.team}${p.cat ? ` • ${p.cat}` : ""}${p.pos ? ` • ${p.pos}` : ""}`
+        : "AGREGA UN JUGADOR EN LA TABLA";
+      document.getElementById("hudScore").textContent = spCalcScore(live);
+      document.getElementById("hudTarget").textContent = `${spCalcTarget()} PTS`;
+
+      const hudLogoBox = document.getElementById("hudTeamLogoBox");
+      const teamKey = p ? (p.team || "").trim().toUpperCase() : "";
+      const tLogo = teamKey ? (cfg.teamLogos || {})[teamKey] || "" : "";
+      hudLogoBox.innerHTML = tLogo ? `<img src="${tLogo}" alt="">` : "<span>SIN<br>LOGO</span>";
+
+      const clockEl = document.getElementById("hudClock");
+      if (cfg.useTimer === false && Number(cfg.maxShots) > 0) {
+        clockEl.textContent = `${(live.shots || []).length}/${cfg.maxShots}`;
+        clockEl.classList.remove("danger");
+      } else {
+        document.getElementById("hudClockLabel").textContent = "Cronómetro";
+        clockEl.textContent = spFormatClock(live.timeMs, live.roundMode);
+        clockEl.classList.toggle("danger", live.roundMode !== "muerte_subita" && live.timeMs <= 10000 && live.timeMs > 0);
+      }
+
+      const strip = document.getElementById("shotHistoryStrip");
+      strip.innerHTML = (live.shots || []).map((s) => {
+        if (s.type === "normal") return `<span class="ball-badge ball-1">+${s.pts}</span>`;
+        if (s.type === "money") return `<span class="ball-badge ball-money">+${s.pts}</span>`;
+        if (s.type === "half") return `<span class="ball-badge ball-half">+${s.pts}</span>`;
+        return `<span class="ball-badge ball-0">✕</span>`;
+      }).join("");
+
+      syncSpecialDynamicButtons();
+    }
+
+    function renderSpecialPlayersTable() {
+      const cfg = getCurCfg();
+      const live = getCurLive();
+      const list = cfg.players || [];
+      document.getElementById("playerCountLabel").textContent = list.length;
+
+      // Actualizar filtro de categorías dinámico
+      const filterEl = document.getElementById("filterCat");
+      const currentFilter = filterEl.value || "ALL";
+      const cats = [...new Set(list.map((p) => p.cat).filter(Boolean))];
+      filterEl.innerHTML = `<option value="ALL">Todas las Categorías</option>` +
+        cats.map((c) => `<option value="${c}">${c}</option>`).join("");
+      if ([...filterEl.options].some((o) => o.value === currentFilter)) {
+        filterEl.value = currentFilter;
+      }
+
+      const filter = filterEl.value;
+      const tbody = document.getElementById("playersTableBody");
+      const filtered = list.filter((p) => filter === "ALL" || p.cat === filter);
+
+      if (!filtered.length) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#777; padding:18px;">No hay participantes cargados en esta vista.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map((p) => {
+        const isAct = String(p.id) === String(live.activePlayerId);
+        const teamKey = (p.team || "").trim().toUpperCase();
+        const logo = (cfg.teamLogos || {})[teamKey] || "";
+        const logoCell = logo
+          ? `<img src="${logo}" class="tbl-logo" style="cursor:pointer;" title="Cambiar escudo ${p.team}" data-logo-team="${teamKey}">`
+          : `<button type="button" class="sp-btn btn-dark" style="padding:3px 6px; font-size:10px;" data-logo-team="${teamKey}">+ Logo</button>`;
+
+        return `<tr class="${isAct ? "active-row" : ""}">
+          <td>${logoCell}</td>
+          <td><strong>${p.name}</strong></td>
+          <td>${p.team}</td>
+          <td>${p.cat || "-"}</td>
+          <td style="color:#e3b857; font-weight:800;">${p.bestScore !== null && p.bestScore !== undefined ? p.bestScore : "-"}</td>
+          <td><div class="actions-cell">
+            <button type="button" class="sp-btn ${isAct ? "btn-gold" : "btn-dark"}" style="padding:4px 8px; font-size:11px;" data-select-id="${p.id}">${isAct ? "EN CANCHA" : "ELEGIR"}</button>
+            <button type="button" class="sp-btn btn-danger" style="padding:4px 7px; font-size:11px;" title="Eliminar" data-del-id="${p.id}">✕</button>
+          </div></td>
+        </tr>`;
+      }).join("");
+
+      tbody.querySelectorAll("[data-logo-team]").forEach((el) => {
+        el.addEventListener("click", () => {
+          pendingTeamForLogo = el.dataset.logoTeam;
+          const picker = document.getElementById("rowTeamLogoPicker");
+          picker.value = "";
+          picker.click();
+        });
+      });
+
+      tbody.querySelectorAll("[data-select-id]").forEach((el) => {
+        el.addEventListener("click", () => {
+          const liveCur = getCurLive();
+          liveCur.activePlayerId = el.dataset.selectId;
+          setSpecialRoundMode(liveCur.roundMode || "oficial");
+          renderSpecialPlayersTable();
+        });
+      });
+
+      tbody.querySelectorAll("[data-del-id]").forEach((el) => {
+        el.addEventListener("click", async () => {
+          const idStr = el.dataset.delId;
+          const cfgCur = getCurCfg();
+          cfgCur.players = (cfgCur.players || []).filter((x) => String(x.id) !== idStr);
+          const liveCur = getCurLive();
+          if (String(liveCur.activePlayerId) === idStr) {
+            liveCur.activePlayerId = cfgCur.players.length ? cfgCur.players[0].id : null;
+          }
+          await update(ref(db, `${DB_PATH}/modules/especiales/config/${activeSpecialKind}`), {
+            players: cfgCur.players
+          });
+          renderSpecialPlayersTable();
+          updateSpecialHUD();
+          await pushSpecialLive();
+        });
+      });
+    }
+
+    function stopSpecialTimer() {
+      spTimerRunning = false;
+      if (spRafId) cancelAnimationFrame(spRafId);
+      spRafId = null;
+      const btn = document.getElementById("btnToggleTimer");
+      btn.innerHTML = '▶ INICIAR RELOJ<span class="kbd-hint">[Barra Espaciadora]</span>';
+      btn.className = "sp-btn btn-start";
+    }
+
+    function tickSpecialTimer(now) {
+      if (!spTimerRunning) return;
+      const live = getCurLive();
+      const dt = now - spLastTick;
+      spLastTick = now;
+      live.timeMs = Math.max(0, live.timeMs - dt);
+      updateSpecialHUD();
+
+      if (live.timeMs === 0 || (now - spLastPush) >= 120) {
+        spLastPush = now;
+        pushSpecialLive();
+      }
+      if (live.timeMs <= 0) {
+        stopSpecialTimer();
+        return;
+      }
+      spRafId = requestAnimationFrame(tickSpecialTimer);
+    }
+
+    function toggleSpecialTimer() {
+      const cfg = getCurCfg();
+      const live = getCurLive();
+      if (cfg.useTimer === false || live.roundMode === "muerte_subita") return;
+      if (spTimerRunning) {
+        stopSpecialTimer();
+        pushSpecialLive();
+      } else {
+        if (live.timeMs <= 0) {
+          const baseSec = live.roundMode === "desempate30" ? (Number(cfg.tiebreakSec) || 30) : (Number(cfg.officialSec) || 60);
+          live.timeMs = baseSec * 1000;
+        }
+        spTimerRunning = true;
+        spLastTick = performance.now();
+        spLastPush = 0;
+        const btn = document.getElementById("btnToggleTimer");
+        btn.innerHTML = '⏸ PAUSAR RELOJ<span class="kbd-hint">[Barra Espaciadora]</span>';
+        btn.className = "sp-btn btn-pause";
+        spRafId = requestAnimationFrame(tickSpecialTimer);
+      }
+    }
+
+    async function setSpecialRoundMode(mode) {
+      stopSpecialTimer();
+      const cfg = getCurCfg();
+      const live = getCurLive();
+      live.roundMode = mode;
+      live.shots = [];
+      live.moneyStatus = (cfg.moneyEnabled && mode === "oficial") ? "available" : "disabled";
+      live.halfStatus = (cfg.halfEnabled && mode === "oficial") ? "available" : "disabled";
+
+      if (mode === "oficial") live.timeMs = (Number(cfg.officialSec) || 60) * 1000;
+      else if (mode === "desempate30") live.timeMs = (Number(cfg.tiebreakSec) || 30) * 1000;
+      else live.timeMs = 0;
+
+      updateSpecialHUD();
+      await pushSpecialLive();
+    }
+
+    async function registerSpecialShot(type) {
+      if (isSpecialLockedByOther()) return;
+      const cfg = getCurCfg();
+      const live = getCurLive();
+      const maxShots = Number(cfg.maxShots) || 0;
+      if (maxShots > 0 && (live.shots || []).length >= maxShots) return;
+
+      if (type === "normal") {
+        live.shots.push({ type: "normal", pts: Number(cfg.ptsNormal) || 1 });
+      } else if (type === "fallo") {
+        live.shots.push({ type: "fallo", pts: 0 });
+      } else if (type === "money" && cfg.moneyEnabled && live.roundMode === "oficial" && live.moneyStatus === "available") {
+        live.shots.push({ type: "money", pts: Number(cfg.ptsMoney) || 3 });
+        live.moneyStatus = "made";
+      } else if (type === "half" && cfg.halfEnabled && live.roundMode === "oficial" && live.halfStatus === "available") {
+        live.shots.push({ type: "half", pts: Number(cfg.ptsHalf) || 3 });
+        live.halfStatus = "made";
+      }
+      updateSpecialHUD();
+      await pushSpecialLive();
+    }
+
+    async function registerSpecialMissBonus(which) {
+      if (isSpecialLockedByOther()) return;
+      const cfg = getCurCfg();
+      const live = getCurLive();
+      if (live.roundMode !== "oficial") return;
+      if (which === "money" && cfg.moneyEnabled && live.moneyStatus === "available") {
+        live.moneyStatus = "missed";
+        live.shots.push({ type: "money_miss", pts: 0 });
+      } else if (which === "half" && cfg.halfEnabled && live.halfStatus === "available") {
+        live.halfStatus = "missed";
+        live.shots.push({ type: "half_miss", pts: 0 });
+      }
+      updateSpecialHUD();
+      await pushSpecialLive();
+    }
+
+    async function undoSpecialShot() {
+      if (isSpecialLockedByOther()) return;
+      const live = getCurLive();
+      if (!live.shots?.length) return;
+      const last = live.shots.pop();
+      if (last.type === "money" || last.type === "money_miss") live.moneyStatus = "available";
+      if (last.type === "half" || last.type === "half_miss") live.halfStatus = "available";
+      updateSpecialHUD();
+      await pushSpecialLive();
+    }
+
+    /* Eventos Mesa Especial */
+    document.getElementById("btnToggleTimer").addEventListener("click", toggleSpecialTimer);
+    document.getElementById("btnModeOficial").addEventListener("click", () => setSpecialRoundMode("oficial"));
+    document.getElementById("btnModeDesempate").addEventListener("click", () => setSpecialRoundMode("desempate30"));
+    document.getElementById("btnModeSubita").addEventListener("click", () => setSpecialRoundMode("muerte_subita"));
+    document.getElementById("btnResetShotsRound").addEventListener("click", () => setSpecialRoundMode("oficial"));
+
+    document.getElementById("btnMakeNormal").addEventListener("click", () => registerSpecialShot("normal"));
+    document.getElementById("btnMissNormal").addEventListener("click", () => registerSpecialShot("fallo"));
+    document.getElementById("btnMoneyBall").addEventListener("click", () => registerSpecialShot("money"));
+    document.getElementById("btnHalfCourt").addEventListener("click", () => registerSpecialShot("half"));
+    document.getElementById("btnMissMoney").addEventListener("click", () => registerSpecialMissBonus("money"));
+    document.getElementById("btnMissHalf").addEventListener("click", () => registerSpecialMissBonus("half"));
+    document.getElementById("btnUndoShot").addEventListener("click", undoSpecialShot);
+
+    document.getElementById("spOverlayVisible").addEventListener("change", async (e) => {
+      getCurLive().visible = e.target.checked;
+      await pushSpecialLive();
+    });
+
+    document.getElementById("btnSavePlayerScore").addEventListener("click", async () => {
+      const cfg = getCurCfg();
+      const live = getCurLive();
+      const p = (cfg.players || []).find((x) => String(x.id) === String(live.activePlayerId));
+      if (!p) return;
+      p.bestScore = spCalcScore(live);
+      await update(ref(db, `${DB_PATH}/modules/especiales/config/${activeSpecialKind}`), {
+        players: cfg.players
+      });
+      renderSpecialPlayersTable();
+      updateSpecialHUD();
+      await pushSpecialLive();
+    });
+
+    document.getElementById("filterCat").addEventListener("change", renderSpecialPlayersTable);
+
+    document.getElementById("btnClearScores").addEventListener("click", async () => {
+      const cfg = getCurCfg();
+      cfg.players = (cfg.players || []).map((p) => ({ ...p, bestScore: null }));
+      await update(ref(db, `${DB_PATH}/modules/especiales/config/${activeSpecialKind}`), { players: cfg.players });
+      renderSpecialPlayersTable();
+      updateSpecialHUD();
+      await pushSpecialLive();
+    });
+
+    document.getElementById("btnClearList").addEventListener("click", async () => {
+      const cfg = getCurCfg();
+      cfg.players = [];
+      getCurLive().activePlayerId = null;
+      await update(ref(db, `${DB_PATH}/modules/especiales/config/${activeSpecialKind}`), { players: [] });
+      renderSpecialPlayersTable();
+      updateSpecialHUD();
+      await pushSpecialLive();
+    });
+
+    document.getElementById("btnRestoreBase").addEventListener("click", async () => {
+      const cfg = getCurCfg();
+      cfg.players = JSON.parse(JSON.stringify(DEFAULT_PLAYERS));
+      getCurLive().activePlayerId = cfg.players[0].id;
+      await update(ref(db, `${DB_PATH}/modules/especiales/config/${activeSpecialKind}`), { players: cfg.players });
+      renderSpecialPlayersTable();
+      updateSpecialHUD();
+      await pushSpecialLive();
+    });
+
+    document.getElementById("rowTeamLogoPicker").addEventListener("change", (e) => {
+      const file = e.target.files?.[0];
+      if (!file || !pendingTeamForLogo) return;
+      const r = new FileReader();
+      r.onload = async (ev) => {
+        const cfg = getCurCfg();
+        cfg.teamLogos = { ...(cfg.teamLogos || {}), [pendingTeamForLogo]: ev.target.result };
+        await update(ref(db, `${DB_PATH}/modules/especiales/config/${activeSpecialKind}`), {
+          teamLogos: cfg.teamLogos
+        });
+        renderSpecialPlayersTable();
+        updateSpecialHUD();
+        await pushSpecialLive();
+      };
+      r.readAsDataURL(file);
+    });
+
+    document.getElementById("btnAddPlayer").addEventListener("click", async () => {
+      const name = document.getElementById("newPlayerName").value.trim();
+      const team = document.getElementById("newPlayerTeam").value.trim().toUpperCase() || "SIN EQUIPO";
+      const cat = document.getElementById("newPlayerCat").value.trim() || "GENERAL";
+      const logoIn = document.getElementById("newPlayerLogoIn");
+      if (!name) return;
+
+      const finish = async () => {
+        const cfg = getCurCfg();
+        const newId = Date.now();
+        cfg.players = [...(cfg.players || []), { id: newId, name, team, cat, pos: "", bestScore: null }];
+        if (!getCurLive().activePlayerId) getCurLive().activePlayerId = newId;
+        document.getElementById("newPlayerName").value = "";
+        document.getElementById("newPlayerTeam").value = "";
+        document.getElementById("newPlayerCat").value = "";
+        logoIn.value = "";
+        await update(ref(db, `${DB_PATH}/modules/especiales/config/${activeSpecialKind}`), {
+          players: cfg.players,
+          teamLogos: cfg.teamLogos || {}
+        });
+        renderSpecialPlayersTable();
+        updateSpecialHUD();
+        await pushSpecialLive();
+      };
+
+      if (logoIn.files?.[0]) {
+        const r = new FileReader();
+        r.onload = async (ev) => {
+          const cfg = getCurCfg();
+          cfg.teamLogos = { ...(cfg.teamLogos || {}), [team]: ev.target.result };
+          await finish();
+        };
+        r.readAsDataURL(logoIn.files[0]);
+      } else {
+        await finish();
+      }
+    });
+
+    /* Selector Triples / Tiros Libres */
+    async function selectSpecialKind(kind) {
+      stopSpecialTimer();
+      activeSpecialKind = kind;
+      document.getElementById("btnPickTriples").classList.toggle("is-active", kind === "triples");
+      document.getElementById("btnPickLibres").classList.toggle("is-active", kind === "libres");
+      await claimSpecialLock(kind, false);
+      renderSpecialPlayersTable();
+      updateSpecialHUD();
+      updateSpecialLockUI();
+    }
+
+    document.getElementById("btnPickTriples").addEventListener("click", () => selectSpecialKind("triples"));
+    document.getElementById("btnPickLibres").addEventListener("click", () => selectSpecialKind("libres"));
+    document.getElementById("btnForceTakeSpecial").addEventListener("click", () => claimSpecialLock(activeSpecialKind, true));
+    document.getElementById("btnReleaseMyLock").addEventListener("click", releaseMySpecialLock);
+    document.getElementById("btnOpenSpecialLive").addEventListener("click", () => {
+      window.open(activeSpecialKind === "libres" ? "live-libres.html" : "live-triples.html", "_blank");
+    });
+
+    /* Atajos de teclado cuando estás en Competencias Especiales */
+    document.addEventListener("keydown", (e) => {
+      if (document.getElementById("tab-especiales").classList.contains("hidden")) return;
+      if (e.target.tagName === "INPUT" || e.target.tagName === "SELECT") return;
+      if (isSpecialLockedByOther()) return;
+
+      if (e.code === "Space") {
+        e.preventDefault();
+        toggleSpecialTimer();
+      } else if (e.key === "1" || e.code === "ArrowRight") {
+        e.preventDefault();
+        registerSpecialShot("normal");
+      } else if (e.key === "0" || e.code === "ArrowLeft") {
+        e.preventDefault();
+        registerSpecialShot("fallo");
+      } else if (e.key.toLowerCase() === "e") {
+        e.preventDefault();
+        registerSpecialShot("money");
+      } else if (e.key.toLowerCase() === "m") {
+        e.preventDefault();
+        registerSpecialShot("half");
+      } else if (e.code === "Backspace") {
+        e.preventDefault();
+        undoSpecialShot();
+      }
+    });
+
+    /* Pestañas principales de control.html */
+    function switchMainTab(paneId) {
+      document.querySelectorAll(".ctrl-tab").forEach((t) => {
+        t.classList.toggle("is-active", t.dataset.pane === paneId);
+      });
+      document.getElementById("tab-marcadores").classList.toggle("hidden", paneId !== "tab-marcadores");
+      document.getElementById("tab-especiales").classList.toggle("hidden", paneId !== "tab-especiales");
+
+      if (paneId === "tab-especiales") {
+        selectSpecialKind(activeSpecialKind);
+      }
+    }
+
+    document.querySelectorAll(".ctrl-tab").forEach((tab) => {
+      tab.addEventListener("click", () => switchMainTab(tab.dataset.pane));
+    });
+
+    /* Bloqueo / Heartbeat de operador */
+    async function claimControl() {
+      hasControlLock = true;
+      document.getElementById("multiOpAlert").classList.remove("is-active");
+      await update(ref(db, `${DB_PATH}/modules/marcadores/activeOperator`), {
+        sessionId: SESSION_ID,
+        name: operatorName,
+        ts: Date.now()
+      });
+    }
+
+    document.getElementById("takeControlBtn").addEventListener("click", claimControl);
 
     setInterval(async () => {
-      if (spLive.running && spLive.seconds > 0) {
-        spLive.seconds -= 1;
-        if (spLive.seconds <= 0) {
-          spLive.seconds = 0;
-          spLive.running = false;
-        }
-        renderEspecialesControlUI();
-        await pushEspecialesLive();
+      if (hasControlLock) {
+        await update(ref(db, `${DB_PATH}/modules/marcadores/activeOperator`), {
+          sessionId: SESSION_ID,
+          name: operatorName,
+          ts: Date.now()
+        });
       }
-    }, 1000);
+      if (!document.getElementById("tab-especiales").classList.contains("hidden") && !isSpecialLockedByOther(activeSpecialKind)) {
+        await update(ref(db, `${DB_PATH}/locks/${activeSpecialKind}`), {
+          sessionId: SESSION_ID,
+          email: operatorEmail,
+          name: operatorName,
+          ts: Date.now()
+        });
+      }
+    }, 15000);
 
-    // Cambio de pestañas
-    document.querySelectorAll(".ctrl-tab").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        if (btn.disabled) return;
-        document.querySelectorAll(".ctrl-tab").forEach((b) => b.classList.remove("is-active"));
-        document.querySelectorAll(".ctrl-pane").forEach((p) => p.classList.remove("is-active"));
-        btn.classList.add("is-active");
-        document.getElementById(`pane-${btn.dataset.ctrlTab}`).classList.add("is-active");
-      });
-    });
-
-    document.getElementById("ctrl-logout-btn").addEventListener("click", () => signOut(auth));
+    function applyRoleRestrictions() {
+      if (userRole === "op_marcador") {
+        document.getElementById("goStudioBtn").classList.add("hidden");
+        document.getElementById("tabBtnEspeciales").classList.add("hidden");
+        switchMainTab("tab-marcadores");
+      } else if (userRole === "op_competencias") {
+        document.getElementById("goStudioBtn").classList.add("hidden");
+        document.getElementById("tabBtnMarcadores").classList.add("hidden");
+        if (userScope === "triples") {
+          document.getElementById("btnPickLibres").classList.add("hidden");
+          activeSpecialKind = "triples";
+        } else if (userScope === "libres") {
+          document.getElementById("btnPickTriples").classList.add("hidden");
+          activeSpecialKind = "libres";
+        }
+        switchMainTab("tab-especiales");
+      }
+    }
 
     requireSession(async (user) => {
-      const role = await getUserRole(user);
-      if (role === "operator_marcadores") {
-        userScope = "marcadores";
+      operatorEmail = (user?.email || "").toLowerCase();
+      operatorName = user?.displayName || operatorEmail || "Operador";
+      document.getElementById("op-badge").textContent = `Operador: ${operatorName}`;
+
+      const roleSnap = await get(ref(db, `${DB_PATH}/roles/${sanitizeEmailKey(operatorEmail)}`));
+      if (roleSnap.exists()) {
+        const r = roleSnap.val();
+        userRole = r.role || "admin";
+        userScope = r.scope || "all";
       }
-      statusEl.textContent = "En línea";
+      applyRoleRestrictions();
+
+      if (userRole !== "op_competencias") {
+        await claimControl();
+      }
 
       onValue(ref(db, `${DB_PATH}/modules/marcadores`), (snap) => {
         if (!snap.exists()) return;
-        const data = snap.val();
-        const isOn = Boolean(data.enabled);
-        liveSlideInput.checked = isOn;
-        updateSlideLabel(isOn);
+        const val = snap.val();
 
-        if (data.config) {
-          document.getElementById("ctrlName1").textContent = data.config.name1 || "LOCAL";
-          document.getElementById("ctrlName2").textContent = data.config.name2 || "VISITA";
+        const lock = val.activeOperator;
+        if (lock && lock.sessionId && lock.sessionId !== SESSION_ID && (Date.now() - (lock.ts || 0)) < 45000) {
+          hasControlLock = false;
+          document.getElementById("multiOpText").textContent =
+            `Aviso: "${lock.name || "Otro operador"}" está operando este marcador ahora mismo.`;
+          document.getElementById("multiOpAlert").classList.add("is-active");
+        } else {
+          document.getElementById("multiOpAlert").classList.remove("is-active");
         }
-        if (data.live) {
-          matchState = { ...matchState, ...data.live };
-          renderMatchUI();
+
+        modState = {
+          enabled: val.enabled !== false,
+          on: Boolean(val.on),
+          config: val.config || {},
+          feeds: {
+            manual: {
+              points_1: 0,
+              points_2: 0,
+              timer: "10:00",
+              period: 1,
+              fouls_1: 0,
+              fouls_2: 0,
+              ...(val.feeds?.manual || {})
+            },
+            scoresight: { ...(val.liveData || {}), ...(val.feeds?.scoresight || {}) },
+            flexyscore: { ...(val.feeds?.flexyscore || {}) }
+          }
+        };
+
+        if (!timerRunning && modState.feeds.manual.timer) {
+          remainingTenths = parseTimerToTenths(modState.feeds.manual.timer);
+          syncTimeInputsFromTenths(remainingTenths);
         }
+
+        renderMonitor();
       });
 
       onValue(ref(db, `${DB_PATH}/modules/especiales`), (snap) => {
         if (!snap.exists()) return;
-        const data = snap.val();
-        especialesModule = {
-          enabled: Boolean(data.enabled),
-          config: data.config || especialesModule.config
-        };
-        if (data.live) {
-          spLive = { ...spLive, ...data.live };
+        const val = snap.val();
+        if (val.config) {
+          specialsStudioConfig = {
+            ...specialsStudioConfig,
+            ...val.config,
+            triples: { ...specialsStudioConfig.triples, ...(val.config.triples || {}) },
+            libres: { ...specialsStudioConfig.libres, ...(val.config.libres || {}) }
+          };
         }
-        const tabEsp = document.getElementById("tabBtnEspeciales");
-        tabEsp.disabled = !(especialesModule.enabled && userScope !== "marcadores");
-        renderEspecialesControlUI();
+        renderSpecialPlayersTable();
+        updateSpecialHUD();
+      });
+
+      onValue(ref(db, `${DB_PATH}/locks`), (snap) => {
+        specialLocks = snap.exists() ? (snap.val() || {}) : { triples: null, libres: null };
+        updateSpecialLockUI();
       });
     });
   </script>
