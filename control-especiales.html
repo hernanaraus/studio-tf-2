@@ -53,7 +53,7 @@
       grid-template-columns: 1fr 1fr;
       gap: 14px;
       padding: 14px;
-      max-width: 1800px;
+      max-width: 1840px;
       width: 100%;
       margin: 0 auto;
       align-items: start;
@@ -94,7 +94,7 @@
     .is-triples .panel-title { color: #e3b857; }
     .is-libres .panel-title { color: #f87171; }
 
-    .mini-tabs { display: flex; gap: 6px; }
+    .mini-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
     .mini-tab {
       background: var(--bg-app);
       color: var(--muted);
@@ -129,6 +129,9 @@
       font-weight: 800;
       text-transform: uppercase;
       line-height: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .hud-sub { font-size: 0.72rem; color: var(--muted); font-weight: 700; margin-top: 3px; }
     .hud-box {
@@ -226,6 +229,23 @@
     .chk-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
     .chk-row label { display: inline-flex; gap: 5px; align-items: center; font-size: 0.74rem; font-weight: 700; cursor: pointer; }
 
+    .style-block {
+      background: #10131a;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .style-block-title {
+      font-size: 0.7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #e3b857;
+    }
+
     table { width: 100%; border-collapse: collapse; font-size: 0.74rem; }
     th { text-align: left; color: var(--muted); border-bottom: 1px solid var(--border); padding: 5px 4px; font-size: 0.66rem; text-transform: uppercase; }
     td { padding: 5px 4px; border-bottom: 1px solid rgba(255,255,255,0.05); }
@@ -239,9 +259,9 @@
     <div class="brand" onclick="location.href='index.html'">STUDIO <span>TF 2.0</span> · COMPETENCIAS ESPECIALES</div>
     <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
       <span id="syncBadge" style="font-size:0.74rem; color:var(--muted);">Conectando...</span>
-      <button type="button" class="btn btn-ghost" style="padding:5px 10px; font-size:0.74rem;" onclick="window.open('live-triples.html','_blank')">Abrir live-triples</button>
-      <button type="button" class="btn btn-ghost" style="padding:5px 10px; font-size:0.74rem;" onclick="window.open('live-libres.html','_blank')">Abrir live-libres</button>
-      <button type="button" class="btn btn-ghost" style="padding:5px 10px; font-size:0.74rem;" onclick="location.href='control.html'">Control Principal</button>
+      <button type="button" class="btn btn-ghost" style="padding:5px 10px; font-size:0.74rem;" onclick="window.open('live-triples_3.html','_blank')">Abrir live-triples</button>
+      <button type="button" class="btn btn-ghost" style="padding:5px 10px; font-size:0.74rem;" onclick="window.open('live-libres_3.html','_blank')">Abrir live-libres</button>
+      <button type="button" class="btn btn-ghost" style="padding:5px 10px; font-size:0.74rem;" onclick="location.href='control_3.html'">Control Principal</button>
     </div>
   </header>
 
@@ -251,7 +271,7 @@
       <input type="file" id="sharedLogoFile" accept="image/*" style="font-size:0.72rem; color:var(--muted);">
       <button type="button" class="btn-act" style="padding:5px 9px;" id="btnInheritMarcador">Heredar Logo/Colores Marcador Principal</button>
     </div>
-    <span style="font-size:0.72rem; color:var(--muted);">Panel Izquierdo: Triples · Panel Derecho: Tiros Libres (independientes del Estudio)</span>
+    <span style="font-size:0.72rem; color:var(--muted);">Eliminación Directa · Triples Izquierda · Tiros Libres Derecha</span>
   </div>
 
   <main class="dual-board">
@@ -259,13 +279,14 @@
     <section class="comp-panel is-triples" id="panel-triples">
       <div class="panel-head">
         <div class="panel-title">Concurso de Triples</div>
-        <div style="display:flex; gap:8px; align-items:center;">
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
           <label style="font-size:0.74rem; font-weight:700; display:inline-flex; gap:4px; align-items:center; cursor:pointer;">
             <input type="checkbox" id="tr_enabledChk" checked> Activo
           </label>
           <div class="mini-tabs">
             <button type="button" class="mini-tab is-active" data-comp="triples" data-view="live">En Vivo</button>
-            <button type="button" class="mini-tab" data-comp="triples" data-view="cfg">Config / Reglas</button>
+            <button type="button" class="mini-tab" data-comp="triples" data-view="cfg">Reglas</button>
+            <button type="button" class="mini-tab" data-comp="triples" data-view="style">Personalización</button>
           </div>
         </div>
       </div>
@@ -350,7 +371,7 @@
             </select>
           </div>
           <div class="field"><label>Título</label><input type="text" id="tr_title" data-c="triples" data-k="title"></div>
-          <div class="field"><label>Fase / Instancia</label><input type="text" id="tr_stage" data-c="triples" data-k="stage"></div>
+          <div class="field"><label>Instancia</label><input type="text" id="tr_stage" data-c="triples" data-k="stage"></div>
         </div>
 
         <div class="grid-4">
@@ -360,11 +381,10 @@
           <div class="field"><label>Meta Manual (0=Auto)</label><input type="number" id="tr_targetOverride" data-c="triples" data-k="targetOverride" data-t="int"></div>
         </div>
 
-        <div class="grid-4">
+        <div class="grid-3">
           <div class="field"><label>Pts Normal</label><input type="number" id="tr_ptsNormal" data-c="triples" data-k="ptsNormal" data-t="int"></div>
           <div class="field"><label>Pts Especial</label><input type="number" id="tr_ptsMoney" data-c="triples" data-k="ptsMoney" data-t="int"></div>
           <div class="field"><label>Pts Media Cancha</label><input type="number" id="tr_ptsHalf" data-c="triples" data-k="ptsHalf" data-t="int"></div>
-          <div class="field"><label>Color Acento</label><input type="color" id="tr_colorAccent" data-c="triples" data-k="colorAccent"></div>
         </div>
 
         <div class="chk-row">
@@ -378,19 +398,52 @@
           <textarea id="tr_rulesText" data-c="triples" data-k="rulesText"></textarea>
         </div>
       </div>
+
+      <div id="tr_view_style" class="hidden" style="display:flex; flex-direction:column; gap:10px;">
+        <div class="style-block">
+          <div class="style-block-title">Marcador, Trazo, Glow y Textura</div>
+          <div class="grid-4">
+            <div class="field"><label>Color Fondo</label><input type="color" id="tr_colorBg" data-c="triples" data-k="colorBg"></div>
+            <div class="field"><label>Color Trazo</label><input type="color" id="tr_colorStroke" data-c="triples" data-k="colorStroke"></div>
+            <div class="field"><label>Color Glow</label><input type="color" id="tr_glowColor" data-c="triples" data-k="glowColor"></div>
+            <div class="field"><label>Intensidad Glow (px)</label><input type="number" min="0" max="60" id="tr_glowSize" data-c="triples" data-k="glowSize" data-t="int"></div>
+          </div>
+          <div class="chk-row">
+            <label><input type="checkbox" id="tr_glowEnabled" data-c="triples" data-k="glowEnabled" data-t="bool"> Activar Glow</label>
+            <label><input type="checkbox" id="tr_textureEnabled" data-c="triples" data-k="textureEnabled" data-t="bool"> Textura Marcador Juego</label>
+          </div>
+        </div>
+
+        <div class="style-block">
+          <div class="style-block-title">Nombre Competidor, Puntos y Tiros</div>
+          <div class="grid-4">
+            <div class="field"><label>Color Nombre</label><input type="color" id="tr_playerNameColor" data-c="triples" data-k="playerNameColor"></div>
+            <div class="field"><label>Tamaño Nombre (px)</label><input type="number" min="16" max="64" id="tr_playerNameSize" data-c="triples" data-k="playerNameSize" data-t="int"></div>
+            <div class="field"><label>Color Puntos</label><input type="color" id="tr_colorScore" data-c="triples" data-k="colorScore"></div>
+            <div class="field"><label>Tamaño Puntos (px)</label><input type="number" min="24" max="80" id="tr_scoreSize" data-c="triples" data-k="scoreSize" data-t="int"></div>
+          </div>
+          <div class="grid-4">
+            <div class="field"><label>Color Tiros</label><input type="color" id="tr_colorShot" data-c="triples" data-k="colorShot"></div>
+            <div class="field"><label>Tamaño Tiros (px)</label><input type="number" min="14" max="36" id="tr_shotSize" data-c="triples" data-k="shotSize" data-t="int"></div>
+            <div class="field"><label>Logo Competencia (px)</label><input type="number" min="28" max="110" id="tr_compLogoSize" data-c="triples" data-k="compLogoSize" data-t="int"></div>
+            <div class="field"><label>Logo Equipo (px)</label><input type="number" min="28" max="110" id="tr_teamLogoSize" data-c="triples" data-k="teamLogoSize" data-t="int"></div>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- ==================== PANEL DERECHO: TIROS LIBRES ==================== -->
     <section class="comp-panel is-libres" id="panel-libres">
       <div class="panel-head">
         <div class="panel-title">Concurso de Tiros Libres</div>
-        <div style="display:flex; gap:8px; align-items:center;">
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
           <label style="font-size:0.74rem; font-weight:700; display:inline-flex; gap:4px; align-items:center; cursor:pointer;">
             <input type="checkbox" id="ft_enabledChk"> Activo
           </label>
           <div class="mini-tabs">
             <button type="button" class="mini-tab is-active" data-comp="libres" data-view="live">En Vivo</button>
-            <button type="button" class="mini-tab" data-comp="libres" data-view="cfg">Config / Reglas</button>
+            <button type="button" class="mini-tab" data-comp="libres" data-view="cfg">Reglas</button>
+            <button type="button" class="mini-tab" data-comp="libres" data-view="style">Personalización</button>
           </div>
         </div>
       </div>
@@ -475,7 +528,7 @@
             </select>
           </div>
           <div class="field"><label>Título</label><input type="text" id="ft_title" data-c="libres" data-k="title"></div>
-          <div class="field"><label>Fase / Instancia</label><input type="text" id="ft_stage" data-c="libres" data-k="stage"></div>
+          <div class="field"><label>Instancia</label><input type="text" id="ft_stage" data-c="libres" data-k="stage"></div>
         </div>
 
         <div class="grid-4">
@@ -485,11 +538,10 @@
           <div class="field"><label>Meta Manual (0=Auto)</label><input type="number" id="ft_targetOverride" data-c="libres" data-k="targetOverride" data-t="int"></div>
         </div>
 
-        <div class="grid-4">
+        <div class="grid-3">
           <div class="field"><label>Pts Normal</label><input type="number" id="ft_ptsNormal" data-c="libres" data-k="ptsNormal" data-t="int"></div>
           <div class="field"><label>Pts Especial</label><input type="number" id="ft_ptsMoney" data-c="libres" data-k="ptsMoney" data-t="int"></div>
           <div class="field"><label>Pts Bonus</label><input type="number" id="ft_ptsHalf" data-c="libres" data-k="ptsHalf" data-t="int"></div>
-          <div class="field"><label>Color Acento</label><input type="color" id="ft_colorAccent" data-c="libres" data-k="colorAccent"></div>
         </div>
 
         <div class="chk-row">
@@ -501,6 +553,38 @@
         <div class="field">
           <label>Reglas del Concurso de Tiros Libres (visible sin jugador activo)</label>
           <textarea id="ft_rulesText" data-c="libres" data-k="rulesText"></textarea>
+        </div>
+      </div>
+
+      <div id="ft_view_style" class="hidden" style="display:flex; flex-direction:column; gap:10px;">
+        <div class="style-block">
+          <div class="style-block-title">Marcador, Trazo, Glow y Textura</div>
+          <div class="grid-4">
+            <div class="field"><label>Color Fondo</label><input type="color" id="ft_colorBg" data-c="libres" data-k="colorBg"></div>
+            <div class="field"><label>Color Trazo</label><input type="color" id="ft_colorStroke" data-c="libres" data-k="colorStroke"></div>
+            <div class="field"><label>Color Glow</label><input type="color" id="ft_glowColor" data-c="libres" data-k="glowColor"></div>
+            <div class="field"><label>Intensidad Glow (px)</label><input type="number" min="0" max="60" id="ft_glowSize" data-c="libres" data-k="glowSize" data-t="int"></div>
+          </div>
+          <div class="chk-row">
+            <label><input type="checkbox" id="ft_glowEnabled" data-c="libres" data-k="glowEnabled" data-t="bool"> Activar Glow</label>
+            <label><input type="checkbox" id="ft_textureEnabled" data-c="libres" data-k="textureEnabled" data-t="bool"> Textura Marcador Juego</label>
+          </div>
+        </div>
+
+        <div class="style-block">
+          <div class="style-block-title">Nombre Competidor, Puntos y Tiros</div>
+          <div class="grid-4">
+            <div class="field"><label>Color Nombre</label><input type="color" id="ft_playerNameColor" data-c="libres" data-k="playerNameColor"></div>
+            <div class="field"><label>Tamaño Nombre (px)</label><input type="number" min="16" max="64" id="ft_playerNameSize" data-c="libres" data-k="playerNameSize" data-t="int"></div>
+            <div class="field"><label>Color Puntos</label><input type="color" id="ft_colorScore" data-c="libres" data-k="colorScore"></div>
+            <div class="field"><label>Tamaño Puntos (px)</label><input type="number" min="24" max="80" id="ft_scoreSize" data-c="libres" data-k="scoreSize" data-t="int"></div>
+          </div>
+          <div class="grid-4">
+            <div class="field"><label>Color Tiros</label><input type="color" id="ft_colorShot" data-c="libres" data-k="colorShot"></div>
+            <div class="field"><label>Tamaño Tiros (px)</label><input type="number" min="14" max="36" id="ft_shotSize" data-c="libres" data-k="shotSize" data-t="int"></div>
+            <div class="field"><label>Logo Competencia (px)</label><input type="number" min="28" max="110" id="ft_compLogoSize" data-c="libres" data-k="compLogoSize" data-t="int"></div>
+            <div class="field"><label>Logo Equipo (px)</label><input type="number" min="28" max="110" id="ft_teamLogoSize" data-c="libres" data-k="teamLogoSize" data-t="int"></div>
+          </div>
         </div>
       </div>
     </section>
@@ -517,7 +601,7 @@
       triples: {
         time_attack: {
           title: "TORNEO TRIPLES",
-          stage: "CLASIFICATORIA",
+          stage: "ELIMINACIÓN DIRECTA",
           useTimer: true,
           officialSec: 60,
           tiebreakSec: 30,
@@ -527,11 +611,11 @@
           ptsMoney: 3,
           halfEnabled: true,
           ptsHalf: 3,
-          rulesText: "1 minuto para sumar la mayor cantidad de triples. Balón especial y media cancha suman +3 pts. Desempates en 30 segundos."
+          rulesText: "Eliminación directa: 1 minuto para sumar la mayor cantidad de triples. Balón especial y media cancha suman +3 pts. Desempates en 30 segundos."
         },
         femicentro: {
           title: "TRIPLES FEMICENTRO",
-          stage: "SERIE ÚNICA",
+          stage: "ELIMINACIÓN DIRECTA",
           useTimer: false,
           officialSec: 0,
           tiebreakSec: 0,
@@ -541,13 +625,13 @@
           ptsMoney: 3,
           halfEnabled: false,
           ptsHalf: 3,
-          rulesText: "Modalidad Femicentro: 6 lanzamientos por participante sin cronómetro. Quien logre más aciertos avanza o gana."
+          rulesText: "Eliminación directa · Femicentro: 6 lanzamientos por participante sin cronómetro. Quien logre más aciertos avanza."
         }
       },
       libres: {
         time_attack: {
           title: "CONCURSO DE TIROS LIBRES",
-          stage: "CLASIFICATORIA",
+          stage: "ELIMINACIÓN DIRECTA",
           useTimer: true,
           officialSec: 60,
           tiebreakSec: 30,
@@ -557,11 +641,11 @@
           ptsMoney: 2,
           halfEnabled: false,
           ptsHalf: 3,
-          rulesText: "1 minuto en la línea de tiros libres para lograr el mayor puntaje. Desempates en 30 segundos."
+          rulesText: "Eliminación directa: 1 minuto en la línea de tiros libres para lograr el mayor puntaje. Desempates en 30 segundos."
         },
         femicentro: {
           title: "TIROS LIBRES FEMICENTRO",
-          stage: "SERIE ÚNICA",
+          stage: "ELIMINACIÓN DIRECTA",
           useTimer: false,
           officialSec: 0,
           tiebreakSec: 0,
@@ -571,9 +655,26 @@
           ptsMoney: 2,
           halfEnabled: false,
           ptsHalf: 3,
-          rulesText: "Modalidad Femicentro: 10 tiros libres sin cronómetro. Mayor número de aciertos gana la ronda."
+          rulesText: "Eliminación directa · Femicentro: 10 tiros libres sin cronómetro. Mayor número de aciertos avanza."
         }
       }
+    };
+
+    const BASE_STYLE = {
+      colorBg: "#14171f",
+      colorStroke: "#e3b857",
+      glowEnabled: true,
+      glowColor: "#e3b857",
+      glowSize: 22,
+      textureEnabled: true,
+      playerNameColor: "#ffffff",
+      playerNameSize: 32,
+      colorScore: "#e3b857",
+      scoreSize: 44,
+      colorShot: "#ea580c",
+      shotSize: 20,
+      compLogoSize: 58,
+      teamLogoSize: 54
     };
 
     let espState = {
@@ -582,20 +683,23 @@
         enabledTriples: true,
         enabledLibres: false,
         compLogo: "",
-        colorBg: "#14171f",
         triples: {
           preset: "time_attack",
           ...PRESETS.triples.time_attack,
+          ...BASE_STYLE,
           targetOverride: 0,
-          colorAccent: "#e3b857",
           teamLogos: {},
           players: []
         },
         libres: {
           preset: "time_attack",
           ...PRESETS.libres.time_attack,
+          ...BASE_STYLE,
+          colorStroke: "#ef4444",
+          glowColor: "#ef4444",
+          colorScore: "#f87171",
+          colorShot: "#e3b857",
           targetOverride: 0,
-          colorAccent: "#ef4444",
           teamLogos: {},
           players: []
         }
@@ -632,7 +736,7 @@
       }
     };
 
-    let pendingLogoCtx = null; // { comp, team }
+    let pendingLogoCtx = null;
     let lastTick = Date.now();
 
     function fmtMsClock(ms) {
@@ -696,8 +800,7 @@
       await update(ref(db, `${MOD_PATH}/config`), {
         enabledTriples: Boolean(espState.config.enabledTriples),
         enabledLibres: Boolean(espState.config.enabledLibres),
-        compLogo: espState.config.compLogo || "",
-        colorBg: espState.config.colorBg || "#14171f"
+        compLogo: espState.config.compLogo || ""
       });
       await update(ref(db, MOD_PATH), { enabled: true });
     }
@@ -805,22 +908,13 @@
         });
       }
 
-      // Sync config fields
-      document.getElementById(`${pfx}_preset`).value = cfg.preset || "time_attack";
-      document.getElementById(`${pfx}_title`).value = cfg.title || "";
-      document.getElementById(`${pfx}_stage`).value = cfg.stage || "";
-      document.getElementById(`${pfx}_officialSec`).value = cfg.officialSec ?? 60;
-      document.getElementById(`${pfx}_tiebreakSec`).value = cfg.tiebreakSec ?? 30;
-      document.getElementById(`${pfx}_maxShots`).value = cfg.maxShots ?? 0;
-      document.getElementById(`${pfx}_targetOverride`).value = cfg.targetOverride ?? 0;
-      document.getElementById(`${pfx}_ptsNormal`).value = cfg.ptsNormal ?? 1;
-      document.getElementById(`${pfx}_ptsMoney`).value = cfg.ptsMoney ?? 3;
-      document.getElementById(`${pfx}_ptsHalf`).value = cfg.ptsHalf ?? 3;
-      document.getElementById(`${pfx}_colorAccent`).value = cfg.colorAccent || (comp === "libres" ? "#ef4444" : "#e3b857");
-      document.getElementById(`${pfx}_useTimer`).checked = cfg.useTimer !== false;
-      document.getElementById(`${pfx}_moneyEnabled`).checked = Boolean(cfg.moneyEnabled);
-      document.getElementById(`${pfx}_halfEnabled`).checked = Boolean(cfg.halfEnabled);
-      document.getElementById(`${pfx}_rulesText`).value = cfg.rulesText || "";
+      // Sync config & style inputs
+      document.querySelectorAll(`#panel-${comp} [data-c="${comp}"]`).forEach((el) => {
+        const k = el.dataset.k;
+        const t = el.dataset.t;
+        if (t === "bool") el.checked = Boolean(cfg[k]);
+        else if (cfg[k] !== undefined && cfg[k] !== null) el.value = cfg[k];
+      });
     }
 
     function renderAll() {
@@ -864,9 +958,10 @@
         tab.addEventListener("click", () => {
           document.querySelectorAll(`.mini-tab[data-comp="${comp}"]`).forEach((t) => t.classList.remove("is-active"));
           tab.classList.add("is-active");
-          const isCfg = tab.dataset.view === "cfg";
-          document.getElementById(`${pfx}_view_live`).classList.toggle("hidden", isCfg);
-          document.getElementById(`${pfx}_view_cfg`).classList.toggle("hidden", !isCfg);
+          const v = tab.dataset.view;
+          document.getElementById(`${pfx}_view_live`).classList.toggle("hidden", v !== "live");
+          document.getElementById(`${pfx}_view_cfg`).classList.toggle("hidden", v !== "cfg");
+          document.getElementById(`${pfx}_view_style`).classList.toggle("hidden", v !== "style");
         });
       });
 
@@ -980,7 +1075,7 @@
       });
 
       document.querySelectorAll(`#panel-${comp} [data-c="${comp}"]`).forEach((el) => {
-        el.addEventListener("change", async () => {
+        const handler = async () => {
           const k = el.dataset.k;
           const t = el.dataset.t;
           let val = el.value;
@@ -995,10 +1090,12 @@
             await writeCompLive(comp);
           } else {
             espState.config[comp][k] = val;
-            renderAll();
+            if (el.type === "range" || el.type === "color") renderAll();
           }
           await writeCompConfig(comp);
-        });
+        };
+        el.addEventListener("change", handler);
+        if (el.type === "color" || el.type === "number") el.addEventListener("input", handler);
       });
     }
 
@@ -1040,8 +1137,12 @@
       if (!snap.exists()) return;
       const sb = snap.val();
       if (sb.logoLiga) espState.config.compLogo = sb.logoLiga;
-      if (sb.clockBgColor) espState.config.colorBg = sb.clockBgColor;
+      if (sb.clockBgColor) {
+        espState.config.triples.colorBg = sb.clockBgColor;
+        espState.config.libres.colorBg = sb.clockBgColor;
+      }
       await writeCompConfig("triples");
+      await writeCompConfig("libres");
     });
 
     setInterval(async () => {
