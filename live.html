@@ -230,42 +230,84 @@
       text-transform: uppercase;
     }
 
-    .social-bug {
+    .social-anchor {
       position: absolute;
       top: 32px;
       left: 36px;
-      display: flex;
+      transform-origin: top left;
+      z-index: 20;
+      pointer-events: none;
+    }
+    .social-anchor.right {
+      left: auto;
+      right: 36px;
+      transform-origin: top right;
+    }
+
+    .social-bug {
+      position: relative;
+      display: inline-flex;
       align-items: center;
       gap: 10px;
-      background: rgba(14, 16, 22, 0.94);
-      border-left: 4px solid var(--sb-accent, #e3b857);
-      border-top: 1px solid rgba(255, 255, 255, 0.16);
-      border-right: 1px solid rgba(255, 255, 255, 0.16);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+      background: var(--rrss-bg, rgba(14, 16, 22, 0.94));
+      border: 2px solid var(--rrss-accent, var(--sb-accent, #e3b857));
+      border-left: 4px solid var(--rrss-accent, var(--sb-accent, #e3b857));
       border-radius: 0 8px 8px 0;
       padding: 8px 18px;
       font-family: 'Barlow Condensed', sans-serif;
       opacity: 0;
       transform: translateY(-12px);
       transition: opacity 0.22s ease, transform 0.22s ease;
-      z-index: 20;
     }
-    .social-bug.right {
-      left: auto;
-      right: 36px;
-      border-left: 1px solid rgba(255, 255, 255, 0.16);
-      border-right: 4px solid var(--sb-accent, #e3b857);
+    .social-anchor.right .social-bug {
+      border-left: 2px solid var(--rrss-accent, var(--sb-accent, #e3b857));
+      border-right: 4px solid var(--rrss-accent, var(--sb-accent, #e3b857));
       border-radius: 8px 0 0 8px;
     }
     .social-bug.is-shown {
       opacity: 1;
       transform: translateY(0);
     }
+
+    .social-subscribe-pill {
+      position: absolute;
+      top: -12px;
+      right: 10px;
+      background: #ff0000;
+      color: #ffffff;
+      border: 1.5px solid var(--rrss-accent, var(--sb-accent, #e3b857));
+      border-radius: 5px;
+      padding: 1px 7px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      line-height: 1.2;
+      display: none;
+    }
+    .social-bug.is-yt .social-subscribe-pill {
+      display: inline-block;
+    }
+
+    .social-icon-wrap {
+      width: 24px;
+      height: 24px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .social-icon-wrap svg {
+      width: 22px;
+      height: 22px;
+      display: block;
+    }
+
     .social-net {
       font-size: 18px;
       font-weight: 800;
       text-transform: uppercase;
-      color: var(--sb-accent, #e3b857);
+      color: var(--rrss-accent, var(--sb-accent, #e3b857));
       letter-spacing: 0.8px;
     }
     .social-handle {
@@ -323,9 +365,13 @@
       </div>
     </div>
 
-    <div class="social-bug" id="socialBug">
-      <span class="social-net" id="socialNet">INSTAGRAM</span>
-      <span class="social-handle">@tiempofuera_cl</span>
+    <div class="social-anchor" id="socialAnchor">
+      <div class="social-bug" id="socialBug">
+        <span class="social-subscribe-pill" id="socialSubBadge">SUSCRÍBETE</span>
+        <span class="social-icon-wrap" id="socialIcon"></span>
+        <span class="social-net" id="socialNet">INSTAGRAM</span>
+        <span class="social-handle" id="socialHandle">@tiempofuera_cl</span>
+      </div>
     </div>
   </div>
 
@@ -336,9 +382,35 @@
     const BROKER_URL = "wss://broker.emqx.io:8084/mqtt";
     const CANAL_BASE = "tiempofuera/marcador/tf_canal_secreto_9981";
 
+    const IG_SVG = `
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <defs>
+          <linearGradient id="igGradLive" x1="2" y1="22" x2="22" y2="2" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#f58529"/>
+            <stop offset="50%" stop-color="#dd2a7b"/>
+            <stop offset="100%" stop-color="#8134af"/>
+          </linearGradient>
+        </defs>
+        <rect x="2.5" y="2.5" width="19" height="19" rx="5.5" stroke="url(#igGradLive)" stroke-width="2.2"/>
+        <circle cx="12" cy="12" r="4.2" stroke="url(#igGradLive)" stroke-width="2.2"/>
+        <circle cx="17.4" cy="6.6" r="1.3" fill="url(#igGradLive)"/>
+      </svg>
+    `;
+
+    const YT_SVG = `
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <rect x="1.8" y="4.5" width="20.4" height="15" rx="4.2" fill="#FF0000"/>
+        <polygon points="10,8.5 16,12 10,15.5" fill="#FFFFFF"/>
+      </svg>
+    `;
+
     let scoreSightDirecto = {};
     let latestMarcadorVal = null;
     let socialTimer = null;
+    let autoCycleTimer = null;
+    let lastCycleKey = "";
+    let lastManualCmdTs = 0;
+    let currentNet = "ig";
 
     const wsClient = mqtt.connect(BROKER_URL, { reconnectPeriod: 1000 });
     wsClient.on("connect", () => {
@@ -429,6 +501,98 @@
         if (flexVal !== undefined) return flexVal;
       }
       return pickFromBucket(val.feeds?.manual, field, altKeys);
+    }
+
+    function applySocialStyles(cfg) {
+      const accent = cfg.socialAccentColor || cfg.accentColor || "#e3b857";
+      const bg = cfg.socialBgColor || "rgba(14, 16, 22, 0.94)";
+      const scale = Number(cfg.socialScale) || 1.0;
+      const fontFamily = cfg.fontFamily || "'Barlow Condensed', sans-serif";
+      const isRight = cfg.socialPosition === "top-right";
+
+      const anchor = document.getElementById("socialAnchor");
+      anchor.classList.toggle("right", isRight);
+      if (cfg.socialPosX !== undefined && cfg.socialPosY !== undefined) {
+        anchor.style.left = isRight ? "auto" : `${cfg.socialPosX}%`;
+        anchor.style.right = isRight ? `${Math.max(0, 100 - Number(cfg.socialPosX))}%` : "auto";
+        anchor.style.top = `${cfg.socialPosY}%`;
+      } else {
+        anchor.style.left = isRight ? "auto" : "36px";
+        anchor.style.right = isRight ? "36px" : "auto";
+        anchor.style.top = "32px";
+      }
+      anchor.style.transform = `scale(${scale})`;
+
+      const bug = document.getElementById("socialBug");
+      bug.style.fontFamily = fontFamily;
+      bug.style.setProperty("--rrss-accent", accent);
+      bug.style.setProperty("--rrss-bg", bg);
+      bug.style.borderColor = accent;
+
+      const handleEl = document.getElementById("socialHandle");
+      handleEl.textContent = cfg.socialHandle || "@tiempofuera_cl";
+    }
+
+    function triggerSocial(network, cfg = {}, durationSec = 6.5) {
+      applySocialStyles(cfg);
+      currentNet = network === "yt" ? "yt" : "ig";
+
+      const bug = document.getElementById("socialBug");
+      const netEl = document.getElementById("socialNet");
+      const iconEl = document.getElementById("socialIcon");
+      const subBadge = document.getElementById("socialSubBadge");
+
+      if (currentNet === "yt") {
+        netEl.textContent = "YOUTUBE";
+        iconEl.innerHTML = YT_SVG;
+        subBadge.textContent = cfg.socialSubLabel || "SUSCRÍBETE";
+        bug.classList.add("is-yt");
+      } else {
+        netEl.textContent = "INSTAGRAM";
+        iconEl.innerHTML = IG_SVG;
+        bug.classList.remove("is-yt");
+      }
+
+      bug.classList.add("is-shown");
+      if (socialTimer) clearTimeout(socialTimer);
+      socialTimer = setTimeout(() => {
+        bug.classList.remove("is-shown");
+      }, Math.max(2, Number(durationSec) || 6.5) * 1000);
+    }
+
+    function syncSocialAutomation(val) {
+      const cfg = val.config || {};
+      applySocialStyles(cfg);
+
+      const autoEnabled = cfg.socialAutoEnabled !== false;
+      const intervalSec = Math.max(8, Number(cfg.socialIntervalSec) || 25);
+      const durationSec = Math.max(2, Number(cfg.socialDurationSec) || 6.5);
+      const isLiveActive = val.enabled !== false && Boolean(val.on);
+
+      const cycleKey = `${isLiveActive}|${autoEnabled}|${intervalSec}|${durationSec}`;
+      if (cycleKey !== lastCycleKey) {
+        lastCycleKey = cycleKey;
+        if (autoCycleTimer) {
+          clearInterval(autoCycleTimer);
+          autoCycleTimer = null;
+        }
+        if (isLiveActive && autoEnabled) {
+          triggerSocial(currentNet, cfg, durationSec);
+          autoCycleTimer = setInterval(() => {
+            currentNet = currentNet === "ig" ? "yt" : "ig";
+            triggerSocial(currentNet, cfg, durationSec);
+          }, intervalSec * 1000);
+        }
+      }
+
+      if (val.cmd?.action === "social_now" && val.cmd.ts) {
+        const tsNum = Number(val.cmd.ts);
+        if (tsNum > lastManualCmdTs && Date.now() - tsNum < 4000) {
+          lastManualCmdTs = tsNum;
+          currentNet = val.cmd.network === "yt" ? "yt" : "ig";
+          triggerSocial(currentNet, cfg, durationSec);
+        }
+      }
     }
 
     function applyStudioStyles(val) {
@@ -550,18 +714,7 @@
 
       const bug = document.getElementById("socialBug");
       bug.style.setProperty("--sb-accent", accent);
-      bug.classList.toggle("right", cfg.socialPosition === "top-right");
-    }
-
-    function triggerSocial(network) {
-      const bug = document.getElementById("socialBug");
-      const netEl = document.getElementById("socialNet");
-      netEl.textContent = network === "yt" ? "YOUTUBE" : "INSTAGRAM";
-      bug.classList.add("is-shown");
-      if (socialTimer) clearTimeout(socialTimer);
-      socialTimer = setTimeout(() => {
-        bug.classList.remove("is-shown");
-      }, 6500);
+      document.getElementById("socialAnchor").classList.toggle("right", cfg.socialPosition === "top-right");
     }
 
     function renderAll(val) {
@@ -587,12 +740,7 @@
       document.getElementById("clockText").textContent = clock;
       document.getElementById("periodPill").textContent = formatPeriodFiba(per);
 
-      if (val.cmd?.action === "social_now" && val.cmd.ts) {
-        const ageMs = Date.now() - Number(val.cmd.ts);
-        if (ageMs >= 0 && ageMs < 4000) {
-          triggerSocial(val.cmd.network);
-        }
-      }
+      syncSocialAutomation(val);
     }
 
     onValue(ref(db, `${DB_PATH}/modules/marcadores`), (snap) => {
@@ -603,3 +751,4 @@
   </script>
 </body>
 </html>
+```[cite: 15, 16]
